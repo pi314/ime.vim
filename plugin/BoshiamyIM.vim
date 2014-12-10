@@ -23421,6 +23421,3 @@ function! BoshiamyIM#LeaveIM ()
     return ''
 endfunction
 
-inoremap <expr> ,, BoshiamyIM#ToggleIM()
-inoremap <space> <C-R>=SendKey()<CR>
-nnoremap <expr> <ESC><ESC> BoshiamyIM#LeaveIM()
