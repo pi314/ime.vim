@@ -2,6 +2,20 @@
 BoshiamyIM
 ==========
 
+Install
+-------
+
+BoshiamyIM 可以使用 Vundle 安裝，請參考 Vundle 的安裝教學，在 vimrc 中加上 ::
+
+  Bundle 'pi314/BoshiamyIM'
+
+這些是我習慣的 mappings ::
+
+  set statusline=%<%{BoshiamyIM#Status()}%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+  inoremap <expr> ,, BoshiamyIM#ToggleIM()
+  inoremap <space> <C-R>=BoshiamyIM#SendKey()<CR>
+  nnoremap <expr> <ESC><ESC> BoshiamyIM#LeaveIM()
+
 Introduction
 ------------
 
@@ -61,13 +75,17 @@ Usage
 
   - ``set statusline=%<%{BoshiamyIM#Status()}%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P``
 
-* Boshiamy#ToggleIM() 用來切換輸入法/英文
+* BoshiamyIM#ToggleIM() 用來切換輸入法/英文
 
   - ``inoremap <expr>  ToggleIM()``
   - 我正計畫加入其他種類的輸入法， ``Boshiamy#ToggleIM()`` 仍會在英文和這些輸入法之間做 Toggle
   - 離開 Vim 的 Insert Mode 並不會一併關閉輸入法
 
-* Boshiamy#LeaveIM() 用來離開輸入法
+* BoshiamyIM#Sendkey() 用來送字
+
+  - ``inoremap <space> <C-R>=BoshiamyIM#SendKey()<CR>``
+
+* BoshiamyIM#LeaveIM() 用來離開輸入法
 
   - ``nnoremap <expr> <ESC><ESC> LeaveIM()``
 

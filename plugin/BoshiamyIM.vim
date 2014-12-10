@@ -23316,7 +23316,7 @@ function! CharType (c)
     return 0
 endfunction
 
-function! SendKey ()
+function! BoshiamyIM#SendKey ()
 
     if g:boshiamy_status == 0
         " IM is not ON, just return a space
