@@ -23324,7 +23324,7 @@ function! SendKey ()
     endif
 
     let line = getline('.')
-    let chewing_str = matchstr(l:line, ';[^;]\+$')
+    let chewing_str = matchstr(l:line[: (col('.')-1) ], ';[^;]\+$')
     if l:chewing_str != ''
         " Found chewing pattern
         let l:start = strlen(l:line) - strlen(l:chewing_str)
