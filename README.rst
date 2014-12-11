@@ -71,23 +71,29 @@ Usage
 
 這個 Plugin 提供一些介面可供使用。
 
-* BoshiamyIM#Status() 函式回傳輸入法當前的狀態，你可以在自己的 statusline 中顯示這個資訊
+* ``BoshiamyIM#Status()`` 函式回傳輸入法當前的狀態，你可以在自己的 statusline 中顯示這個資訊 ::
 
-  - ``set statusline=%<%{BoshiamyIM#Status()}%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P``
+    set statusline=%<%{BoshiamyIM#Status()}%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 
-* BoshiamyIM#ToggleIM() 用來切換輸入法/英文
+* ``BoshiamyIM#ToggleIM()`` 切換輸入法/英文 ::
 
-  - ``inoremap <expr>  ToggleIM()``
+    inoremap <expr>  ToggleIM()
+
   - 我正計畫加入其他種類的輸入法， ``Boshiamy#ToggleIM()`` 仍會在英文和這些輸入法之間做 Toggle
   - 離開 Vim 的 Insert Mode 並不會一併關閉輸入法
 
-* BoshiamyIM#Sendkey() 用來送字
+* ``BoshiamyIM#Sendkey()`` 送字 ::
 
-  - ``inoremap <space> <C-R>=BoshiamyIM#SendKey()<CR>``
+    inoremap <space> <C-R>=BoshiamyIM#SendKey()<CR>
 
-* BoshiamyIM#LeaveIM() 用來離開輸入法
+* ``BoshiamyIM#LeaveIM()`` 離開輸入法 ::
 
-  - ``nnoremap <expr> <ESC><ESC> LeaveIM()``
+    nnoremap <expr> <ESC><ESC> LeaveIM()
+
+* ``g:boshiamy_im_cancel_key`` 指定 "取消輸入" 的按鍵 ::
+
+    let g:boshiamy_im_cancel_key = '<BS>'
+    let g:boshiamy_im_cancel_key = ['<BS>', '<F1>']
 
 空白鍵是送字，如同嘸蝦米輸入法的行為
 

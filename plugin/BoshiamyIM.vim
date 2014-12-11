@@ -23421,3 +23421,25 @@ function! BoshiamyIM#LeaveIM ()
     return ''
 endfunction
 
+let s:cancel_key_list = []
+
+" Default Values
+if !exists('g:boshiamy_im_cancel_key')
+    let g:boshiamy_im_cancel_key = '<BS>'
+    let s:cancel_key_list = [g:boshiamy_im_cancel_key]
+else
+    if type(g:boshiamy_im_cancel_key) != 3
+        let s:cancel_key_list = [g:boshiamy_im_cancel_key]
+    else
+        let s:cancel_key_list = g:boshiamy_im_cancel_key
+    endif
+endif
+
+
+" I want this option be set because it's related to my "cancel" feature
+set completeopt+=menuone
+
+for i in s:cancel_key_list
+    execute 'inoremap <expr> '. i .' pumvisible() ? "<C-E> " : "'. i .'"'
+endfor
+
