@@ -23297,52 +23297,300 @@ let chewing_table["zp3"] = ["粉", "扮", "黺"]
 let chewing_table["zp4"] = ["分", "份", "奮", "噴", "憤", "糞", "墳", "忿", "焚", "坋", "弅", "秎", "僨", "魵", "橨", "膹", "瀵"]
 let chewing_table["zp6"] = ["頒", "墳", "焚", "汾", "賁", "妢", "弅", "枌", "炃", "秎", "羒", "蚡", "梤", "棼", "蒶", "幩", "濆", "橨", "蕡", "鼢", "羵", "鼖", "豶", "轒", "鐼", "黂"]
 let chewing_table["zul4"] = ["覅"]
+let chewing_table['1'] = ['ㄅ']
+let chewing_table['q'] = ['ㄆ']
+let chewing_table['a'] = ['ㄇ']
+let chewing_table['z'] = ['ㄈ']
+let chewing_table['2'] = ['ㄉ']
+let chewing_table['w'] = ['ㄊ']
+let chewing_table['s'] = ['ㄋ']
+let chewing_table['x'] = ['ㄌ']
+let chewing_table['e'] = ['ㄍ']
+let chewing_table['d'] = ['ㄎ']
+let chewing_table['c'] = ['ㄏ']
+let chewing_table['r'] = ['ㄐ']
+let chewing_table['f'] = ['ㄑ']
+let chewing_table['v'] = ['ㄒ']
+let chewing_table['5'] = ['ㄓ']
+let chewing_table['t'] = ['ㄔ']
+let chewing_table['g'] = ['ㄕ']
+let chewing_table['b'] = ['ㄖ']
+let chewing_table['y'] = ['ㄗ']
+let chewing_table['h'] = ['ㄘ']
+let chewing_table['n'] = ['ㄙ']
+let chewing_table['u'] = ['ㄧ']
+let chewing_table['j'] = ['ㄨ']
+let chewing_table['m'] = ['ㄩ']
+let chewing_table['8'] = ['ㄚ']
+let chewing_table['i'] = ['ㄛ']
+let chewing_table['k'] = ['ㄜ']
+let chewing_table[','] = ['ㄝ']
+let chewing_table['9'] = ['ㄞ']
+let chewing_table['o'] = ['ㄟ']
+let chewing_table['l'] = ['ㄠ']
+let chewing_table['.'] = ['ㄡ']
+let chewing_table['0'] = ['ㄢ']
+let chewing_table['p'] = ['ㄣ']
+let chewing_table[';'] = ['ㄤ']
+let chewing_table['/'] = ['ㄥ']
+let chewing_table['-'] = ['ㄦ']
+let chewing_table['6'] = ['ˊ']
+let chewing_table['3'] = ['ˇ']
+let chewing_table['4'] = ['ˋ']
+let chewing_table['7'] = ['˙']
 " }}}
 
-" chewing symbol table
+" kana_table
 " {{{
-let chewing_symbol_table = {}
-let chewing_symbol_table['1'] = 'ㄅ'
-let chewing_symbol_table['q'] = 'ㄆ'
-let chewing_symbol_table['a'] = 'ㄇ'
-let chewing_symbol_table['z'] = 'ㄈ'
-let chewing_symbol_table['2'] = 'ㄉ'
-let chewing_symbol_table['w'] = 'ㄊ'
-let chewing_symbol_table['s'] = 'ㄋ'
-let chewing_symbol_table['x'] = 'ㄌ'
-let chewing_symbol_table['e'] = 'ㄍ'
-let chewing_symbol_table['d'] = 'ㄎ'
-let chewing_symbol_table['c'] = 'ㄏ'
-let chewing_symbol_table['r'] = 'ㄐ'
-let chewing_symbol_table['f'] = 'ㄑ'
-let chewing_symbol_table['v'] = 'ㄒ'
-let chewing_symbol_table['5'] = 'ㄓ'
-let chewing_symbol_table['t'] = 'ㄔ'
-let chewing_symbol_table['g'] = 'ㄕ'
-let chewing_symbol_table['b'] = 'ㄖ'
-let chewing_symbol_table['y'] = 'ㄗ'
-let chewing_symbol_table['h'] = 'ㄘ'
-let chewing_symbol_table['n'] = 'ㄙ'
-let chewing_symbol_table['u'] = 'ㄧ'
-let chewing_symbol_table['j'] = 'ㄨ'
-let chewing_symbol_table['m'] = 'ㄩ'
-let chewing_symbol_table['8'] = 'ㄚ'
-let chewing_symbol_table['i'] = 'ㄛ'
-let chewing_symbol_table['k'] = 'ㄜ'
-let chewing_symbol_table[','] = 'ㄝ'
-let chewing_symbol_table['9'] = 'ㄞ'
-let chewing_symbol_table['o'] = 'ㄟ'
-let chewing_symbol_table['l'] = 'ㄠ'
-let chewing_symbol_table['.'] = 'ㄡ'
-let chewing_symbol_table['0'] = 'ㄢ'
-let chewing_symbol_table['p'] = 'ㄣ'
-let chewing_symbol_table[';'] = 'ㄤ'
-let chewing_symbol_table['/'] = 'ㄥ'
-let chewing_symbol_table['-'] = 'ㄦ'
-let chewing_symbol_table['6'] = 'ˊ'
-let chewing_symbol_table['3'] = 'ˇ'
-let chewing_symbol_table['4'] = 'ˋ'
-let chewing_symbol_table['7'] = '˙'
+let kana_table = {}
+let kana_table['a'] = ['あ', 'ぁ']
+let kana_table['av'] = ['ぁ']
+let kana_table['ka'] = ['か', 'ゕ']
+let kana_table['kav'] = ['ゕ']
+let kana_table['sa'] = ['さ']
+let kana_table['ta'] = ['た']
+let kana_table['na'] = ['な']
+let kana_table['ha'] = ['は']
+let kana_table['ma'] = ['ま']
+let kana_table['ya'] = ['や', 'ゃ']
+let kana_table['yav'] = ['ゃ']
+let kana_table['ra'] = ['ら']
+let kana_table['wa'] = ['わ', 'ゎ']
+let kana_table['wav'] = ['ゎ']
+let kana_table['i'] = ['い', 'ぃ']
+let kana_table['iv'] = ['ぃ']
+let kana_table['ki'] = ['き']
+let kana_table['shi'] = ['し']
+let kana_table['chi'] = ['ち']
+let kana_table['ni'] = ['に']
+let kana_table['hi'] = ['ひ']
+let kana_table['mi'] = ['み']
+let kana_table['ri'] = ['り']
+let kana_table['u'] = ['う', 'ぅ']
+let kana_table['uv'] = ['ぅ']
+let kana_table['ku'] = ['く']
+let kana_table['su'] = ['す']
+let kana_table['tsu'] = ['つ', 'っ']
+let kana_table['tsuv'] = ['っ']
+let kana_table['nu'] = ['ぬ']
+let kana_table['fu'] = ['ふ']
+let kana_table['mu'] = ['む']
+let kana_table['yu'] = ['ゆ', 'ゅ']
+let kana_table['yuv'] = ['ゅ']
+let kana_table['ru'] = ['る']
+let kana_table['n'] = ['ん']
+let kana_table['e'] = ['え', 'ぇ']
+let kana_table['ev'] = ['ぇ']
+let kana_table['ke'] = ['け', 'ゖ']
+let kana_table['kev'] = ['ゖ']
+let kana_table['se'] = ['せ']
+let kana_table['te'] = ['て']
+let kana_table['ne'] = ['ね']
+let kana_table['he'] = ['へ']
+let kana_table['me'] = ['め']
+let kana_table['re'] = ['れ']
+let kana_table['o'] = ['お', 'ぉ']
+let kana_table['ov'] = ['ぉ']
+let kana_table['ko'] = ['こ']
+let kana_table['so'] = ['そ']
+let kana_table['to'] = ['と']
+let kana_table['no'] = ['の']
+let kana_table['ho'] = ['ほ']
+let kana_table['mo'] = ['も']
+let kana_table['yo'] = ['よ', 'ょ']
+let kana_table['yov'] = ['ょ']
+let kana_table['ro'] = ['ろ']
+let kana_table['wo'] = ['を']
+let kana_table['ga'] = ['が']
+let kana_table['za'] = ['ざ']
+let kana_table['da'] = ['だ']
+let kana_table['ba'] = ['ば']
+let kana_table['pa'] = ['ぱ']
+let kana_table['gi'] = ['ぎ']
+let kana_table['ji'] = ['じ']
+let kana_table['ji'] = ['ぢ']
+let kana_table['bi'] = ['び']
+let kana_table['pi'] = ['ぴ']
+let kana_table['gu'] = ['ぐ']
+let kana_table['zu'] = ['ず']
+let kana_table['zu'] = ['づ']
+let kana_table['bu'] = ['ぶ']
+let kana_table['pu'] = ['ぷ']
+let kana_table['ge'] = ['げ']
+let kana_table['ze'] = ['ぜ']
+let kana_table['de'] = ['で']
+let kana_table['be'] = ['べ']
+let kana_table['pe'] = ['ぺ']
+let kana_table['go'] = ['ご']
+let kana_table['zo'] = ['ぞ']
+let kana_table['do'] = ['ど']
+let kana_table['bo'] = ['ぼ']
+let kana_table['po'] = ['ぽ']
+let kana_table['kya'] = ['きゃ']
+let kana_table['gya'] = ['ぎゃ']
+let kana_table['sha'] = ['しゃ']
+let kana_table['ja'] = ['じゃ']
+let kana_table['cha'] = ['ちゃ']
+let kana_table['nya'] = ['にゃ']
+let kana_table['hya'] = ['ひゃ']
+let kana_table['bya'] = ['びゃ']
+let kana_table['pya'] = ['ぴゃ']
+let kana_table['mya'] = ['みゃ']
+let kana_table['rya'] = ['りゃ']
+let kana_table['kyu'] = ['きゅ']
+let kana_table['gyu'] = ['ぎゅ']
+let kana_table['shu'] = ['しゅ']
+let kana_table['ju'] = ['じゅ']
+let kana_table['chu'] = ['ちゅ']
+let kana_table['nyu'] = ['にゅ']
+let kana_table['hyu'] = ['ひゅ']
+let kana_table['byu'] = ['びゅ']
+let kana_table['pyu'] = ['ぴゅ']
+let kana_table['myu'] = ['みゅ']
+let kana_table['ryu'] = ['りゅ']
+let kana_table['kyo'] = ['きょ']
+let kana_table['gyo'] = ['ぎょ']
+let kana_table['sho'] = ['しょ']
+let kana_table['jo'] = ['じょ']
+let kana_table['cho'] = ['ちょ']
+let kana_table['nyo'] = ['にょ']
+let kana_table['hyo'] = ['ひょ']
+let kana_table['byo'] = ['びょ']
+let kana_table['pyo'] = ['ぴょ']
+let kana_table['myo'] = ['みょ']
+let kana_table['ryo'] = ['りょ']
+let kana_table['wi'] = ['ゐ']
+let kana_table['we'] = ['ゑ']
+let kana_table['a.'] = ['ア', 'ァ']
+let kana_table['a.v'] = ['ァ']
+let kana_table['av.'] = ['ァ']
+let kana_table['ka.'] = ['カ', 'ヵ']
+let kana_table['ka.v'] = ['ヵ']
+let kana_table['kav.'] = ['ヵ']
+let kana_table['sa.'] = ['サ']
+let kana_table['ta.'] = ['タ']
+let kana_table['na.'] = ['ナ']
+let kana_table['ha.'] = ['ハ']
+let kana_table['ma.'] = ['マ']
+let kana_table['ya.'] = ['ヤ', 'ャ']
+let kana_table['ya.v'] = ['ャ']
+let kana_table['yav.'] = ['ャ']
+let kana_table['ra.'] = ['ラ']
+let kana_table['wa.'] = ['ワ', 'ヮ']
+let kana_table['wa.v'] = ['ヮ']
+let kana_table['wav.'] = ['ヮ']
+let kana_table['i.'] = ['イ', 'ィ']
+let kana_table['i.v'] = ['ィ']
+let kana_table['iv.'] = ['ィ']
+let kana_table['ki.'] = ['キ']
+let kana_table['shi.'] = ['シ']
+let kana_table['chi.'] = ['チ']
+let kana_table['ni.'] = ['ニ']
+let kana_table['hi.'] = ['ヒ']
+let kana_table['mi.'] = ['ミ']
+let kana_table['ri.'] = ['リ']
+let kana_table['u.'] = ['ウ', 'ゥ']
+let kana_table['u.v'] = ['ゥ']
+let kana_table['uv.'] = ['ゥ']
+let kana_table['ku.'] = ['ク']
+let kana_table['su.'] = ['ス']
+let kana_table['tsu.'] = ['ツ', 'ッ']
+let kana_table['tsu.v'] = ['ッ']
+let kana_table['tsuv.'] = ['ッ']
+let kana_table['nu.'] = ['ヌ']
+let kana_table['fu.'] = ['フ']
+let kana_table['mu.'] = ['ム']
+let kana_table['yu.'] = ['ユ', 'ュ']
+let kana_table['yu.v'] = ['ュ']
+let kana_table['yuv.'] = ['ュ']
+let kana_table['ru.'] = ['ル']
+let kana_table['n.'] = ['ン']
+let kana_table['e.'] = ['エ', 'ェ']
+let kana_table['e.v'] = ['ェ']
+let kana_table['ev.'] = ['ェ']
+let kana_table['ke.'] = ['ケ', 'ヶ']
+let kana_table['ke.v'] = ['ヶ']
+let kana_table['kev.'] = ['ヶ']
+let kana_table['se.'] = ['セ']
+let kana_table['te.'] = ['テ']
+let kana_table['ne.'] = ['ネ']
+let kana_table['he.'] = ['ヘ']
+let kana_table['me.'] = ['メ']
+let kana_table['re.'] = ['レ']
+let kana_table['o.'] = ['オ', 'ォ']
+let kana_table['o.v'] = ['ォ']
+let kana_table['ov.'] = ['ォ']
+let kana_table['ko.'] = ['コ']
+let kana_table['so.'] = ['ソ']
+let kana_table['to.'] = ['ト']
+let kana_table['no.'] = ['ノ']
+let kana_table['ho.'] = ['ホ']
+let kana_table['mo.'] = ['モ']
+let kana_table['yo.'] = ['ヨ', 'ョ']
+let kana_table['yo.v'] = ['ョ']
+let kana_table['yov.'] = ['ョ']
+let kana_table['ro.'] = ['ロ']
+let kana_table['o.'] = ['ヲ']
+let kana_table['ga.'] = ['ガ']
+let kana_table['za.'] = ['ザ']
+let kana_table['da.'] = ['ダ']
+let kana_table['ba.'] = ['バ']
+let kana_table['pa.'] = ['パ']
+let kana_table['gi.'] = ['ギ']
+let kana_table['ji.'] = ['ジ']
+let kana_table['ji.'] = ['ジ']
+let kana_table['bi.'] = ['ビ']
+let kana_table['pi.'] = ['ピ']
+let kana_table['gu.'] = ['グ']
+let kana_table['zu.'] = ['ズ']
+let kana_table['zu.'] = ['ズ']
+let kana_table['bu.'] = ['ブ']
+let kana_table['pu.'] = ['プ']
+let kana_table['ge.'] = ['ゲ']
+let kana_table['ze.'] = ['ゼ']
+let kana_table['de.'] = ['デ']
+let kana_table['be.'] = ['ベ']
+let kana_table['pe.'] = ['ペ']
+let kana_table['go.'] = ['ゴ']
+let kana_table['zo.'] = ['ゾ']
+let kana_table['do.'] = ['ド']
+let kana_table['bo.'] = ['ボ']
+let kana_table['po.'] = ['ポ']
+let kana_table['kya.'] = ['キャ']
+let kana_table['gya.'] = ['ギャ']
+let kana_table['sha.'] = ['シャ']
+let kana_table['ja.'] = ['ジャ']
+let kana_table['cha.'] = ['チャ']
+let kana_table['nya.'] = ['ニャ']
+let kana_table['hya.'] = ['ヒャ']
+let kana_table['bya.'] = ['ビャ']
+let kana_table['pya.'] = ['ピャ']
+let kana_table['mya.'] = ['ミャ']
+let kana_table['rya.'] = ['リャ']
+let kana_table['kyu.'] = ['キュ']
+let kana_table['gyu.'] = ['ギュ']
+let kana_table['shu.'] = ['シュ']
+let kana_table['ju.'] = ['ジュ']
+let kana_table['chu.'] = ['チュ']
+let kana_table['nyu.'] = ['ニュ']
+let kana_table['hyu.'] = ['ヒュ']
+let kana_table['byu.'] = ['ビュ']
+let kana_table['pyu.'] = ['ピュ']
+let kana_table['myu.'] = ['ミュ']
+let kana_table['ryu.'] = ['チュ']
+let kana_table['kyo.'] = ['キョ']
+let kana_table['gyo.'] = ['ギョ']
+let kana_table['sho.'] = ['ショ']
+let kana_table['jo.'] = ['ジョ']
+let kana_table['cho.'] = ['チョ']
+let kana_table['nyo.'] = ['ニョ']
+let kana_table['hyo.'] = ['ヒョ']
+let kana_table['byo.'] = ['ビョ']
+let kana_table['pyo.'] = ['ピョ']
+let kana_table['myo.'] = ['ミョ']
+let kana_table['ryo.'] = ['リョ']
+let kana_table['wi.'] = ['ヰ']
+let kana_table['we.'] = ['ヱ']
 " }}}
 
 function! CharType (c)
@@ -23377,25 +23625,39 @@ function! ProcessChewing (line, chewing_str)
 
 endfunction
 
-function! ProcessChewingSymbol (line, chewing_str)
-    let l:start = strlen(a:line) - strlen(a:chewing_str)
+function! ProcessKana (line, kana_str)
+    let l:start = strlen(a:line) - strlen(a:kana_str)
     let l:col  = l:start + 1
 
     let ret = ''
-    let chewing_str_length = strlen(a:chewing_str)
-    if l:chewing_str_length == 0
+    let kana_str_length = strlen(a:kana_str)
+    if l:kana_str_length == 0
         return ' '
     endif
 
+    if has_key(g:kana_table, a:kana_str)
+        call complete(l:col, g:kana_table[ (a:kana_str) ])
+        return ''
+    endif
+
     let i = 0
-    while l:i < l:chewing_str_length
-        let ret = l:ret . g:chewing_symbol_table[ (a:chewing_str[(l:i)]) ]
-        let i = l:i + 1
+    let j = 4
+    while l:i <= l:j
+        let t = a:kana_str[ (l:i) : (l:j) ]
+        echom l:t
+
+        if has_key(g:kana_table, l:t)
+            let ret = l:ret . g:kana_table[(l:t)][0]
+            let i = l:j + 1
+            let j = l:i + 4
+        else
+            let j = l:j - 1
+        endif
+
     endwhile
 
-    call complete(l:col, [l:ret] )
+    call complete(l:col, [ l:ret . a:kana_str[(l:j + 1) : ] ] )
     return ''
-
 endfunction
 
 function! BoshiamyIM#SendKey ()
@@ -23429,14 +23691,17 @@ function! BoshiamyIM#SendKey ()
         endif
     endfor
 
-    if s:boshiamy_status == s:IM_CHEWING
-        let chewing_str = matchstr(l:line, '[0-9a-z,.;/-]\+$')
-        return ProcessChewingSymbol(l:line, l:chewing_str)
+    if s:boshiamy_status == s:IM_KANA
+        let kana_str = matchstr(l:line, '[.a-z]\+$')
+        return ProcessKana(l:line, l:kana_str)
 
     endif
 
     " Try chewing
-    let chewing_str = matchstr(l:line[: (col('.')-1) ], ';[^;]\+$')
+    let chewing_str = matchstr(l:line, ';[^;]\+$')
+    if l:chewing_str == ''
+        let chewing_str = matchstr(l:line, ';;$')
+    endif
     if l:chewing_str != ''
         " Found chewing pattern
         if ProcessChewing(l:line, l:chewing_str) == 0
@@ -23495,7 +23760,7 @@ endfunction
 " 1: Boshiamy
 let s:IM_ENGLISH = 0
 let s:IM_BOSHIAMY = 1
-let s:IM_CHEWING = 2
+let s:IM_KANA = 2
 
 let s:boshiamy_sub_status = s:IM_BOSHIAMY
 let s:boshiamy_status = s:IM_ENGLISH
@@ -23505,8 +23770,8 @@ function! BoshiamyIM#Status ()
         return '[英]'
     elseif s:boshiamy_status == s:IM_BOSHIAMY
         return '[嘸]'
-    elseif s:boshiamy_status == s:IM_CHEWING
-        return '[ㄅ]'
+    elseif s:boshiamy_status == s:IM_KANA
+        return '[あ]'
     endif
     return '[？]'
 endfunction
@@ -23556,10 +23821,10 @@ if !exists('g:boshiamy_im_switch_boshiamy')
 endif
 let s:switch_boshiamy = UnifyType(g:boshiamy_im_switch_boshiamy)
 
-if !exists('g:boshiamy_im_switch_chewing')
-    let g:boshiamy_im_switch_chewing = ',c,'
+if !exists('g:boshiamy_im_switch_kana')
+    let g:boshiamy_im_switch_kana = ',j,'
 endif
-let s:switch_chewing = UnifyType(g:boshiamy_im_switch_chewing)
+let s:switch_kana = UnifyType(g:boshiamy_im_switch_kana)
 " ==============
 " ==============
 
@@ -23578,7 +23843,6 @@ for i in s:switch_boshiamy
     let s:switch_table[i .'$'] = s:IM_BOSHIAMY
 endfor
 
-for i in s:switch_chewing
-    let s:switch_table[i .'$'] = s:IM_CHEWING
+for i in s:switch_kana
+    let s:switch_table[i .'$'] = s:IM_KANA
 endfor
-
