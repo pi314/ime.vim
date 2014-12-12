@@ -23629,7 +23629,6 @@ function! ProcessKana (line, kana_str)
     let l:start = strlen(a:line) - strlen(a:kana_str)
     let l:col  = l:start + 1
 
-    let ret = ''
     let kana_str_length = strlen(a:kana_str)
     if l:kana_str_length == 0
         return ' '
@@ -23640,6 +23639,8 @@ function! ProcessKana (line, kana_str)
         return ''
     endif
 
+    let ret_hiragana = ''
+    let ret_katakana = ''
     let i = 0
     let j = 4
     while l:i <= l:j
@@ -23647,7 +23648,12 @@ function! ProcessKana (line, kana_str)
         echom l:t
 
         if has_key(g:kana_table, l:t)
-            let ret = l:ret . g:kana_table[(l:t)][0]
+            let ret_hiragana = l:ret_hiragana . g:kana_table[(l:t)][0]
+            if has_key(g:kana_table, l:t .'.')
+                let ret_katakana = l:ret_katakana . g:kana_table[(l:t .'.')][0]
+            else
+                let ret_katakana = l:ret_katakana . g:kana_table[(l:t)][0]
+            endif
             let i = l:j + 1
             let j = l:i + 4
         else
@@ -23655,8 +23661,9 @@ function! ProcessKana (line, kana_str)
         endif
 
     endwhile
+    let remain = a:kana_str[(l:j + 1) : ]
 
-    call complete(l:col, [ l:ret . a:kana_str[(l:j + 1) : ] ] )
+    call complete(l:col, [ l:ret_hiragana . l:remain, l:ret_katakana . l:remain] )
     return ''
 endfunction
 
