@@ -23317,45 +23317,52 @@ function! CharType (c)
     return 0
 endfunction
 
-function! BoshiamyIM#SendKey ()
+function! ProcessChewing (start, chewing_str)
+    let line = getline('.')
+    let l:base = l:line[(a:start): (col('.')-2)]
+    let l:col  = a:start + 1
 
+    let chewing_code = l:base[1:]
+    if has_key(g:chewing_table, l:chewing_code)
+        call complete(l:col, g:chewing_table[l:chewing_code])
+        return 0
+    endif
+
+    return 1
+
+endfunction
+
+function! BoshiamyIM#SendKey ()
     if g:boshiamy_status == 0
         " IM is not ON, just return a space
         return ' '
     endif
 
     let line = getline('.')
+
     let chewing_str = matchstr(l:line[: (col('.')-1) ], ';[^;]\+$')
     if l:chewing_str != ''
         " Found chewing pattern
         let l:start = strlen(l:line) - strlen(l:chewing_str)
-    else
-        " Locate the start of the boshiamy key sequence
-        let start = col('.') - 1
-        while l:start > 0 && CharType(l:line[l:start-1])
-            let start -= 1
-        endwhile
+        let chewing_succ = ProcessChewing(l:start, l:chewing_str)
+        if chewing_succ == 0
+            return ''
+        endif
     endif
+
+    " Locate the start of the boshiamy key sequence
+    let start = col('.') - 1
+    while l:start > 0 && CharType(l:line[l:start-1])
+        let start -= 1
+    endwhile
 
     let l:base = l:line[(l:start): (col('.')-2)]
     let l:col  = l:start + 1
+    echom l:base
 
     " Input key start is l:start
     " Input key col is l:col
     " Input key sequence is l:base
-
-    " Try chewing
-    if l:base[0] == ';'
-        let chewing_code = l:base[1:]
-        if has_key(g:chewing_table, l:chewing_code)
-            call complete(l:col, g:chewing_table[l:chewing_code])
-            return ''
-        endif
-
-        " It's not chewing, cut off the ';' and try boshiamy
-        let l:col = l:col + 1
-        let l:base = l:base[1:]
-    endif
 
     if has_key(g:boshiamy_table, l:base)
         call complete(l:col, g:boshiamy_table[l:base])
@@ -23435,7 +23442,6 @@ else
         let s:cancel_key_list = g:boshiamy_im_cancel_key
     endif
 endif
-
 
 " I want this option be set because it's related to my "cancel" feature
 set completeopt+=menuone
