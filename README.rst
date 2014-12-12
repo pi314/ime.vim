@@ -99,12 +99,11 @@ Usage
 
   - 目前這個 Plugin 提供一些輸入模式
 
-    + 中文 (包含嘸蝦米、用 ``;`` 做注音輸入)
+    + 中文
 
       * 可直接輸入嘸蝦米
       * 輸入 ``;`` 後可直接以注音輸入
 
-    + 注音符號
     + 日文假名
   
   - 在中文模式下，輸入一特定字串後按下空白鍵送字，可以在不同輸入模式之間切換
@@ -113,10 +112,6 @@ Usage
 
         let g:boshiamy_im_switch_boshiamy = ',t,'
         let g:boshiamy_im_switch_boshiamy = [',t,']
-
-    + 切換為注音符號的預設值為 ::
-
-        let g:boshiamy_im_switch_chewing = [',c,']
 
     + 切換為日文假名的預設值為 ::
 
