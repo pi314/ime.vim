@@ -23418,25 +23418,16 @@ function! BoshiamyIM#SendKey ()
     "
     let l:line = getline('.')[ : (col('.')-2)]
 
-    " Switch back to Boshiamy
+    " Switch input mode
     for [switch, switch_type] in items(s:switch_table)
         if l:line =~# switch
-            call setline('.', l:line[:(0-strlen(switch))] . getline('.')[ (col('.')-1) : ] )
-            call cursor(line('.'), col('.')-( strlen(switch)-1 ) )
+            let c = col('.')
+            call setline('.', l:line[:(0-strlen(switch))] . getline('.')[ (l:c-1) : ] )
+            call cursor(line('.'), l:c-( strlen(switch)-1 ) )
             call BoshiamyIM#UpdateIMStatus(switch_type)
             return ''
         endif
     endfor
-
-    " if l:line =~# g:boshiamy_im_switch_boshiamy .'$'
-    "     call setline('.', l:line[:-4] )
-    "     call BoshiamyIM#UpdateIMStatus(s:IM_BOSHIAMY)
-    "     return ''
-    " elseif l:line =~# g:boshiamy_im_switch_chewing .'$'
-    "     call setline('.', l:line[:-4] )
-    "     call BoshiamyIM#UpdateIMStatus(s:IM_CHEWING)
-    "     return ''
-    " endif
 
     if s:boshiamy_status == s:IM_CHEWING
         let chewing_str = matchstr(l:line, '[0-9a-z,.;/-]\+$')
