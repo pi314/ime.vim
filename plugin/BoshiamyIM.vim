@@ -23363,9 +23363,8 @@ function! CharType (c)
     return 0
 endfunction
 
-function! ProcessChewing (chewing_str)
-    let line = getline('.')
-    let l:start = strlen(l:line) - strlen(a:chewing_str)
+function! ProcessChewing (line, chewing_str)
+    let l:start = strlen(a:line) - strlen(a:chewing_str)
     let l:col  = l:start + 1
 
     let chewing_code = a:chewing_str[1:]
@@ -23378,9 +23377,8 @@ function! ProcessChewing (chewing_str)
 
 endfunction
 
-function! ProcessChewingSymbol (chewing_str)
-    let line = getline('.')
-    let l:start = strlen(l:line) - strlen(a:chewing_str)
+function! ProcessChewingSymbol (line, chewing_str)
+    let l:start = strlen(a:line) - strlen(a:chewing_str)
     let l:col  = l:start + 1
 
     let ret = ''
@@ -23406,23 +23404,43 @@ function! BoshiamyIM#SendKey ()
         return ' '
     endif
 
-    let line = getline('.')
+    " I need to substract 2 here, because
+    " 1.
+    "   col  : 1 2 3 4 5 6
+    "   index: 0 1 2 3 4 5
+    "   line : a b c d e f
+    " 2.
+    "   string slice is head-tail-including
+    "
+    " if you want "bcde", and the cursor is on "f",
+    " so the col=6, the index=5, tail-index=4
+    " so you have to use "line[1:col-2]", which is "line[1:4]"
+    "
+    let l:line = getline('.')[ : (col('.')-2)]
 
     " Switch back to Boshiamy
-    if l:line =~# ',t,$'
-        call setline('.', l:line[:-4] )
-        call BoshiamyIM#UpdateIMStatus(s:IM_BOSHIAMY)
-        return ''
-    elseif l:line =~# ',c,$'
-        call setline('.', l:line[:-4] )
-        call BoshiamyIM#UpdateIMStatus(s:IM_CHEWING)
-        return ''
-    endif
+    for [switch, switch_type] in items(s:switch_table)
+        if l:line =~# switch
+            call setline('.', l:line[:(0-strlen(switch))] . getline('.')[ (col('.')-1) : ] )
+            call cursor(line('.'), col('.')-( strlen(switch)-1 ) )
+            call BoshiamyIM#UpdateIMStatus(switch_type)
+            return ''
+        endif
+    endfor
+
+    " if l:line =~# g:boshiamy_im_switch_boshiamy .'$'
+    "     call setline('.', l:line[:-4] )
+    "     call BoshiamyIM#UpdateIMStatus(s:IM_BOSHIAMY)
+    "     return ''
+    " elseif l:line =~# g:boshiamy_im_switch_chewing .'$'
+    "     call setline('.', l:line[:-4] )
+    "     call BoshiamyIM#UpdateIMStatus(s:IM_CHEWING)
+    "     return ''
+    " endif
 
     if s:boshiamy_status == s:IM_CHEWING
         let chewing_str = matchstr(l:line, '[0-9a-z,.;/-]\+$')
-        call ProcessChewingSymbol(l:chewing_str)
-        return ''
+        return ProcessChewingSymbol(l:line, l:chewing_str)
 
     endif
 
@@ -23430,7 +23448,7 @@ function! BoshiamyIM#SendKey ()
     let chewing_str = matchstr(l:line[: (col('.')-1) ], ';[^;]\+$')
     if l:chewing_str != ''
         " Found chewing pattern
-        if ProcessChewing(l:chewing_str) == 0
+        if ProcessChewing(l:line, l:chewing_str) == 0
             return ''
         endif
     endif
@@ -23443,7 +23461,6 @@ function! BoshiamyIM#SendKey ()
 
     let l:base = l:line[(l:start): (col('.')-2)]
     let l:col  = l:start + 1
-    echom l:base
 
     " Input key start is l:start
     " Input key col is l:col
@@ -23528,24 +23545,49 @@ function! BoshiamyIM#LeaveIM ()
     return ''
 endfunction
 
-let s:cancel_key_list = []
+function! UnifyType (variable)
+    if type(a:variable) != 3
+        return [a:variable]
+    endif
+    return a:variable
+endfunction
 
+" ==============
 " Default Values
+" ==============
 if !exists('g:boshiamy_im_cancel_key')
     let g:boshiamy_im_cancel_key = '<BS>'
-    let s:cancel_key_list = [g:boshiamy_im_cancel_key]
-else
-    if type(g:boshiamy_im_cancel_key) != 3
-        let s:cancel_key_list = [g:boshiamy_im_cancel_key]
-    else
-        let s:cancel_key_list = g:boshiamy_im_cancel_key
-    endif
 endif
+let s:cancel_key_list = UnifyType(g:boshiamy_im_cancel_key)
+
+if !exists('g:boshiamy_im_switch_boshiamy')
+    let g:boshiamy_im_switch_boshiamy = ',t,'
+endif
+let s:switch_boshiamy = UnifyType(g:boshiamy_im_switch_boshiamy)
+
+if !exists('g:boshiamy_im_switch_chewing')
+    let g:boshiamy_im_switch_chewing = ',c,'
+endif
+let s:switch_chewing = UnifyType(g:boshiamy_im_switch_chewing)
+" ==============
+" ==============
 
 " I want this option be set because it's related to my "cancel" feature
 set completeopt+=menuone
 
+" ==============
+" Apply Settings
+" ==============
 for i in s:cancel_key_list
     execute 'inoremap <expr> '. i .' pumvisible() ? "<C-E> " : "'. i .'"'
+endfor
+
+let s:switch_table = {}
+for i in s:switch_boshiamy
+    let s:switch_table[i .'$'] = s:IM_BOSHIAMY
+endfor
+
+for i in s:switch_chewing
+    let s:switch_table[i .'$'] = s:IM_CHEWING
 endfor
 
