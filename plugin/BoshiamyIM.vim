@@ -23299,6 +23299,52 @@ let chewing_table["zp6"] = ["頒", "墳", "焚", "汾", "賁", "妢", "弅", "�
 let chewing_table["zul4"] = ["覅"]
 " }}}
 
+" chewing symbol table
+" {{{
+let chewing_symbol_table = {}
+let chewing_symbol_table['1'] = 'ㄅ'
+let chewing_symbol_table['q'] = 'ㄆ'
+let chewing_symbol_table['a'] = 'ㄇ'
+let chewing_symbol_table['z'] = 'ㄈ'
+let chewing_symbol_table['2'] = 'ㄉ'
+let chewing_symbol_table['w'] = 'ㄊ'
+let chewing_symbol_table['s'] = 'ㄋ'
+let chewing_symbol_table['x'] = 'ㄌ'
+let chewing_symbol_table['e'] = 'ㄍ'
+let chewing_symbol_table['d'] = 'ㄎ'
+let chewing_symbol_table['c'] = 'ㄏ'
+let chewing_symbol_table['r'] = 'ㄐ'
+let chewing_symbol_table['f'] = 'ㄑ'
+let chewing_symbol_table['v'] = 'ㄒ'
+let chewing_symbol_table['5'] = 'ㄓ'
+let chewing_symbol_table['t'] = 'ㄔ'
+let chewing_symbol_table['g'] = 'ㄕ'
+let chewing_symbol_table['b'] = 'ㄖ'
+let chewing_symbol_table['y'] = 'ㄗ'
+let chewing_symbol_table['h'] = 'ㄘ'
+let chewing_symbol_table['n'] = 'ㄙ'
+let chewing_symbol_table['u'] = 'ㄧ'
+let chewing_symbol_table['j'] = 'ㄨ'
+let chewing_symbol_table['m'] = 'ㄩ'
+let chewing_symbol_table['8'] = 'ㄚ'
+let chewing_symbol_table['i'] = 'ㄛ'
+let chewing_symbol_table['k'] = 'ㄜ'
+let chewing_symbol_table[','] = 'ㄝ'
+let chewing_symbol_table['9'] = 'ㄞ'
+let chewing_symbol_table['o'] = 'ㄟ'
+let chewing_symbol_table['l'] = 'ㄠ'
+let chewing_symbol_table['.'] = 'ㄡ'
+let chewing_symbol_table['0'] = 'ㄢ'
+let chewing_symbol_table['p'] = 'ㄣ'
+let chewing_symbol_table[';'] = 'ㄤ'
+let chewing_symbol_table['/'] = 'ㄥ'
+let chewing_symbol_table['-'] = 'ㄦ'
+let chewing_symbol_table['6'] = 'ˊ'
+let chewing_symbol_table['3'] = 'ˇ'
+let chewing_symbol_table['4'] = 'ˋ'
+let chewing_symbol_table['7'] = '˙'
+" }}}
+
 function! CharType (c)
     if a:c =~# "[a-zA-Z0-9]"
         return 1
@@ -23317,45 +23363,91 @@ function! CharType (c)
     return 0
 endfunction
 
-function! BoshiamyIM#SendKey ()
+function! ProcessChewing (chewing_str)
+    let line = getline('.')
+    let l:start = strlen(l:line) - strlen(a:chewing_str)
+    let l:col  = l:start + 1
 
-    if g:boshiamy_status == 0
+    let chewing_code = a:chewing_str[1:]
+    if has_key(g:chewing_table, l:chewing_code)
+        call complete(l:col, g:chewing_table[l:chewing_code])
+        return 0
+    endif
+
+    return 1
+
+endfunction
+
+function! ProcessChewingSymbol (chewing_str)
+    let line = getline('.')
+    let l:start = strlen(l:line) - strlen(a:chewing_str)
+    let l:col  = l:start + 1
+
+    let ret = ''
+    let chewing_str_length = strlen(a:chewing_str)
+    if l:chewing_str_length == 0
+        return ' '
+    endif
+
+    let i = 0
+    while l:i < l:chewing_str_length
+        let ret = l:ret . g:chewing_symbol_table[ (a:chewing_str[(l:i)]) ]
+        let i = l:i + 1
+    endwhile
+
+    call complete(l:col, [l:ret] )
+    return ''
+
+endfunction
+
+function! BoshiamyIM#SendKey ()
+    if s:boshiamy_status == s:IM_ENGLISH
         " IM is not ON, just return a space
         return ' '
     endif
 
     let line = getline('.')
+
+    " Switch back to Boshiamy
+    if l:line =~# ',t,$'
+        call setline('.', l:line[:-4] )
+        call BoshiamyIM#UpdateIMStatus(s:IM_BOSHIAMY)
+        return ''
+    elseif l:line =~# ',c,$'
+        call setline('.', l:line[:-4] )
+        call BoshiamyIM#UpdateIMStatus(s:IM_CHEWING)
+        return ''
+    endif
+
+    if s:boshiamy_status == s:IM_CHEWING
+        let chewing_str = matchstr(l:line, '[0-9a-z,.;/-]\+$')
+        call ProcessChewingSymbol(l:chewing_str)
+        return ''
+
+    endif
+
+    " Try chewing
     let chewing_str = matchstr(l:line[: (col('.')-1) ], ';[^;]\+$')
     if l:chewing_str != ''
         " Found chewing pattern
-        let l:start = strlen(l:line) - strlen(l:chewing_str)
-    else
-        " Locate the start of the boshiamy key sequence
-        let start = col('.') - 1
-        while l:start > 0 && CharType(l:line[l:start-1])
-            let start -= 1
-        endwhile
+        if ProcessChewing(l:chewing_str) == 0
+            return ''
+        endif
     endif
+
+    " Locate the start of the boshiamy key sequence
+    let start = col('.') - 1
+    while l:start > 0 && CharType(l:line[l:start-1])
+        let start -= 1
+    endwhile
 
     let l:base = l:line[(l:start): (col('.')-2)]
     let l:col  = l:start + 1
+    echom l:base
 
     " Input key start is l:start
     " Input key col is l:col
     " Input key sequence is l:base
-
-    " Try chewing
-    if l:base[0] == ';'
-        let chewing_code = l:base[1:]
-        if has_key(g:chewing_table, l:chewing_code)
-            call complete(l:col, g:chewing_table[l:chewing_code])
-            return ''
-        endif
-
-        " It's not chewing, cut off the ';' and try boshiamy
-        let l:col = l:col + 1
-        let l:base = l:base[1:]
-    endif
 
     if has_key(g:boshiamy_table, l:base)
         call complete(l:col, g:boshiamy_table[l:base])
@@ -23391,34 +23483,48 @@ function! BoshiamyIM#SendKey ()
 
 endfunction
 
-let boshiamy_status = 0
+" 0: English
+" 1: Boshiamy
+let s:IM_ENGLISH = 0
+let s:IM_BOSHIAMY = 1
+let s:IM_CHEWING = 2
+
+let s:boshiamy_sub_status = s:IM_BOSHIAMY
+let s:boshiamy_status = s:IM_ENGLISH
 
 function! BoshiamyIM#Status ()
-    if g:boshiamy_status
+    if s:boshiamy_status == s:IM_ENGLISH
+        return '[英]'
+    elseif s:boshiamy_status == s:IM_BOSHIAMY
         return '[嘸]'
+    elseif s:boshiamy_status == s:IM_CHEWING
+        return '[ㄅ]'
     endif
-    return '[英]'
+    return '[？]'
 endfunction
 
 function! BoshiamyIM#UpdateIMStatus (new_status)
-    let g:boshiamy_status = a:new_status
+    let s:boshiamy_status = a:new_status
+    if a:new_status != s:IM_ENGLISH
+        let s:boshiamy_sub_status = a:new_status
+    endif
     redrawstatus!
     redraw!
 endfunction
 
 function! BoshiamyIM#ToggleIM ()
-    if g:boshiamy_status
-        call BoshiamyIM#UpdateIMStatus(0)
+    if s:boshiamy_status
+        call BoshiamyIM#UpdateIMStatus(s:IM_ENGLISH)
 
     else
-        call BoshiamyIM#UpdateIMStatus(1)
+        call BoshiamyIM#UpdateIMStatus(s:boshiamy_sub_status)
 
     endif
     return ''
 endfunction
 
 function! BoshiamyIM#LeaveIM ()
-    call BoshiamyIM#UpdateIMStatus(0)
+    call BoshiamyIM#UpdateIMStatus(s:IM_ENGLISH)
     return ''
 endfunction
 
@@ -23435,7 +23541,6 @@ else
         let s:cancel_key_list = g:boshiamy_im_cancel_key
     endif
 endif
-
 
 " I want this option be set because it's related to my "cancel" feature
 set completeopt+=menuone
