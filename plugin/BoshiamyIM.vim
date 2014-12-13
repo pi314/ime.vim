@@ -23593,7 +23593,7 @@ let kana_table['wi.'] = ['ヰ']
 let kana_table['we.'] = ['ヱ']
 " }}}
 
-function! CharType (c)
+function! CharType (c) " {{{
     if a:c =~# "[a-zA-Z0-9]"
         return 1
 
@@ -23609,9 +23609,9 @@ function! CharType (c)
     endif
 
     return 0
-endfunction
+endfunction " }}}
 
-function! ProcessChewing (line, chewing_str)
+function! ProcessChewing (line, chewing_str) " {{{
     let l:start = strlen(a:line) - strlen(a:chewing_str)
     let l:col  = l:start + 1
 
@@ -23623,9 +23623,9 @@ function! ProcessChewing (line, chewing_str)
 
     return 1
 
-endfunction
+endfunction " }}}
 
-function! ProcessKana (line, kana_str)
+function! ProcessKana (line, kana_str) " {{{
     let l:start = strlen(a:line) - strlen(a:kana_str)
     let l:col  = l:start + 1
 
@@ -23665,7 +23665,28 @@ function! ProcessKana (line, kana_str)
 
     call complete(l:col, [ l:ret_hiragana . l:remain, l:ret_katakana . l:remain] )
     return ''
-endfunction
+endfunction " }}}
+
+function! ProcessUnicodeEncode (line, unicode_pattern) " {{{
+    let l:start = strlen(a:line) - strlen(a:unicode_pattern)
+    let l:col  = l:start + 1
+
+    let unicode_codepoint = str2nr(a:unicode_pattern[2:], 16)
+    call complete(l:col, [nr2char(l:unicode_codepoint)])
+
+    return 0
+endfunction " }}}
+
+function! ProcessUnicodeDecode (line, unicode_pattern) " {{{
+    let l:start = strlen(a:line) - strlen(a:unicode_pattern)
+    let l:col  = l:start + 1
+
+    let utf8_str = a:unicode_pattern[2:-2]
+    let unicode_codepoint = printf('%x', char2nr(l:utf8_str))
+    call complete(l:col, [ '\u'. l:unicode_codepoint, l:unicode_codepoint ])
+
+    return 0
+endfunction " }}}
 
 function! BoshiamyIM#SendKey ()
     if s:boshiamy_status == s:IM_ENGLISH
@@ -23712,6 +23733,23 @@ function! BoshiamyIM#SendKey ()
     if l:chewing_str != ''
         " Found chewing pattern
         if ProcessChewing(l:line, l:chewing_str) == 0
+            return ''
+        endif
+    endif
+
+    let unicode_pattern = matchstr(l:line, '\\[Uu][0-9a-f]\+$')
+    if l:unicode_pattern != ''
+        if ProcessUnicodeEncode(l:line, l:unicode_pattern) == 0
+            return ''
+        endif
+    endif
+
+    let unicode_pattern = matchstr(l:line, '[Uu]\[[^]]*\]$')
+    if l:unicode_pattern == ''
+        let unicode_pattern = matchstr(l:line, '[Uu]\[\]\]$')
+    endif
+    if l:unicode_pattern != ''
+        if ProcessUnicodeDecode(l:line, l:unicode_pattern) == 0
             return ''
         endif
     endif
