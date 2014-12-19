@@ -23857,7 +23857,7 @@ endfunction
 " Default Values
 " ==============
 if !exists('g:boshiamy_im_cancel_key')
-    let g:boshiamy_im_cancel_key = '<BS>'
+    let g:boshiamy_im_cancel_key = '<C-H>'
 endif
 let s:cancel_key_list = UnifyType(g:boshiamy_im_cancel_key)
 
