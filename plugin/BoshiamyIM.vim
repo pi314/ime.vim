@@ -23681,7 +23681,7 @@ function! ProcessUnicodeDecode (line, unicode_pattern) " {{{
     let l:start = strlen(a:line) - strlen(a:unicode_pattern)
     let l:col  = l:start + 1
 
-    let utf8_str = a:unicode_pattern[2:-2]
+    let utf8_str = a:unicode_pattern[3:-2]
     let unicode_codepoint = printf('%x', char2nr(l:utf8_str))
     call complete(l:col, [ '\u'. l:unicode_codepoint, l:unicode_codepoint ])
 
@@ -23744,9 +23744,9 @@ function! BoshiamyIM#SendKey ()
         endif
     endif
 
-    let unicode_pattern = matchstr(l:line, '[Uu]\[[^]]*\]$')
+    let unicode_pattern = matchstr(l:line, '\\[Uu]\[[^]]*\]$')
     if l:unicode_pattern == ''
-        let unicode_pattern = matchstr(l:line, '[Uu]\[\]\]$')
+        let unicode_pattern = matchstr(l:line, '\\[Uu]\[\]\]$')
     endif
     if l:unicode_pattern != ''
         if ProcessUnicodeDecode(l:line, l:unicode_pattern) == 0
