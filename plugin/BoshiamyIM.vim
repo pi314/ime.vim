@@ -394,7 +394,6 @@ let boshiamy_table[",poker9"] = ["🂩", "🂹", "🃉", "🃙"]
 let boshiamy_table[",pokerx"] = ["🂪", "🂺", "🃊", "🃚"]
 let boshiamy_table[",poker10"] = ["🂪", "🂺", "🃊", "🃚"]
 let boshiamy_table[",pokerj"] = ["🂫", "🂻", "🃋", "🃛"]
-let boshiamy_table[",pokerc"] = ["🂬", "🂼", "🃌", "🃜"]
 let boshiamy_table[",pokerq"] = ["🂭", "🂽", "🃍", "🃝"]
 let boshiamy_table[",pokerk"] = ["🂮", "🂾", "🃎", "🃞"]
 " }}}
