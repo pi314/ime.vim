@@ -23797,7 +23797,7 @@ function! BoshiamyIM#SendKey ()
     " so the col=6, the index=5, tail-index=4
     " so you have to use "line[1:col-2]", which is "line[1:4]"
     "
-    let l:line = getline('.')[ : (col('.')-2)]
+    let l:line = strpart(getline('.'), 0, (col('.')-2) )
 
     " Switch input mode
     for [switch, switch_type] in items(s:switch_table)
