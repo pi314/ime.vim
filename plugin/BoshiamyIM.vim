@@ -23832,8 +23832,9 @@ function! BoshiamyIM#SendKey ()
     " Try chewing
     let chewing_str = matchstr(l:line, ';[^;]\+$')
     if l:chewing_str == ''
-        let chewing_str = matchstr(l:line, ';;$')
+        let chewing_str = matchstr(l:line, ';[^;]*;[346]\?$')
     endif
+
     if l:chewing_str != ''
         " Found chewing pattern
         if ProcessChewing(l:line, l:chewing_str) == 0
