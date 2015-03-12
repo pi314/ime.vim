@@ -23967,41 +23967,52 @@ function! BoshiamyIM#LeaveIM ()
     return ''
 endfunction
 
-function! UnifyType (variable)
-    if type(a:variable) != 3
+function! UnifyType (variable, vname, default)
+    if type(a:variable) == type('')
         return [a:variable]
     endif
-    return a:variable
+
+    if type(a:variable) == type([])
+        for i in a:variable
+            if type(i) != type('')
+                echoerr "'". a:vname ."' should contain only strings."
+            endif
+        endfor
+        return a:variable
+    endif
+    echoerr "'". a:vname ."' should be in type 'string' or 'list'."
+    echoerr "set to default value: ". a:default
+    return [a:default]
 endfunction
 
 " ==============
 " Default Values
 " ==============
 if !exists('g:boshiamy_im_cancel_key')
-    let g:boshiamy_im_cancel_key = '<C-H>'
+    let g:boshiamy_im_cancel_key = '<C-h>'
 endif
-let s:cancel_key_list = UnifyType(g:boshiamy_im_cancel_key)
+let s:cancel_key_list = UnifyType(g:boshiamy_im_cancel_key, 'g:boshiamy_im_cancel_key', '<C-h>')
 
 if !exists('g:boshiamy_im_switch_boshiamy')
     let g:boshiamy_im_switch_boshiamy = ',t,'
 endif
-let s:switch_boshiamy = UnifyType(g:boshiamy_im_switch_boshiamy)
+let s:switch_boshiamy = UnifyType(g:boshiamy_im_switch_boshiamy, 'g:boshiamy_im_switch_boshiamy', ',t,')
 
 if !exists('g:boshiamy_im_switch_kana')
     let g:boshiamy_im_switch_kana = ',j,'
 endif
-let s:switch_kana = UnifyType(g:boshiamy_im_switch_kana)
+let s:switch_kana = UnifyType(g:boshiamy_im_switch_kana, 'g:boshiamy_im_switch_kana', ',j,')
 " ==============
 " ==============
 
-" I want this option be set because it's related to my "cancel" feature
+" I want this option be set because it's related to my 'cancel' feature
 set completeopt+=menuone
 
 " ==============
 " Apply Settings
 " ==============
 for i in s:cancel_key_list
-    execute 'inoremap <expr> '. i .' pumvisible() ? "<C-E> " : "'. i .'"'
+    execute 'inoremap <expr> '. i .' pumvisible() ? "<C-e> " : "'. i .'"'
 endfor
 
 let s:switch_table = {}
