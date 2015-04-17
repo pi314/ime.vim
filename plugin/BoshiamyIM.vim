@@ -29120,6 +29120,7 @@ let kana_table['myo.'] = ['ミョ']
 let kana_table['ryo.'] = ['リョ']
 let kana_table['wi.'] = ['ヰ']
 let kana_table['we.'] = ['ヱ']
+let kana_table['..'] = ['々']
 " }}}
 
 function! CharType (c) " {{{
