@@ -29179,9 +29179,8 @@ function! ProcessChewing (line, chewing_str) " {{{
     let l:start = strlen(a:line) - strlen(a:chewing_str)
     let l:col  = l:start + 1
 
-    let chewing_code = a:chewing_str[1:]
-    if has_key(g:chewing_table, l:chewing_code)
-        call complete(l:col, g:chewing_table[l:chewing_code])
+    if has_key(g:chewing_table, a:chewing_str)
+        call complete(l:col, g:chewing_table[a:chewing_str])
         return 0
     endif
 
