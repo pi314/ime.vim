@@ -27505,6 +27505,11 @@ let boshiamy_table["zzjr"] = ["卐"]
 let boshiamy_table["zzn"] = ["歨"]
 let boshiamy_table["zzz"] = ["歮"]
 let boshiamy_table["zzzd"] = ["孴"]
+let boshiamy_table[",command"] = ["⌘"]
+let boshiamy_table[",cmd"] = ["⌘"]
+let boshiamy_table[",option"] = ["⌥"]
+let boshiamy_table[",alt"] = ["⌥"]
+let boshiamy_table[",shift"] = ["⇧"]
 " }}}
 
 " chewing_table
