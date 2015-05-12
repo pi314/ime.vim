@@ -3,7 +3,6 @@
 " File:        BoshiamyIM.vim
 " Description: A Boshiamy Chinese input method plugin for vim
 " Maintainer:  Pi314 <michael66230@gmail.com>
-" Last Change: 2014/12/10
 " License:     This program is free software. It comes without any warranty,
 "              to the extent permitted by applicable law. You can redistribute
 "              it and/or modify it under the terms of the Do What The Fuck You
