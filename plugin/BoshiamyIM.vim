@@ -10,8 +10,7 @@
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 " ============================================================================
 
-" boshiamy_table
-" {{{
+" boshiamy_table {{{
 let boshiamy_table = {}
 let boshiamy_table["'"] = ["、", "．", "‧", "丶"]
 let boshiamy_table["''"] = ["“", "〝"]
@@ -27511,8 +27510,7 @@ let boshiamy_table[",alt"] = ["⌥"]
 let boshiamy_table[",shift"] = ["⇧"]
 " }}}
 
-" chewing_table
-" {{{
+" chewing_table {{{
 let chewing_table = {}
 let chewing_table[";,"] = ["ㄝ", "掖"]
 let chewing_table[";,4"] = ["誒"]
@@ -28909,8 +28907,7 @@ let chewing_table[";zp6"] = ["頒", "墳", "焚", "汾", "賁", "妢", "弅", "�
 let chewing_table[";zul4"] = ["覅"]
 " }}}
 
-" kana_table
-" {{{
+" kana_table {{{
 let kana_table = {}
 let kana_table['a'] = ['あ', 'ぁ']
 let kana_table['av'] = ['ぁ']
@@ -29161,6 +29158,102 @@ let kana_table['we.'] = ['ヱ']
 let kana_table['..'] = ['々']
 " }}}
 
+" wide_table {{{
+let wide_table = {}
+let wide_table["a"] = "ａ"
+let wide_table["b"] = "ｂ"
+let wide_table["c"] = "ｃ"
+let wide_table["d"] = "ｄ"
+let wide_table["e"] = "ｅ"
+let wide_table["f"] = "ｆ"
+let wide_table["g"] = "ｇ"
+let wide_table["h"] = "ｈ"
+let wide_table["i"] = "ｉ"
+let wide_table["j"] = "ｊ"
+let wide_table["k"] = "ｋ"
+let wide_table["l"] = "ｌ"
+let wide_table["m"] = "ｍ"
+let wide_table["n"] = "ｎ"
+let wide_table["o"] = "ｏ"
+let wide_table["p"] = "ｐ"
+let wide_table["q"] = "ｑ"
+let wide_table["r"] = "ｒ"
+let wide_table["s"] = "ｓ"
+let wide_table["t"] = "ｔ"
+let wide_table["u"] = "ｕ"
+let wide_table["v"] = "ｖ"
+let wide_table["w"] = "ｗ"
+let wide_table["x"] = "ｘ"
+let wide_table["y"] = "ｙ"
+let wide_table["z"] = "ｚ"
+let wide_table["A"] = "Ａ"
+let wide_table["B"] = "Ｂ"
+let wide_table["C"] = "Ｃ"
+let wide_table["D"] = "Ｄ"
+let wide_table["E"] = "Ｅ"
+let wide_table["F"] = "Ｆ"
+let wide_table["G"] = "Ｇ"
+let wide_table["H"] = "Ｈ"
+let wide_table["I"] = "Ｉ"
+let wide_table["J"] = "Ｊ"
+let wide_table["K"] = "Ｋ"
+let wide_table["L"] = "Ｌ"
+let wide_table["M"] = "Ｍ"
+let wide_table["N"] = "Ｎ"
+let wide_table["O"] = "Ｏ"
+let wide_table["P"] = "Ｐ"
+let wide_table["Q"] = "Ｑ"
+let wide_table["R"] = "Ｒ"
+let wide_table["S"] = "Ｓ"
+let wide_table["T"] = "Ｔ"
+let wide_table["U"] = "Ｕ"
+let wide_table["V"] = "Ｖ"
+let wide_table["W"] = "Ｗ"
+let wide_table["X"] = "Ｘ"
+let wide_table["Y"] = "Ｙ"
+let wide_table["Z"] = "Ｚ"
+let wide_table["0"] = "０"
+let wide_table["1"] = "１"
+let wide_table["2"] = "２"
+let wide_table["3"] = "３"
+let wide_table["4"] = "４"
+let wide_table["5"] = "５"
+let wide_table["6"] = "６"
+let wide_table["7"] = "７"
+let wide_table["8"] = "８"
+let wide_table["9"] = "９"
+let wide_table["-"] = "ー"
+let wide_table["="] = "＝"
+let wide_table["!"] = "！"
+let wide_table["@"] = "＠"
+let wide_table["#"] = "＃"
+let wide_table["$"] = "＄"
+let wide_table["%"] = "％"
+let wide_table["^"] = "︿"
+let wide_table["&"] = "＆"
+let wide_table["*"] = "＊"
+let wide_table["("] = "（"
+let wide_table[")"] = "）"
+let wide_table["_"] = "＿"
+let wide_table["+"] = "﹢"
+let wide_table["["] = "〔"
+let wide_table["]"] = "〕"
+let wide_table["\\"] = "＼"
+let wide_table['{'] = "｛"
+let wide_table['}'] = "｝"
+let wide_table['|'] = "│"
+let wide_table[";"] = "；"
+let wide_table["'"] = "、"
+let wide_table[","] = "，"
+let wide_table["."] = "。"
+let wide_table["/"] = "／"
+let wide_table[":"] = "："
+let wide_table['"'] = "〝"
+let wide_table["<"] = "＜"
+let wide_table[">"] = "＞"
+let wide_table["?"] = "？"
+" }}}
+
 function! CharType (c) " {{{
     if a:c =~# "[a-zA-Z0-9]"
         return 1
@@ -29189,7 +29282,6 @@ function! ProcessChewing (line, chewing_str) " {{{
     endif
 
     return 1
-
 endfunction " }}}
 
 function! ProcessKana (line, kana_str) " {{{
@@ -29230,7 +29322,31 @@ function! ProcessKana (line, kana_str) " {{{
     endwhile
     let remain = a:kana_str[(l:j + 1) : ]
 
-    call complete(l:col, [ l:ret_hiragana . l:remain, l:ret_katakana . l:remain] )
+    call complete(l:col, [l:ret_hiragana . l:remain, l:ret_katakana . l:remain] )
+    return ''
+endfunction " }}}
+
+function! ProcessWide (line, wide_str) " {{{
+    let l:start = strlen(a:line) - strlen(a:wide_str)
+    let l:col  = l:start + 1
+
+    let wide_str_length = strlen(a:wide_str)
+    if l:wide_str_length == 0
+        return ' '
+    endif
+
+    let p = 0
+    let ret = ''
+    echom a:wide_str
+    echom strlen(a:wide_str)
+    while l:p < strlen(a:wide_str)
+        echom l:p
+        echom a:wide_str[(l:p)]
+        let l:ret = l:ret . g:wide_table[a:wide_str[(l:p)]]
+        let l:p = l:p + 1
+    endwhile
+
+    call complete(l:col, [l:ret] )
     return ''
 endfunction " }}}
 
@@ -29286,10 +29402,14 @@ function! BoshiamyIM#SendKey ()
         endif
     endfor
 
+    if s:boshiamy_status == s:IM_WIDE
+        let wide_str = matchstr(l:line, '\([a-zA-Z0-9]\|[-=,./;:<>?_+\\|!@#$%^&*(){}"]\|\[\|\]\|'."'".'\)\+$')
+        return ProcessWide(l:line, l:wide_str)
+    endif
+
     if s:boshiamy_status == s:IM_KANA
         let kana_str = matchstr(l:line, '[.a-z]\+$')
         return ProcessKana(l:line, l:kana_str)
-
     endif
 
     " Try chewing
@@ -29371,9 +29491,12 @@ endfunction
 
 " 0: English
 " 1: Boshiamy
+" 2: Kana (Japanese alphabet)
+" 3: Wide characters
 let s:IM_ENGLISH = 0
 let s:IM_BOSHIAMY = 1
 let s:IM_KANA = 2
+let s:IM_WIDE = 3
 
 let s:boshiamy_sub_status = s:IM_BOSHIAMY
 let s:boshiamy_status = s:IM_ENGLISH
@@ -29385,6 +29508,8 @@ function! BoshiamyIM#Status ()
         return '[嘸]'
     elseif s:boshiamy_status == s:IM_KANA
         return '[あ]'
+    elseif s:boshiamy_status == s:IM_WIDE
+        return '[Ａ]'
     endif
     return '[？]'
 endfunction
@@ -29435,20 +29560,30 @@ endfunction
 " ==============
 " Default Values
 " ==============
+let s:BOSHIAMY_IM_CANCEL_KEY_DEFAULT = '<C-h>'
+let s:BOSHIAMY_IM_SWITCH_BOSHIAMY_DEFAULT = ',t,'
+let s:BOSHIAMY_IM_SWITCH_KANA_DEFAULT = ',j,'
+let s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT = ',w,'
+
 if !exists('g:boshiamy_im_cancel_key')
-    let g:boshiamy_im_cancel_key = '<C-h>'
+    let g:boshiamy_im_cancel_key = s:BOSHIAMY_IM_CANCEL_KEY_DEFAULT
 endif
-let s:cancel_key_list = UnifyType(g:boshiamy_im_cancel_key, 'g:boshiamy_im_cancel_key', '<C-h>')
+let s:cancel_key_list = UnifyType(g:boshiamy_im_cancel_key, 'g:boshiamy_im_cancel_key', s:BOSHIAMY_IM_CANCEL_KEY_DEFAULT)
 
 if !exists('g:boshiamy_im_switch_boshiamy')
-    let g:boshiamy_im_switch_boshiamy = ',t,'
+    let g:boshiamy_im_switch_boshiamy = s:BOSHIAMY_IM_SWITCH_BOSHIAMY_DEFAULT
 endif
-let s:switch_boshiamy = UnifyType(g:boshiamy_im_switch_boshiamy, 'g:boshiamy_im_switch_boshiamy', ',t,')
+let s:switch_boshiamy = UnifyType(g:boshiamy_im_switch_boshiamy, 'g:boshiamy_im_switch_boshiamy', s:BOSHIAMY_IM_SWITCH_BOSHIAMY_DEFAULT)
 
 if !exists('g:boshiamy_im_switch_kana')
-    let g:boshiamy_im_switch_kana = ',j,'
+    let g:boshiamy_im_switch_kana = s:BOSHIAMY_IM_SWITCH_KANA_DEFAULT
 endif
-let s:switch_kana = UnifyType(g:boshiamy_im_switch_kana, 'g:boshiamy_im_switch_kana', ',j,')
+let s:switch_kana = UnifyType(g:boshiamy_im_switch_kana, 'g:boshiamy_im_switch_kana', s:BOSHIAMY_IM_SWITCH_KANA_DEFAULT)
+
+if !exists('g:boshiamy_im_switch_wide')
+    let g:boshiamy_im_switch_wide = s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT
+endif
+let s:switch_wide = UnifyType(g:boshiamy_im_switch_wide, 'g:boshiamy_im_switch_wide', s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT)
 " ==============
 " ==============
 
@@ -29470,3 +29605,8 @@ endfor
 for i in s:switch_kana
     let s:switch_table[i .'$'] = s:IM_KANA
 endfor
+
+for i in s:switch_wide
+    let s:switch_table[i .'$'] = s:IM_WIDE
+endfor
+
