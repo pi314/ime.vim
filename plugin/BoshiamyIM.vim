@@ -29365,8 +29365,27 @@ function! ProcessUnicodeDecode (line, unicode_pattern) " {{{
     let l:col  = l:start + 1
 
     let utf8_str = a:unicode_pattern[3:-2]
-    let unicode_codepoint = printf('%x', char2nr(l:utf8_str))
-    call complete(l:col, [ '\u'. l:unicode_codepoint, l:unicode_codepoint ])
+    let unicode_codepoint = char2nr(l:utf8_str)
+    let unicode_codepoint_str = printf('\u%x', unicode_codepoint)
+    let html_code_str = printf('&#%d;', unicode_codepoint)
+    call complete(l:col, [unicode_codepoint_str, html_code_str])
+
+    return 0
+endfunction " }}}
+
+function! ProcessHTMLCode (line, htmlcode_pattern) " {{{
+    let l:start = strlen(a:line) - strlen(a:htmlcode_pattern)
+    let l:col  = l:start + 1
+
+    if a:htmlcode_pattern[2] == 'x'
+        let utf8_str = a:htmlcode_pattern[3:-2]
+        let unicode_codepoint = str2nr(l:utf8_str, 16)
+    else
+        let utf8_str = a:htmlcode_pattern[2:-2]
+        let unicode_codepoint = str2nr(l:utf8_str, 10)
+    endif
+    echom l:unicode_codepoint
+    call complete(l:col, [nr2char(l:unicode_codepoint)])
 
     return 0
 endfunction " }}}
@@ -29386,7 +29405,7 @@ function! BoshiamyIM#SendKey ()
     "   string slice is head-tail-including
     "
     " if you want "bcde", and the cursor is on "f",
-    " so the col=6, the index=5, tail-index=4
+    " the col=6, the index=5, tail_index=4
     " so you have to use "line[1:col-2]", which is "line[1:4]"
     "
     let l:line = strpart(getline('.'), 0, (col('.')-1) )
@@ -29425,7 +29444,7 @@ function! BoshiamyIM#SendKey ()
         endif
     endif
 
-    let unicode_pattern = matchstr(l:line, '\\[Uu][0-9a-f]\+$')
+    let unicode_pattern = matchstr(l:line, '\\[Uu][0-9a-fA-F]\+$')
     if l:unicode_pattern != ''
         if ProcessUnicodeEncode(l:line, l:unicode_pattern) == 0
             return ''
@@ -29438,6 +29457,13 @@ function! BoshiamyIM#SendKey ()
     endif
     if l:unicode_pattern != ''
         if ProcessUnicodeDecode(l:line, l:unicode_pattern) == 0
+            return ''
+        endif
+    endif
+
+    let htmlcode_pattern = matchstr(l:line, '&#x\?[0-9a-fA-F]\+;$')
+    if l:htmlcode_pattern != ''
+        if ProcessHTMLCode(l:line, l:htmlcode_pattern) == 0
             return ''
         endif
     endif
