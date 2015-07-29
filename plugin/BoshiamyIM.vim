@@ -29432,9 +29432,9 @@ function! BoshiamyIM#SendKey ()
     endif
 
     " Try chewing
-    let chewing_str = matchstr(l:line, ';[^;]\+$')
+    let chewing_str = matchstr(l:line, ';[^;]*;[346]\?$')
     if l:chewing_str == ''
-        let chewing_str = matchstr(l:line, ';[^;]*;[346]\?$')
+        let chewing_str = matchstr(l:line, ';[^;]\+$')
     endif
 
     if l:chewing_str != ''
