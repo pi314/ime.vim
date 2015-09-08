@@ -351,25 +351,25 @@ let s:BOSHIAMY_IM_SWITCH_BOSHIAMY_DEFAULT = ',t,'
 let s:BOSHIAMY_IM_SWITCH_KANA_DEFAULT = ',j,'
 let s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT = ',w,'
 
-if !exists('g:boshiamy_im_cancel_key')
-    let g:boshiamy_im_cancel_key = s:BOSHIAMY_IM_CANCEL_KEY_DEFAULT
+if !exists('g:boshiamy_cancel_key')
+    let g:boshiamy_cancel_key = s:BOSHIAMY_IM_CANCEL_KEY_DEFAULT
 endif
-let s:cancel_key_list = s:UnifyType(g:boshiamy_im_cancel_key, 'g:boshiamy_im_cancel_key', s:BOSHIAMY_IM_CANCEL_KEY_DEFAULT)
+let s:cancel_key_list = s:UnifyType(g:boshiamy_cancel_key, 'g:boshiamy_cancel_key', s:BOSHIAMY_IM_CANCEL_KEY_DEFAULT)
 
-if !exists('g:boshiamy_im_switch_boshiamy')
-    let g:boshiamy_im_switch_boshiamy = s:BOSHIAMY_IM_SWITCH_BOSHIAMY_DEFAULT
+if !exists('g:boshiamy_switch_boshiamy')
+    let g:boshiamy_switch_boshiamy = s:BOSHIAMY_IM_SWITCH_BOSHIAMY_DEFAULT
 endif
-let s:switch_boshiamy = s:UnifyType(g:boshiamy_im_switch_boshiamy, 'g:boshiamy_im_switch_boshiamy', s:BOSHIAMY_IM_SWITCH_BOSHIAMY_DEFAULT)
+let s:switch_boshiamy = s:UnifyType(g:boshiamy_switch_boshiamy, 'g:boshiamy_switch_boshiamy', s:BOSHIAMY_IM_SWITCH_BOSHIAMY_DEFAULT)
 
-if !exists('g:boshiamy_im_switch_kana')
-    let g:boshiamy_im_switch_kana = s:BOSHIAMY_IM_SWITCH_KANA_DEFAULT
+if !exists('g:boshiamy_switch_kana')
+    let g:boshiamy_switch_kana = s:BOSHIAMY_IM_SWITCH_KANA_DEFAULT
 endif
-let s:switch_kana = s:UnifyType(g:boshiamy_im_switch_kana, 'g:boshiamy_im_switch_kana', s:BOSHIAMY_IM_SWITCH_KANA_DEFAULT)
+let s:switch_kana = s:UnifyType(g:boshiamy_switch_kana, 'g:boshiamy_switch_kana', s:BOSHIAMY_IM_SWITCH_KANA_DEFAULT)
 
-if !exists('g:boshiamy_im_switch_wide')
-    let g:boshiamy_im_switch_wide = s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT
+if !exists('g:boshiamy_switch_wide')
+    let g:boshiamy_switch_wide = s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT
 endif
-let s:switch_wide = s:UnifyType(g:boshiamy_im_switch_wide, 'g:boshiamy_im_switch_wide', s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT)
+let s:switch_wide = s:UnifyType(g:boshiamy_switch_wide, 'g:boshiamy_switch_wide', s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT)
 " ==============
 " ==============
 

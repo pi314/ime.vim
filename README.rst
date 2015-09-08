@@ -1,22 +1,24 @@
-==========
-BoshiamyIM
-==========
+==================
+pi314.boshiamy.vim
+==================
 
 安裝
 ----
 
-BoshiamyIM 可以使用 Vundle_ 安裝，請參考 Vundle_ 的安裝教學，在你的 vimrc 中加上 ::
+pi314.boshiamy.vim 可以使用 Vundle_ 安裝，請參考 Vundle_ 的安裝教學，在你的 ``~/.vim/vimrc`` 中加上 ::
 
-  Bundle 'pi314/BoshiamyIM'
+  Bundle 'pi314/pi314.boshiamy.vim'
+
+並在 Vim 裡面執行 ``:PluginInstall``
 
 ..  _Vundle: https://github.com/gmarik/Vundle.vim
 
-這些是我習慣的設定 ::
+這些是我習慣的設定，放在 ``~/.vim/vimrc`` 中 ::
 
-  set statusline=%<%{BoshiamyIM#Status()}%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
-  inoremap <expr> ,, BoshiamyIM#ToggleIM()
-  inoremap <space> <C-R>=BoshiamyIM#SendKey()<CR>
-  nnoremap <expr> <ESC><ESC> BoshiamyIM#LeaveIM()
+  set statusline=%<%{boshiamy#status()}%{VimTableModeStatusString()}%f\ %h%m%r%=%y\ %-14.(%l,%c%V%)\ %P
+  inoremap <expr>  boshiamy#toggle()
+  inoremap <space> <C-R>=boshiamy#send_key()<CR>
+  nnoremap <expr> <ESC><ESC> boshiamy#leave()
 
 介紹
 ----
@@ -70,31 +72,31 @@ boshiamy-cue 則是年代久遠，在 2013 年初發佈第一個版本後就沒�
 
 本 Plugin 提供一些介面可供使用。
 
-* ``BoshiamyIM#Status()`` 函式回傳輸入法當前的狀態，你可以在自己的 statusline 中顯示這個資訊 ::
+* ``boshiamy#status()`` 函式回傳輸入法當前的狀態，你可以在自己的 statusline 中顯示這個資訊 ::
 
-    set statusline=%<%{BoshiamyIM#Status()}%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+    set statusline=%<%{boshiamy#status()}%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 
   - 這行 statusline 看起來會像 ``[嘸]README.rst [+]      75,67-59  53%``
 
-* ``BoshiamyIM#ToggleIM()`` 切換輸入法/英文 ::
+* ``boshiamy#toggle()`` 切換輸入法/英文 ::
 
-    inoremap <expr> ,, BoshiamyIM#ToggleIM()
+    inoremap <expr> ,, boshiamy#toggle()
 
-  - 我正計畫加入其他種類的輸入法， ``Boshiamy#ToggleIM()`` 會在英文和這些輸入法之間做切換
+  - 我正計畫加入其他種類的輸入法， ``boshiamy#toggle()`` 會在英文和這些輸入法之間做切換
   - 離開 Vim 的 Insert Mode 會將輸入法的狀態保留，下次進入 Insert Mode 後不會被還原回預設的模式
 
-* ``BoshiamyIM#Sendkey()`` 送字 ::
+* ``boshiamy#send_key()`` 送字 ::
 
-    inoremap <space> <C-R>=BoshiamyIM#SendKey()<CR>
+    inoremap <space> <C-R>=boshiamy#send_key()<CR>
 
-* ``BoshiamyIM#LeaveIM()`` 離開輸入法 ::
+* ``boshiamy#leave()`` 離開輸入法 ::
 
-    nnoremap <expr> <ESC><ESC> BoshiamyIM#LeaveIM()
+    nnoremap <expr> <ESC><ESC> boshiamy#leave()
 
-* ``g:boshiamy_im_cancel_key`` 指定 "取消輸入" 的按鍵 ::
+* ``g:boshiamy_cancel_key`` 指定 "取消輸入" 的按鍵 ::
 
-    let g:boshiamy_im_cancel_key = '<C-h>'
-    let g:boshiamy_im_cancel_key = ['<C-h>', '<F1>']
+    let g:boshiamy_cancel_key = '<C-h>'
+    let g:boshiamy_cancel_key = ['<C-h>', '<F1>']
 
   - 有些英文單字如 ``user`` 是某些字的字根，如果開著中文模式輸入英文，會讓這些英文單字變成中文，此時按下 ``<C-h>`` 就可以把字打回英文，並在後方加上一個空白字元
 
@@ -117,12 +119,12 @@ boshiamy-cue 則是年代久遠，在 2013 年初發佈第一個版本後就沒�
 
     + 切換為嘸蝦米的預設值為 ::
 
-        let g:boshiamy_im_switch_boshiamy = ',t,'
-        let g:boshiamy_im_switch_boshiamy = [',t,']
+        let g:boshiamy_switch_boshiamy = ',t,'
+        let g:boshiamy_switch_boshiamy = [',t,']
 
     + 切換為日文假名的預設值為 ::
 
-        let g:boshiamy_im_switch_kana = [',j,']
+        let g:boshiamy_switch_kana = [',j,']
 
       * 平假名可以直接用羅馬拼音輸入
       * 片假名需在字根後加上一個 ``.``
@@ -138,12 +140,12 @@ boshiamy-cue 則是年代久遠，在 2013 年初發佈第一個版本後就沒�
 
     + 切換為全型字的預設值為 ::
 
-        let g:boshiamy_im_switch_wide = ',w,'
+        let g:boshiamy_switch_wide = ',w,'
 
       * 之後按下空白鍵送字，會把前面連續的半型字元都換成全型字元
       * 全型空白請在嘸蝦米模式下用 ``,space`` 輸入
 
-    + 若需要自行設定，請注意不要包含 ``BoshiamyIM#Toggle()`` 的按鍵序列，因為 ``imap`` 的效果比較優先
+    + 若需要自行設定，請注意不要包含 ``boshiamy#toggle()`` 的按鍵序列，因為 ``imap`` 的效果比較優先
 
 空白鍵是送字，如同嘸蝦米輸入法的行為
 
