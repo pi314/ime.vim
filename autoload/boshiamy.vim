@@ -1,6 +1,6 @@
 " vim:fdm=marker
 " ============================================================================
-" File:        BoshiamyIM.vim
+" File:        boshiamy.vim
 " Description: A Boshiamy Chinese input method plugin for vim
 " Maintainer:  Pi314 <michael66230@gmail.com>
 " License:     This program is free software. It comes without any warranty,
@@ -10,7 +10,7 @@
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 " ============================================================================
 
-function! BoshiamyIM#CharType (c) " {{{
+function! s:CharType (c) " {{{
     if a:c =~# "[a-zA-Z0-9]"
         return 1
 
@@ -28,19 +28,19 @@ function! BoshiamyIM#CharType (c) " {{{
     return 0
 endfunction " }}}
 
-function! BoshiamyIM#ProcessChewing (line, chewing_str) " {{{
+function! s:ProcessChewing (line, chewing_str) " {{{
     let l:start = strlen(a:line) - strlen(a:chewing_str)
     let l:col  = l:start + 1
 
-    if has_key(g:BoshiamyIM#chewing#table, a:chewing_str)
-        call complete(l:col, g:BoshiamyIM#chewing#table[a:chewing_str])
+    if has_key(g:boshiamy#chewing#table, a:chewing_str)
+        call complete(l:col, g:boshiamy#chewing#table[a:chewing_str])
         return 0
     endif
 
     return 1
 endfunction " }}}
 
-function! BoshiamyIM#ProcessKana (line, kana_str) " {{{
+function! s:ProcessKana (line, kana_str) " {{{
     let l:start = strlen(a:line) - strlen(a:kana_str)
     let l:col  = l:start + 1
 
@@ -49,8 +49,8 @@ function! BoshiamyIM#ProcessKana (line, kana_str) " {{{
         return ' '
     endif
 
-    if has_key(g:BoshiamyIM#kana#table, a:kana_str)
-        call complete(l:col, g:BoshiamyIM#kana#table[ (a:kana_str) ])
+    if has_key(g:boshiamy#kana#table, a:kana_str)
+        call complete(l:col, g:boshiamy#kana#table[ (a:kana_str) ])
         return ''
     endif
 
@@ -62,12 +62,12 @@ function! BoshiamyIM#ProcessKana (line, kana_str) " {{{
         let t = a:kana_str[ (l:i) : (l:j) ]
         echom l:t
 
-        if has_key(g:BoshiamyIM#kana#table, l:t)
-            let ret_hiragana = l:ret_hiragana . g:BoshiamyIM#kana#table[(l:t)][0]
-            if has_key(g:BoshiamyIM#kana#table, l:t .'.')
-                let ret_katakana = l:ret_katakana . g:BoshiamyIM#kana#table[(l:t .'.')][0]
+        if has_key(g:boshiamy#kana#table, l:t)
+            let ret_hiragana = l:ret_hiragana . g:boshiamy#kana#table[(l:t)][0]
+            if has_key(g:boshiamy#kana#table, l:t .'.')
+                let ret_katakana = l:ret_katakana . g:boshiamy#kana#table[(l:t .'.')][0]
             else
-                let ret_katakana = l:ret_katakana . g:BoshiamyIM#kana#table[(l:t)][0]
+                let ret_katakana = l:ret_katakana . g:boshiamy#kana#table[(l:t)][0]
             endif
             let i = l:j + 1
             let j = l:i + 4
@@ -82,7 +82,7 @@ function! BoshiamyIM#ProcessKana (line, kana_str) " {{{
     return ''
 endfunction " }}}
 
-function! BoshiamyIM#ProcessWide (line, wide_str) " {{{
+function! s:ProcessWide (line, wide_str) " {{{
     let l:start = strlen(a:line) - strlen(a:wide_str)
     let l:col  = l:start + 1
 
@@ -98,7 +98,7 @@ function! BoshiamyIM#ProcessWide (line, wide_str) " {{{
     while l:p < strlen(a:wide_str)
         echom l:p
         echom a:wide_str[(l:p)]
-        let l:ret = l:ret . g:BoshiamyIM#wide#table[a:wide_str[(l:p)]]
+        let l:ret = l:ret . g:boshiamy#wide#table[a:wide_str[(l:p)]]
         let l:p = l:p + 1
     endwhile
 
@@ -106,7 +106,7 @@ function! BoshiamyIM#ProcessWide (line, wide_str) " {{{
     return ''
 endfunction " }}}
 
-function! BoshiamyIM#ProcessUnicodeEncode (line, unicode_pattern) " {{{
+function! s:ProcessUnicodeEncode (line, unicode_pattern) " {{{
     let l:start = strlen(a:line) - strlen(a:unicode_pattern)
     let l:col  = l:start + 1
 
@@ -116,7 +116,7 @@ function! BoshiamyIM#ProcessUnicodeEncode (line, unicode_pattern) " {{{
     return 0
 endfunction " }}}
 
-function! BoshiamyIM#ProcessUnicodeDecode (line, unicode_pattern) " {{{
+function! s:ProcessUnicodeDecode (line, unicode_pattern) " {{{
     let l:start = strlen(a:line) - strlen(a:unicode_pattern)
     let l:col  = l:start + 1
 
@@ -129,7 +129,7 @@ function! BoshiamyIM#ProcessUnicodeDecode (line, unicode_pattern) " {{{
     return 0
 endfunction " }}}
 
-function! BoshiamyIM#ProcessHTMLCode (line, htmlcode_pattern) " {{{
+function! s:ProcessHTMLCode (line, htmlcode_pattern) " {{{
     let l:start = strlen(a:line) - strlen(a:htmlcode_pattern)
     let l:col  = l:start + 1
 
@@ -146,7 +146,50 @@ function! BoshiamyIM#ProcessHTMLCode (line, htmlcode_pattern) " {{{
     return 0
 endfunction " }}}
 
-function! BoshiamyIM#SendKey () " {{{
+" 0: English
+" 1: Boshiamy
+" 2: Kana (Japanese alphabet)
+" 3: Wide characters
+let s:IM_ENGLISH = 0
+let s:IM_BOSHIAMY = 1
+let s:IM_KANA = 2
+let s:IM_WIDE = 3
+
+let s:boshiamy_sub_status = s:IM_BOSHIAMY
+let s:boshiamy_status = s:IM_ENGLISH
+
+function! s:UpdateIMStatus (new_status) " {{{
+    let s:boshiamy_status = a:new_status
+    if a:new_status != s:IM_ENGLISH
+        let s:boshiamy_sub_status = a:new_status
+    endif
+    redrawstatus!
+    redraw!
+endfunction " }}}
+
+function! s:UnifyType (variable, vname, default) " {{{
+    if type(a:variable) == type('')
+        return [a:variable]
+    endif
+
+    if type(a:variable) == type([])
+        for i in a:variable
+            if type(i) != type('')
+                echoerr "'". a:vname ."' should contain only strings."
+            endif
+        endfor
+        return a:variable
+    endif
+    echoerr "'". a:vname ."' should be in type 'string' or 'list'."
+    echoerr "set to default value: ". a:default
+    return [a:default]
+endfunction " }}}
+
+" ================
+" Public Functions
+" ================
+
+function! boshiamy#send_key () " {{{
     if s:boshiamy_status == s:IM_ENGLISH
         " IM is not ON, just return a space
         return ' '
@@ -172,19 +215,19 @@ function! BoshiamyIM#SendKey () " {{{
             let c = col('.')
             call setline('.', l:line[:(0-strlen(switch))] . getline('.')[ (l:c-1) : ] )
             call cursor(line('.'), l:c-( strlen(switch)-1 ) )
-            call BoshiamyIM#UpdateIMStatus(switch_type)
+            call s:UpdateIMStatus(switch_type)
             return ''
         endif
     endfor
 
     if s:boshiamy_status == s:IM_WIDE
         let wide_str = matchstr(l:line, '\([a-zA-Z0-9]\|[-=,./;:<>?_+\\|!@#$%^&*(){}"]\|\[\|\]\|'."'".'\)\+$')
-        return BoshiamyIM#ProcessWide(l:line, l:wide_str)
+        return s:ProcessWide(l:line, l:wide_str)
     endif
 
     if s:boshiamy_status == s:IM_KANA
         let kana_str = matchstr(l:line, '[.a-z]\+$')
-        return BoshiamyIM#ProcessKana(l:line, l:kana_str)
+        return s:ProcessKana(l:line, l:kana_str)
     endif
 
     " Try chewing
@@ -195,14 +238,14 @@ function! BoshiamyIM#SendKey () " {{{
 
     if l:chewing_str != ''
         " Found chewing pattern
-        if BoshiamyIM#ProcessChewing(l:line, l:chewing_str) == 0
+        if s:ProcessChewing(l:line, l:chewing_str) == 0
             return ''
         endif
     endif
 
     let unicode_pattern = matchstr(l:line, '\\[Uu][0-9a-fA-F]\+$')
     if l:unicode_pattern != ''
-        if BoshiamyIM#ProcessUnicodeEncode(l:line, l:unicode_pattern) == 0
+        if s:ProcessUnicodeEncode(l:line, l:unicode_pattern) == 0
             return ''
         endif
     endif
@@ -212,21 +255,21 @@ function! BoshiamyIM#SendKey () " {{{
         let unicode_pattern = matchstr(l:line, '\\[Uu]\[\]\]$')
     endif
     if l:unicode_pattern != ''
-        if BoshiamyIM#ProcessUnicodeDecode(l:line, l:unicode_pattern) == 0
+        if s:ProcessUnicodeDecode(l:line, l:unicode_pattern) == 0
             return ''
         endif
     endif
 
     let htmlcode_pattern = matchstr(l:line, '&#x\?[0-9a-fA-F]\+;$')
     if l:htmlcode_pattern != ''
-        if BoshiamyIM#ProcessHTMLCode(l:line, l:htmlcode_pattern) == 0
+        if s:ProcessHTMLCode(l:line, l:htmlcode_pattern) == 0
             return ''
         endif
     endif
 
     " Locate the start of the boshiamy key sequence
     let start = col('.') - 1
-    while l:start > 0 && BoshiamyIM#CharType(l:line[l:start-1])
+    while l:start > 0 && s:CharType(l:line[l:start-1])
         let start -= 1
     endwhile
 
@@ -237,21 +280,21 @@ function! BoshiamyIM#SendKey () " {{{
     " Input key col is l:col
     " Input key sequence is l:base
 
-    if has_key(g:BoshiamyIM#boshiamy#table, l:base)
-        call complete(l:col, g:BoshiamyIM#boshiamy#table[l:base])
+    if has_key(g:boshiamy#boshiamy#table, l:base)
+        call complete(l:col, g:boshiamy#boshiamy#table[l:base])
         return ''
     endif
 
-    let char_type = BoshiamyIM#CharType(l:base[0])
+    let char_type = s:CharType(l:base[0])
 
     while strlen(l:base) > 0
-        let new_char_type = BoshiamyIM#CharType(l:base[0])
+        let new_char_type = s:CharType(l:base[0])
 
         " Cut off the string
         if l:new_char_type != l:char_type
 
-            if has_key( g:BoshiamyIM#boshiamy#table, l:base )
-                call complete(l:col, g:BoshiamyIM#boshiamy#table[ (l:base) ])
+            if has_key( g:boshiamy#boshiamy#table, l:base )
+                call complete(l:col, g:boshiamy#boshiamy#table[ (l:base) ])
                 return ''
 
             endif
@@ -271,19 +314,7 @@ function! BoshiamyIM#SendKey () " {{{
 
 endfunction " }}}
 
-" 0: English
-" 1: Boshiamy
-" 2: Kana (Japanese alphabet)
-" 3: Wide characters
-let s:IM_ENGLISH = 0
-let s:IM_BOSHIAMY = 1
-let s:IM_KANA = 2
-let s:IM_WIDE = 3
-
-let s:boshiamy_sub_status = s:IM_BOSHIAMY
-let s:boshiamy_status = s:IM_ENGLISH
-
-function! BoshiamyIM#Status ()
+function! boshiamy#status () " {{{
     if s:boshiamy_status == s:IM_ENGLISH
         return '[英]'
     elseif s:boshiamy_status == s:IM_BOSHIAMY
@@ -294,50 +325,23 @@ function! BoshiamyIM#Status ()
         return '[Ａ]'
     endif
     return '[？]'
-endfunction
+endfunction " }}}
 
-function! BoshiamyIM#UpdateIMStatus (new_status)
-    let s:boshiamy_status = a:new_status
-    if a:new_status != s:IM_ENGLISH
-        let s:boshiamy_sub_status = a:new_status
-    endif
-    redrawstatus!
-    redraw!
-endfunction
-
-function! BoshiamyIM#ToggleIM ()
+function! boshiamy#toggle () " {{{
     if s:boshiamy_status
-        call BoshiamyIM#UpdateIMStatus(s:IM_ENGLISH)
+        call s:UpdateIMStatus(s:IM_ENGLISH)
 
     else
-        call BoshiamyIM#UpdateIMStatus(s:boshiamy_sub_status)
+        call s:UpdateIMStatus(s:boshiamy_sub_status)
 
     endif
     return ''
-endfunction
+endfunction " }}}
 
-function! BoshiamyIM#LeaveIM ()
-    call BoshiamyIM#UpdateIMStatus(s:IM_ENGLISH)
+function! boshiamy#leave () " {{{
+    call s:UpdateIMStatus(s:IM_ENGLISH)
     return ''
-endfunction
-
-function! BoshiamyIM#UnifyType (variable, vname, default)
-    if type(a:variable) == type('')
-        return [a:variable]
-    endif
-
-    if type(a:variable) == type([])
-        for i in a:variable
-            if type(i) != type('')
-                echoerr "'". a:vname ."' should contain only strings."
-            endif
-        endfor
-        return a:variable
-    endif
-    echoerr "'". a:vname ."' should be in type 'string' or 'list'."
-    echoerr "set to default value: ". a:default
-    return [a:default]
-endfunction
+endfunction " }}}
 
 " ==============
 " Default Values
@@ -350,22 +354,22 @@ let s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT = ',w,'
 if !exists('g:boshiamy_im_cancel_key')
     let g:boshiamy_im_cancel_key = s:BOSHIAMY_IM_CANCEL_KEY_DEFAULT
 endif
-let s:cancel_key_list = BoshiamyIM#UnifyType(g:boshiamy_im_cancel_key, 'g:boshiamy_im_cancel_key', s:BOSHIAMY_IM_CANCEL_KEY_DEFAULT)
+let s:cancel_key_list = s:UnifyType(g:boshiamy_im_cancel_key, 'g:boshiamy_im_cancel_key', s:BOSHIAMY_IM_CANCEL_KEY_DEFAULT)
 
 if !exists('g:boshiamy_im_switch_boshiamy')
     let g:boshiamy_im_switch_boshiamy = s:BOSHIAMY_IM_SWITCH_BOSHIAMY_DEFAULT
 endif
-let s:switch_boshiamy = BoshiamyIM#UnifyType(g:boshiamy_im_switch_boshiamy, 'g:boshiamy_im_switch_boshiamy', s:BOSHIAMY_IM_SWITCH_BOSHIAMY_DEFAULT)
+let s:switch_boshiamy = s:UnifyType(g:boshiamy_im_switch_boshiamy, 'g:boshiamy_im_switch_boshiamy', s:BOSHIAMY_IM_SWITCH_BOSHIAMY_DEFAULT)
 
 if !exists('g:boshiamy_im_switch_kana')
     let g:boshiamy_im_switch_kana = s:BOSHIAMY_IM_SWITCH_KANA_DEFAULT
 endif
-let s:switch_kana = BoshiamyIM#UnifyType(g:boshiamy_im_switch_kana, 'g:boshiamy_im_switch_kana', s:BOSHIAMY_IM_SWITCH_KANA_DEFAULT)
+let s:switch_kana = s:UnifyType(g:boshiamy_im_switch_kana, 'g:boshiamy_im_switch_kana', s:BOSHIAMY_IM_SWITCH_KANA_DEFAULT)
 
 if !exists('g:boshiamy_im_switch_wide')
     let g:boshiamy_im_switch_wide = s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT
 endif
-let s:switch_wide = BoshiamyIM#UnifyType(g:boshiamy_im_switch_wide, 'g:boshiamy_im_switch_wide', s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT)
+let s:switch_wide = s:UnifyType(g:boshiamy_im_switch_wide, 'g:boshiamy_im_switch_wide', s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT)
 " ==============
 " ==============
 
