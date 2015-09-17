@@ -146,14 +146,52 @@ function! s:ProcessHTMLCode (line, htmlcode_pattern) " {{{
     return 0
 endfunction " }}}
 
+function! s:ProcessRune (line, rune_str) " {{{
+    let l:start = strlen(a:line) - strlen(a:rune_str)
+    let l:col  = l:start + 1
+
+    let rune_str_length = strlen(a:rune_str)
+    if l:rune_str_length == 0
+        return ' '
+    endif
+
+    if has_key(g:boshiamy#rune#table, a:rune_str)
+        call complete(l:col, g:boshiamy#rune#table[ (a:rune_str) ])
+        return ''
+    endif
+
+    let ret_rune = ''
+    let i = 0
+    let j = 2
+    while l:i <= l:j
+        let t = a:rune_str[ (l:i) : (l:j) ]
+        echom l:t
+
+        if has_key(g:boshiamy#rune#table, l:t)
+            let ret_rune = l:ret_rune . g:boshiamy#rune#table[(l:t)][0]
+            let i = l:j + 1
+            let j = l:i + 2
+        else
+            let j = l:j - 1
+        endif
+
+    endwhile
+    let remain = a:rune_str[(l:j + 1) : ]
+
+    call complete(l:col, [l:ret_rune . l:remain] )
+    return ''
+endfunction " }}}
+
 " 0: English
 " 1: Boshiamy
 " 2: Kana (Japanese alphabet)
 " 3: Wide characters
+" 4: Runed
 let s:IM_ENGLISH = 0
 let s:IM_BOSHIAMY = 1
 let s:IM_KANA = 2
 let s:IM_WIDE = 3
+let s:IM_RUNE = 4
 
 let s:boshiamy_sub_status = s:IM_BOSHIAMY
 let s:boshiamy_status = s:IM_ENGLISH
@@ -228,6 +266,11 @@ function! boshiamy#send_key () " {{{
     if s:boshiamy_status == s:IM_KANA
         let kana_str = matchstr(l:line, '[.a-z]\+$')
         return s:ProcessKana(l:line, l:kana_str)
+    endif
+
+    if s:boshiamy_status == s:IM_RUNE
+        let rune_str = matchstr(l:line, '[.a-z,]\+$')
+        return s:ProcessRune(l:line, l:rune_str)
     endif
 
     " Try chewing
@@ -323,6 +366,8 @@ function! boshiamy#status () " {{{
         return '[あ]'
     elseif s:boshiamy_status == s:IM_WIDE
         return '[Ａ]'
+    elseif s:boshiamy_status == s:IM_RUNE
+        return '[ᚱ]'
     endif
     return '[？]'
 endfunction " }}}
@@ -350,6 +395,7 @@ let s:BOSHIAMY_IM_CANCEL_KEY_DEFAULT = '<C-h>'
 let s:BOSHIAMY_IM_SWITCH_BOSHIAMY_DEFAULT = ',t,'
 let s:BOSHIAMY_IM_SWITCH_KANA_DEFAULT = ',j,'
 let s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT = ',w,'
+let s:BOSHIAMY_IM_SWITCH_RUNE_DEFAULT = ',r,'
 
 if !exists('g:boshiamy_cancel_key')
     let g:boshiamy_cancel_key = s:BOSHIAMY_IM_CANCEL_KEY_DEFAULT
@@ -370,6 +416,11 @@ if !exists('g:boshiamy_switch_wide')
     let g:boshiamy_switch_wide = s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT
 endif
 let s:switch_wide = s:UnifyType(g:boshiamy_switch_wide, 'g:boshiamy_switch_wide', s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT)
+
+if !exists('g:boshiamy_switch_rune')
+    let g:boshiamy_switch_rune = s:BOSHIAMY_IM_SWITCH_RUNE_DEFAULT
+endif
+let s:switch_rune = s:UnifyType(g:boshiamy_switch_rune, 'g:boshiamy_switch_rune', s:BOSHIAMY_IM_SWITCH_RUNE_DEFAULT)
 " ==============
 " ==============
 
@@ -396,3 +447,6 @@ for i in s:switch_wide
     let s:switch_table[i .'$'] = s:IM_WIDE
 endfor
 
+for i in s:switch_rune
+    let s:switch_table[i .'$'] = s:IM_RUNE
+endfor
