@@ -21,3 +21,11 @@ endif
 if !exists('g:boshiamy_switch_rune') || type(g:boshiamy_switch_rune) != type('')
     let g:boshiamy_switch_rune = ',r,'
 endif
+
+if !exists('g:boshiamy_switch_braille') || type(g:boshiamy_switch_braille) != type('')
+    let g:boshiamy_switch_braille = ',b,'
+endif
+
+if !exists('g:boshiamy_braille_keys') || type(g:boshiamy_braille_keys) != type('') || len(g:boshiamy_braille_keys) != 8
+    let g:boshiamy_braille_keys = '7uj8ikm,'
+endif
