@@ -13,12 +13,9 @@ pi314.boshiamy.vim 可以使用 Vundle_ 安裝，請參考 Vundle_ 的安裝教�
 
 ..  _Vundle: https://github.com/gmarik/Vundle.vim
 
-這些是我習慣的設定，放在 ``~/.vim/vimrc`` 中 ::
+這是我習慣的設定，放在 ``~/.vim/vimrc`` 中 ::
 
-  set statusline=%<%{boshiamy#status()}%{VimTableModeStatusString()}%f\ %h%m%r%=%y\ %-14.(%l,%c%V%)\ %P
-  inoremap <expr>  boshiamy#toggle()
-  inoremap <space> <C-R>=boshiamy#send_key()<CR>
-  nnoremap <expr> <ESC><ESC> boshiamy#leave()
+  set statusline=%<%{boshiamy#status()}%f\ %h%m%r%=%y\ %-14.(%l,%c%V%)\ %P
 
 介紹
 ----
@@ -78,20 +75,22 @@ boshiamy-cue 則是年代久遠，在 2013 年初發佈第一個版本後就沒�
 
   - 這行 statusline 看起來會像 ``[嘸]README.rst [+]      75,67-59  53%``
 
-* ``boshiamy#toggle()`` 切換輸入法/英文 ::
+* 切換輸入法/英文 ::
 
-    inoremap <expr> ,, boshiamy#toggle()
+    let g:boshiamy_toggle_key = ',,'
 
-  - 我正計畫加入其他種類的輸入法， ``boshiamy#toggle()`` 會在英文和這些輸入法之間做切換
+  - 我正計畫加入其他種類的輸入法，這個 plugin 會在英文和這些輸入法之間做切換
   - 離開 Vim 的 Insert Mode 會將輸入法的狀態保留，下次進入 Insert Mode 後不會被還原回預設的模式
 
 * ``boshiamy#send_key()`` 送字 ::
 
     inoremap <space> <C-R>=boshiamy#send_key()<CR>
 
-* ``boshiamy#leave()`` 離開輸入法 ::
+* 離開輸入法 ::
 
-    nnoremap <expr> <ESC><ESC> boshiamy#leave()
+    let g:boshiamy_leave_key = '<ESC><ESC>'
+
+  - 這個設定只作用在 normal 模式底下
 
 * ``g:boshiamy_cancel_key`` 指定 "取消輸入" 的按鍵 ::
 
@@ -113,6 +112,7 @@ boshiamy-cue 則是年代久遠，在 2013 年初發佈第一個版本後就沒�
   - 日文假名
   - 全型字
   - 盧恩字母
+  - 點字
 
 * 在不同輸入模式之間切換
 
@@ -121,11 +121,10 @@ boshiamy-cue 則是年代久遠，在 2013 年初發佈第一個版本後就沒�
     + 切換為嘸蝦米的預設值為 ::
 
         let g:boshiamy_switch_boshiamy = ',t,'
-        let g:boshiamy_switch_boshiamy = [',t,']
 
     + 切換為日文假名的預設值為 ::
 
-        let g:boshiamy_switch_kana = [',j,']
+        let g:boshiamy_switch_kana = ',j,'
 
       * 平假名可以直接用羅馬拼音輸入
       * 片假名需在字根後加上一個 ``.``
@@ -150,7 +149,14 @@ boshiamy-cue 則是年代久遠，在 2013 年初發佈第一個版本後就沒�
 
         let g:boshiamy_switch_rune = ',r,'
 
-    + 若需要自行設定，請注意不要包含 ``boshiamy#toggle()`` 的按鍵序列，因為 ``imap`` 的效果比較優先
+    + 切換為點字的預設值為 ::
+
+        let g:boshiamy_switch_rune = ',b,'
+        let g:boshiamy_braille_keys = '7uj8ikm,'
+
+      * ``7uj8ikm,`` 分別為點字的 ``12345678`` ，請參考 https://en.wikipedia.org/wiki/Braille_Patterns
+
+    + 若需要自行設定，請注意不要包含 ``g:boshiamy_toggle_key`` 的按鍵序列，因為 ``imap`` 的效果比較優先
 
 空白鍵是送字，如同嘸蝦米輸入法的行為
 

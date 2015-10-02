@@ -182,16 +182,40 @@ function! s:ProcessRune (line, rune_str) " {{{
     return ''
 endfunction " }}}
 
+function! s:ProcessBraille (line, braille_pattern) " {{{
+    let l:start = strlen(a:line) - strlen(a:braille_pattern)
+    let l:col  = l:start + 1
+    let l:braille_input_set = [0, 0, 0, 0, 0, 0, 0, 0]
+    let l:boshiamy_braille_keys_list = split(g:boshiamy_braille_keys, '\zs')
+    for i in range(strlen(a:braille_pattern))
+        let l:braille_input_set[index(l:boshiamy_braille_keys_list, a:braille_pattern[i])] = 1
+    endfor
+    " call reverse(l:braille_input_set)
+
+    let l:braille_value = 0
+    let l:probe = 1
+    for i in l:braille_input_set
+        if i == 1
+            let l:braille_value += l:probe
+        endif
+        let l:probe = l:probe * 2
+    endfor
+    call complete(l:col, [nr2char(l:braille_value + 0x2800)])
+    return ''
+endfunction " }}}
+
 " 0: English
 " 1: Boshiamy
 " 2: Kana (Japanese alphabet)
 " 3: Wide characters
 " 4: Runed
+" 5: Braille
 let s:IM_ENGLISH = 0
 let s:IM_BOSHIAMY = 1
 let s:IM_KANA = 2
 let s:IM_WIDE = 3
 let s:IM_RUNE = 4
+let s:IM_BRAILLE = 5
 
 let s:boshiamy_sub_status = s:IM_BOSHIAMY
 let s:boshiamy_status = s:IM_ENGLISH
@@ -205,23 +229,16 @@ function! s:UpdateIMStatus (new_status) " {{{
     redraw!
 endfunction " }}}
 
-function! s:UnifyType (variable, vname, default) " {{{
-    if type(a:variable) == type('')
-        return [a:variable]
-    endif
+" ==============
+" Apply Settings
+" ==============
 
-    if type(a:variable) == type([])
-        for i in a:variable
-            if type(i) != type('')
-                echoerr "'". a:vname ."' should contain only strings."
-            endif
-        endfor
-        return a:variable
-    endif
-    echoerr "'". a:vname ."' should be in type 'string' or 'list'."
-    echoerr "set to default value: ". a:default
-    return [a:default]
-endfunction " }}}
+let s:switch_table = {}
+let s:switch_table[g:boshiamy_switch_boshiamy .'$'] = s:IM_BOSHIAMY
+let s:switch_table[g:boshiamy_switch_kana .'$'] = s:IM_KANA
+let s:switch_table[g:boshiamy_switch_wide .'$'] = s:IM_WIDE
+let s:switch_table[g:boshiamy_switch_rune .'$'] = s:IM_RUNE
+let s:switch_table[g:boshiamy_switch_braille .'$'] = s:IM_BRAILLE
 
 " ================
 " Public Functions
@@ -259,18 +276,23 @@ function! boshiamy#send_key () " {{{
     endfor
 
     if s:boshiamy_status == s:IM_WIDE
-        let wide_str = matchstr(l:line, '\([a-zA-Z0-9]\|[-=,./;:<>?_+\\|!@#$%^&*(){}"]\|\[\|\]\|'."'".'\)\+$')
+        let l:wide_str = matchstr(l:line, '\([a-zA-Z0-9]\|[-=,./;:<>?_+\\|!@#$%^&*(){}"]\|\[\|\]\|'."'".'\)\+$')
         return s:ProcessWide(l:line, l:wide_str)
     endif
 
     if s:boshiamy_status == s:IM_KANA
-        let kana_str = matchstr(l:line, '[.a-z]\+$')
+        let l:kana_str = matchstr(l:line, '[.a-z]\+$')
         return s:ProcessKana(l:line, l:kana_str)
     endif
 
     if s:boshiamy_status == s:IM_RUNE
-        let rune_str = matchstr(l:line, '[.a-z,]\+$')
+        let l:rune_str = matchstr(l:line, '[.a-z,]\+$')
         return s:ProcessRune(l:line, l:rune_str)
+    endif
+
+    if s:boshiamy_status == s:IM_BRAILLE
+        let l:braille_str = matchstr(l:line, '\v['. g:boshiamy_braille_keys .']*$')
+        return s:ProcessBraille(l:line, l:braille_str)
     endif
 
     " Try chewing
@@ -368,6 +390,8 @@ function! boshiamy#status () " {{{
         return '[Ａ]'
     elseif s:boshiamy_status == s:IM_RUNE
         return '[ᚱ]'
+    elseif s:boshiamy_status == s:IM_BRAILLE
+        return '[⢝]'
     endif
     return '[？]'
 endfunction " }}}
@@ -387,66 +411,3 @@ function! boshiamy#leave () " {{{
     call s:UpdateIMStatus(s:IM_ENGLISH)
     return ''
 endfunction " }}}
-
-" ==============
-" Default Values
-" ==============
-let s:BOSHIAMY_IM_CANCEL_KEY_DEFAULT = '<C-h>'
-let s:BOSHIAMY_IM_SWITCH_BOSHIAMY_DEFAULT = ',t,'
-let s:BOSHIAMY_IM_SWITCH_KANA_DEFAULT = ',j,'
-let s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT = ',w,'
-let s:BOSHIAMY_IM_SWITCH_RUNE_DEFAULT = ',r,'
-
-if !exists('g:boshiamy_cancel_key')
-    let g:boshiamy_cancel_key = s:BOSHIAMY_IM_CANCEL_KEY_DEFAULT
-endif
-let s:cancel_key_list = s:UnifyType(g:boshiamy_cancel_key, 'g:boshiamy_cancel_key', s:BOSHIAMY_IM_CANCEL_KEY_DEFAULT)
-
-if !exists('g:boshiamy_switch_boshiamy')
-    let g:boshiamy_switch_boshiamy = s:BOSHIAMY_IM_SWITCH_BOSHIAMY_DEFAULT
-endif
-let s:switch_boshiamy = s:UnifyType(g:boshiamy_switch_boshiamy, 'g:boshiamy_switch_boshiamy', s:BOSHIAMY_IM_SWITCH_BOSHIAMY_DEFAULT)
-
-if !exists('g:boshiamy_switch_kana')
-    let g:boshiamy_switch_kana = s:BOSHIAMY_IM_SWITCH_KANA_DEFAULT
-endif
-let s:switch_kana = s:UnifyType(g:boshiamy_switch_kana, 'g:boshiamy_switch_kana', s:BOSHIAMY_IM_SWITCH_KANA_DEFAULT)
-
-if !exists('g:boshiamy_switch_wide')
-    let g:boshiamy_switch_wide = s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT
-endif
-let s:switch_wide = s:UnifyType(g:boshiamy_switch_wide, 'g:boshiamy_switch_wide', s:BOSHIAMY_IM_SWITCH_WIDE_DEFAULT)
-
-if !exists('g:boshiamy_switch_rune')
-    let g:boshiamy_switch_rune = s:BOSHIAMY_IM_SWITCH_RUNE_DEFAULT
-endif
-let s:switch_rune = s:UnifyType(g:boshiamy_switch_rune, 'g:boshiamy_switch_rune', s:BOSHIAMY_IM_SWITCH_RUNE_DEFAULT)
-" ==============
-" ==============
-
-" I want this option be set because it's related to my 'cancel' feature
-set completeopt+=menuone
-
-" ==============
-" Apply Settings
-" ==============
-for i in s:cancel_key_list
-    execute 'inoremap <expr> '. i .' pumvisible() ? "<C-e> " : "'. i .'"'
-endfor
-
-let s:switch_table = {}
-for i in s:switch_boshiamy
-    let s:switch_table[i .'$'] = s:IM_BOSHIAMY
-endfor
-
-for i in s:switch_kana
-    let s:switch_table[i .'$'] = s:IM_KANA
-endfor
-
-for i in s:switch_wide
-    let s:switch_table[i .'$'] = s:IM_WIDE
-endfor
-
-for i in s:switch_rune
-    let s:switch_table[i .'$'] = s:IM_RUNE
-endfor
