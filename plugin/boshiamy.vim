@@ -1,6 +1,18 @@
 " I want this option be set because it's related to my 'cancel' feature
 set completeopt+=menuone
 
+if !exists('g:boshiamy_toggle_key') || type(g:boshiamy_toggle_key) != type('')
+    let g:boshiamy_toggle_key = ',,'
+endif
+execute 'inoremap <expr> '. g:boshiamy_toggle_key .' boshiamy#toggle()'
+
+inoremap <space> <C-R>=boshiamy#send_key()<CR>
+
+if !exists('g:boshiamy_leave_key') || type(g:boshiamy_leave_key) != type('')
+    let g:boshiamy_leave_key = '<ESC><ESC>'
+endif
+execute 'nnoremap <expr> '. g:boshiamy_leave_key .' boshiamy#leave()'
+
 if !exists('g:boshiamy_cancel_key') || type(g:boshiamy_cancel_key) != type('')
     let g:boshiamy_cancel_key = '<C-h>'
 endif
