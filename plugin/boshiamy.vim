@@ -1,5 +1,5 @@
 " I want this option be set because it's related to my 'cancel' feature
-set completeopt+=menuone
+setlocal completeopt+=menuone
 
 if !exists('g:boshiamy_toggle_key') || type(g:boshiamy_toggle_key) != type('')
     let g:boshiamy_toggle_key = ',,'
