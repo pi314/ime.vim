@@ -86,12 +86,6 @@ boshiamy-cue 則是年代久遠，在 2013 年初發佈第一個版本後就沒�
 
     inoremap <space> <C-R>=boshiamy#send_key()<CR>
 
-* 離開輸入法 ::
-
-    let g:boshiamy_leave_key = '<ESC><ESC>'
-
-  - 這個設定只作用在 normal 模式底下
-
 * ``g:boshiamy_cancel_key`` 指定 "取消輸入" 的按鍵 ::
 
     let g:boshiamy_cancel_key = '<C-h>'
