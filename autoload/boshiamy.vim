@@ -28,7 +28,7 @@ function! s:CharType (c) " {{{
     return 0
 endfunction " }}}
 
-function! s:ProcessChewing (line, chewing_str) " {{{
+function! s:HandleChewing (line, chewing_str) " {{{
     let l:start = strlen(a:line) - strlen(a:chewing_str)
     let l:col  = l:start + 1
 
@@ -40,7 +40,7 @@ function! s:ProcessChewing (line, chewing_str) " {{{
     return 1
 endfunction " }}}
 
-function! s:ProcessKana (line, kana_str) " {{{
+function! s:HandleKana (line, kana_str) " {{{
     let l:start = strlen(a:line) - strlen(a:kana_str)
     let l:col  = l:start + 1
 
@@ -82,7 +82,7 @@ function! s:ProcessKana (line, kana_str) " {{{
     return ''
 endfunction " }}}
 
-function! s:ProcessWide (line, wide_str) " {{{
+function! s:HandleWide (line, wide_str) " {{{
     let l:start = strlen(a:line) - strlen(a:wide_str)
     let l:col  = l:start + 1
 
@@ -106,7 +106,7 @@ function! s:ProcessWide (line, wide_str) " {{{
     return ''
 endfunction " }}}
 
-function! s:ProcessUnicodeEncode (line, unicode_pattern) " {{{
+function! s:HandleUnicodeEncode (line, unicode_pattern) " {{{
     let l:start = strlen(a:line) - strlen(a:unicode_pattern)
     let l:col  = l:start + 1
 
@@ -116,7 +116,7 @@ function! s:ProcessUnicodeEncode (line, unicode_pattern) " {{{
     return 0
 endfunction " }}}
 
-function! s:ProcessUnicodeDecode (line, unicode_pattern) " {{{
+function! s:HandleUnicodeDecode (line, unicode_pattern) " {{{
     let l:start = strlen(a:line) - strlen(a:unicode_pattern)
     let l:col  = l:start + 1
 
@@ -129,7 +129,7 @@ function! s:ProcessUnicodeDecode (line, unicode_pattern) " {{{
     return 0
 endfunction " }}}
 
-function! s:ProcessHTMLCode (line, htmlcode_pattern) " {{{
+function! s:HandleHTMLCode (line, htmlcode_pattern) " {{{
     let l:start = strlen(a:line) - strlen(a:htmlcode_pattern)
     let l:col  = l:start + 1
 
@@ -146,7 +146,7 @@ function! s:ProcessHTMLCode (line, htmlcode_pattern) " {{{
     return 0
 endfunction " }}}
 
-function! s:ProcessRune (line, rune_str) " {{{
+function! s:HandleRune (line, rune_str) " {{{
     let l:start = strlen(a:line) - strlen(a:rune_str)
     let l:col  = l:start + 1
 
@@ -182,7 +182,7 @@ function! s:ProcessRune (line, rune_str) " {{{
     return ''
 endfunction " }}}
 
-function! s:ProcessBraille (line, braille_pattern) " {{{
+function! s:HandleBraille (line, braille_pattern) " {{{
     let l:start = strlen(a:line) - strlen(a:braille_pattern)
     let l:col  = l:start + 1
     let l:braille_input_set = [0, 0, 0, 0, 0, 0, 0, 0]
@@ -277,22 +277,22 @@ function! boshiamy#send_key () " {{{
 
     if s:boshiamy_status == s:IM_WIDE
         let l:wide_str = matchstr(l:line, '\([a-zA-Z0-9]\|[-=,./;:<>?_+\\|!@#$%^&*(){}"]\|\[\|\]\|'."'".'\)\+$')
-        return s:ProcessWide(l:line, l:wide_str)
+        return s:HandleWide(l:line, l:wide_str)
     endif
 
     if s:boshiamy_status == s:IM_KANA
         let l:kana_str = matchstr(l:line, '[.a-z]\+$')
-        return s:ProcessKana(l:line, l:kana_str)
+        return s:HandleKana(l:line, l:kana_str)
     endif
 
     if s:boshiamy_status == s:IM_RUNE
         let l:rune_str = matchstr(l:line, '[.a-z,]\+$')
-        return s:ProcessRune(l:line, l:rune_str)
+        return s:HandleRune(l:line, l:rune_str)
     endif
 
     if s:boshiamy_status == s:IM_BRAILLE
         let l:braille_str = matchstr(l:line, '\v['. g:boshiamy_braille_keys .']*$')
-        return s:ProcessBraille(l:line, l:braille_str)
+        return s:HandleBraille(l:line, l:braille_str)
     endif
 
     " Try chewing
@@ -303,14 +303,14 @@ function! boshiamy#send_key () " {{{
 
     if l:chewing_str != ''
         " Found chewing pattern
-        if s:ProcessChewing(l:line, l:chewing_str) == 0
+        if s:HandleChewing(l:line, l:chewing_str) == 0
             return ''
         endif
     endif
 
     let unicode_pattern = matchstr(l:line, '\\[Uu][0-9a-fA-F]\+$')
     if l:unicode_pattern != ''
-        if s:ProcessUnicodeEncode(l:line, l:unicode_pattern) == 0
+        if s:HandleUnicodeEncode(l:line, l:unicode_pattern) == 0
             return ''
         endif
     endif
@@ -320,14 +320,14 @@ function! boshiamy#send_key () " {{{
         let unicode_pattern = matchstr(l:line, '\\[Uu]\[\]\]$')
     endif
     if l:unicode_pattern != ''
-        if s:ProcessUnicodeDecode(l:line, l:unicode_pattern) == 0
+        if s:HandleUnicodeDecode(l:line, l:unicode_pattern) == 0
             return ''
         endif
     endif
 
     let htmlcode_pattern = matchstr(l:line, '&#x\?[0-9a-fA-F]\+;$')
     if l:htmlcode_pattern != ''
-        if s:ProcessHTMLCode(l:line, l:htmlcode_pattern) == 0
+        if s:HandleHTMLCode(l:line, l:htmlcode_pattern) == 0
             return ''
         endif
     endif
