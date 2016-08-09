@@ -406,8 +406,3 @@ function! boshiamy#toggle () " {{{
     endif
     return ''
 endfunction " }}}
-
-function! boshiamy#leave () " {{{
-    call s:UpdateIMStatus(s:IM_ENGLISH)
-    return ''
-endfunction " }}}
