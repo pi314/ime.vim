@@ -146,29 +146,29 @@ function! s:HandleHTMLCode (line, htmlcode_pattern) " {{{
     return 0
 endfunction " }}}
 
-function! s:HandleRune (line, rune_str) " {{{
-    let l:start = strlen(a:line) - strlen(a:rune_str)
+function! s:HandleRunes (line, runes_str) " {{{
+    let l:start = strlen(a:line) - strlen(a:runes_str)
     let l:col  = l:start + 1
 
-    let rune_str_length = strlen(a:rune_str)
-    if l:rune_str_length == 0
+    let runes_str_length = strlen(a:runes_str)
+    if l:runes_str_length == 0
         return ' '
     endif
 
-    if has_key(g:boshiamy#rune#table, a:rune_str)
-        call complete(l:col, g:boshiamy#rune#table[ (a:rune_str) ])
+    if has_key(g:boshiamy#runes#table, a:runes_str)
+        call complete(l:col, g:boshiamy#runes#table[ (a:runes_str) ])
         return ''
     endif
 
-    let ret_rune = ''
+    let ret_runes = ''
     let i = 0
     let j = 2
     while l:i <= l:j
-        let t = a:rune_str[ (l:i) : (l:j) ]
+        let t = a:runes_str[ (l:i) : (l:j) ]
         echom l:t
 
-        if has_key(g:boshiamy#rune#table, l:t)
-            let ret_rune = l:ret_rune . g:boshiamy#rune#table[(l:t)][0]
+        if has_key(g:boshiamy#runes#table, l:t)
+            let ret_runes = l:ret_runes . g:boshiamy#runes#table[(l:t)][0]
             let i = l:j + 1
             let j = l:i + 2
         else
@@ -176,9 +176,9 @@ function! s:HandleRune (line, rune_str) " {{{
         endif
 
     endwhile
-    let remain = a:rune_str[(l:j + 1) : ]
+    let remain = a:runes_str[(l:j + 1) : ]
 
-    call complete(l:col, [l:ret_rune . l:remain] )
+    call complete(l:col, [l:ret_runes . l:remain] )
     return ''
 endfunction " }}}
 
@@ -208,13 +208,13 @@ endfunction " }}}
 " 1: Boshiamy
 " 2: Kana (Japanese alphabet)
 " 3: Wide characters
-" 4: Runed
+" 4: Runes
 " 5: Braille
 let s:IM_ENGLISH = 0
 let s:IM_BOSHIAMY = 1
 let s:IM_KANA = 2
 let s:IM_WIDE = 3
-let s:IM_RUNE = 4
+let s:IM_RUNES = 4
 let s:IM_BRAILLE = 5
 
 let s:boshiamy_sub_status = s:IM_BOSHIAMY
@@ -237,7 +237,7 @@ let s:switch_table = {}
 let s:switch_table[g:boshiamy_switch_boshiamy .'$'] = s:IM_BOSHIAMY
 let s:switch_table[g:boshiamy_switch_kana .'$'] = s:IM_KANA
 let s:switch_table[g:boshiamy_switch_wide .'$'] = s:IM_WIDE
-let s:switch_table[g:boshiamy_switch_rune .'$'] = s:IM_RUNE
+let s:switch_table[g:boshiamy_switch_runes .'$'] = s:IM_RUNES
 let s:switch_table[g:boshiamy_switch_braille .'$'] = s:IM_BRAILLE
 
 " ================
@@ -285,9 +285,9 @@ function! boshiamy#send_key () " {{{
         return s:HandleKana(l:line, l:kana_str)
     endif
 
-    if s:boshiamy_status == s:IM_RUNE
-        let l:rune_str = matchstr(l:line, '[.a-z,]\+$')
-        return s:HandleRune(l:line, l:rune_str)
+    if s:boshiamy_status == s:IM_RUNES
+        let l:runes_str = matchstr(l:line, '[.a-z,]\+$')
+        return s:HandleRunes(l:line, l:runes_str)
     endif
 
     if s:boshiamy_status == s:IM_BRAILLE
@@ -388,7 +388,7 @@ function! boshiamy#status () " {{{
         return '[あ]'
     elseif s:boshiamy_status == s:IM_WIDE
         return '[Ａ]'
-    elseif s:boshiamy_status == s:IM_RUNE
+    elseif s:boshiamy_status == s:IM_RUNES
         return '[ᚱ]'
     elseif s:boshiamy_status == s:IM_BRAILLE
         return '[⢝]'

@@ -25,8 +25,8 @@ if !exists('g:boshiamy_switch_wide') || type(g:boshiamy_switch_wide) != type('')
     let g:boshiamy_switch_wide = ',w,'
 endif
 
-if !exists('g:boshiamy_switch_rune') || type(g:boshiamy_switch_rune) != type('')
-    let g:boshiamy_switch_rune = ',r,'
+if !exists('g:boshiamy_switch_runes') || type(g:boshiamy_switch_runes) != type('')
+    let g:boshiamy_switch_runes = ',r,'
 endif
 
 if !exists('g:boshiamy_switch_braille') || type(g:boshiamy_switch_braille) != type('')
