@@ -29,8 +29,8 @@ function! s:CharType (c) " {{{
 endfunction " }}}
 
 function! s:HandleChewing (line, chewing_str) " {{{
-    let l:start = strlen(a:line) - strlen(a:chewing_str)
-    let l:col  = l:start + 1
+    let l:idx = strlen(a:line) - strlen(a:chewing_str)
+    let l:col  = l:idx + 1
 
     if has_key(g:boshiamy#chewing#table, a:chewing_str)
         call complete(l:col, g:boshiamy#chewing#table[a:chewing_str])
@@ -41,8 +41,8 @@ function! s:HandleChewing (line, chewing_str) " {{{
 endfunction " }}}
 
 function! s:HandleKana (line, kana_str) " {{{
-    let l:start = strlen(a:line) - strlen(a:kana_str)
-    let l:col  = l:start + 1
+    let l:idx = strlen(a:line) - strlen(a:kana_str)
+    let l:col  = l:idx + 1
 
     let kana_str_length = strlen(a:kana_str)
     if l:kana_str_length == 0
@@ -83,8 +83,8 @@ function! s:HandleKana (line, kana_str) " {{{
 endfunction " }}}
 
 function! s:HandleWide (line, wide_str) " {{{
-    let l:start = strlen(a:line) - strlen(a:wide_str)
-    let l:col  = l:start + 1
+    let l:idx = strlen(a:line) - strlen(a:wide_str)
+    let l:col  = l:idx + 1
 
     let wide_str_length = strlen(a:wide_str)
     if l:wide_str_length == 0
@@ -107,8 +107,8 @@ function! s:HandleWide (line, wide_str) " {{{
 endfunction " }}}
 
 function! s:HandleUnicodeEncode (line, unicode_pattern) " {{{
-    let l:start = strlen(a:line) - strlen(a:unicode_pattern)
-    let l:col  = l:start + 1
+    let l:idx = strlen(a:line) - strlen(a:unicode_pattern)
+    let l:col  = l:idx + 1
 
     let unicode_codepoint = str2nr(a:unicode_pattern[2:], 16)
     call complete(l:col, [nr2char(l:unicode_codepoint)])
@@ -117,8 +117,8 @@ function! s:HandleUnicodeEncode (line, unicode_pattern) " {{{
 endfunction " }}}
 
 function! s:HandleUnicodeDecode (line, unicode_pattern) " {{{
-    let l:start = strlen(a:line) - strlen(a:unicode_pattern)
-    let l:col  = l:start + 1
+    let l:idx = strlen(a:line) - strlen(a:unicode_pattern)
+    let l:col  = l:idx + 1
 
     let utf8_str = a:unicode_pattern[3:-2]
     let unicode_codepoint = char2nr(l:utf8_str)
@@ -130,8 +130,8 @@ function! s:HandleUnicodeDecode (line, unicode_pattern) " {{{
 endfunction " }}}
 
 function! s:HandleHTMLCode (line, htmlcode_pattern) " {{{
-    let l:start = strlen(a:line) - strlen(a:htmlcode_pattern)
-    let l:col  = l:start + 1
+    let l:idx = strlen(a:line) - strlen(a:htmlcode_pattern)
+    let l:col  = l:idx + 1
 
     if a:htmlcode_pattern[2] == 'x'
         let utf8_str = a:htmlcode_pattern[3:-2]
@@ -147,8 +147,8 @@ function! s:HandleHTMLCode (line, htmlcode_pattern) " {{{
 endfunction " }}}
 
 function! s:HandleRunes (line, runes_str) " {{{
-    let l:start = strlen(a:line) - strlen(a:runes_str)
-    let l:col  = l:start + 1
+    let l:idx = strlen(a:line) - strlen(a:runes_str)
+    let l:col  = l:idx + 1
 
     let runes_str_length = strlen(a:runes_str)
     if l:runes_str_length == 0
@@ -183,8 +183,8 @@ function! s:HandleRunes (line, runes_str) " {{{
 endfunction " }}}
 
 function! s:HandleBraille (line, braille_pattern) " {{{
-    let l:start = strlen(a:line) - strlen(a:braille_pattern)
-    let l:col  = l:start + 1
+    let l:idx = strlen(a:line) - strlen(a:braille_pattern)
+    let l:col  = l:idx + 1
     let l:braille_input_set = [0, 0, 0, 0, 0, 0, 0, 0]
     let l:boshiamy_braille_keys_list = split(g:boshiamy_braille_keys, '\zs')
     for i in range(strlen(a:braille_pattern))
@@ -246,22 +246,9 @@ let s:switch_table[g:boshiamy_switch_braille .'$'] = s:IM_BRAILLE
 
 function! boshiamy#send_key () " {{{
     if s:boshiamy_status == s:IM_ENGLISH
-        " IM is not ON, just return a space
         return ' '
     endif
 
-    " I need to substract 2 here, because
-    " 1.
-    "   col  : 1 2 3 4 5 6
-    "   index: 0 1 2 3 4 5
-    "   line : a b c d e f
-    " 2.
-    "   string slice is head-tail-including
-    "
-    " if you want "bcde", and the cursor is on "f",
-    " the col=6, the index=5, tail_index=4
-    " so you have to use "line[1:col-2]", which is "line[1:4]"
-    "
     let l:line = strpart(getline('.'), 0, (col('.')-1) )
 
     " Switch input mode
@@ -332,18 +319,14 @@ function! boshiamy#send_key () " {{{
         endif
     endif
 
-    " Locate the start of the boshiamy key sequence
-    let start = col('.') - 1
-    while l:start > 0 && s:CharType(l:line[l:start-1])
-        let start -= 1
+    " Locate the starting idx of the boshiamy key sequence
+    let idx = col('.') - 1
+    while l:idx > 0 && s:CharType(l:line[l:idx-1])
+        let idx -= 1
     endwhile
 
-    let l:base = l:line[(l:start): (col('.')-2)]
-    let l:col  = l:start + 1
-
-    " Input key start is l:start
-    " Input key col is l:col
-    " Input key sequence is l:base
+    let l:base = l:line[(l:idx): (col('.')-2)]    " the key seq
+    let l:col  = l:idx + 1                        " the col of key seq
 
     if has_key(g:boshiamy#boshiamy#table, l:base)
         call complete(l:col, g:boshiamy#boshiamy#table[l:base])
@@ -351,32 +334,23 @@ function! boshiamy#send_key () " {{{
     endif
 
     let char_type = s:CharType(l:base[0])
-
     while strlen(l:base) > 0
         let new_char_type = s:CharType(l:base[0])
-
-        " Cut off the string
         if l:new_char_type != l:char_type
-
             if has_key( g:boshiamy#boshiamy#table, l:base )
                 call complete(l:col, g:boshiamy#boshiamy#table[ (l:base) ])
                 return ''
-
             endif
-
         endif
 
         " Boshiamy char not found, cut off one char and keep trying
         let l:col = l:col + 1
         let l:base = l:base[1:]
-
         let l:char_type = l:new_char_type
-
     endwhile
 
     " There is nothing I can do, just return a space
     return ' '
-
 endfunction " }}}
 
 function! boshiamy#status () " {{{
