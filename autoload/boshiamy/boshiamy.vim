@@ -27509,6 +27509,52 @@ let g:boshiamy#boshiamy#table["zzz"] = ["歮"]
 let g:boshiamy#boshiamy#table["zzzd"] = ["孴"]
 echom "Done"
 
+echom "Loading custom table..."
+function! s:load_custom_table ()
+    if !exists('g:boshiamy_custom_table') || g:boshiamy_custom_table == ''
+        echom 'Custom table is not configured (g:boshiamy_custom_table == "")'
+        return
+    endif
+
+    if type(g:boshiamy_custom_table) != type('')
+        echom 'The type of g:boshiamy_custom_table is not string, abort'
+        return
+    endif
+
+    if !filereadable(glob(g:boshiamy_custom_table))
+        echom 'Cannot read from "'. g:boshiamy_custom_table .'", abort'
+        return
+    endif
+
+    let l:custom_table = {}
+    let l:custom_file = readfile(glob(g:boshiamy_custom_table))
+    for l:line in l:custom_file
+        let l:entry = split(l:line)
+        if len(l:entry) != 2
+            echom 'Entry format incorrect: ['. l:line .']'
+        endif
+
+        let l:seq = l:entry[0]
+        let l:key = l:entry[1]
+
+        if !has_key(l:custom_table, l:key)
+            let l:custom_table[(l:key)] = []
+        endif
+
+        call add(l:custom_table[(l:key)], l:seq)
+    endfor
+
+    for l:item in items(l:custom_table)
+        let l:key = l:item[0]
+        if !has_key(g:boshiamy#boshiamy#table, l:key)
+            let g:boshiamy#boshiamy#table[(l:key)] = []
+        endif
+        let g:boshiamy#boshiamy#table[(l:key)] = l:custom_table[(l:key)] + g:boshiamy#boshiamy#table[(l:key)]
+    endfor
+endfunction
+call s:load_custom_table()
+echom "Done"
+
 function! s:CharType (c) " {{{
     if a:c =~# "[a-zA-Z0-9]"
         return 1
