@@ -248,3 +248,45 @@ let boshiamy#kana#table['zu'] = ['ず']
 let boshiamy#kana#table['zu'] = ['づ']
 let boshiamy#kana#table['zu.'] = ['ズ']
 echom "Done"
+
+function! boshiamy#kana#handler (line, kana_str)
+    let l:idx = strlen(a:line) - strlen(a:kana_str)
+    let l:col  = l:idx + 1
+
+    let kana_str_length = strlen(a:kana_str)
+    if l:kana_str_length == 0
+        return ' '
+    endif
+
+    if has_key(g:boshiamy#kana#table, a:kana_str)
+        call complete(l:col, g:boshiamy#kana#table[ (a:kana_str) ])
+        return ''
+    endif
+
+    let ret_hiragana = ''
+    let ret_katakana = ''
+    let i = 0
+    let j = 4
+    while l:i <= l:j
+        let t = a:kana_str[ (l:i) : (l:j) ]
+        echom l:t
+
+        if has_key(g:boshiamy#kana#table, l:t)
+            let ret_hiragana = l:ret_hiragana . g:boshiamy#kana#table[(l:t)][0]
+            if has_key(g:boshiamy#kana#table, l:t .'.')
+                let ret_katakana = l:ret_katakana . g:boshiamy#kana#table[(l:t .'.')][0]
+            else
+                let ret_katakana = l:ret_katakana . g:boshiamy#kana#table[(l:t)][0]
+            endif
+            let i = l:j + 1
+            let j = l:i + 4
+        else
+            let j = l:j - 1
+        endif
+
+    endwhile
+    let remain = a:kana_str[(l:j + 1) : ]
+
+    call complete(l:col, [l:ret_hiragana . l:remain, l:ret_katakana . l:remain] )
+    return ''
+endfunction

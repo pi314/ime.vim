@@ -27508,3 +27508,56 @@ let g:boshiamy#boshiamy#table["zzw"] = ["籧"]
 let g:boshiamy#boshiamy#table["zzz"] = ["歮"]
 let g:boshiamy#boshiamy#table["zzzd"] = ["孴"]
 echom "Done"
+
+function! s:CharType (c) " {{{
+    if a:c =~# "[a-zA-Z0-9]"
+        return 1
+
+    elseif a:c == "[" || a:c == "]"
+        return 2
+
+    elseif a:c == "," || a:c == "."
+        return 3
+
+    elseif a:c == "'"
+        return 4
+
+    endif
+
+    return 0
+endfunction " }}}
+
+function! boshiamy#boshiamy#handler (line)
+    " Locate the starting idx of the boshiamy key sequence
+    let idx = col('.') - 1
+    while l:idx > 0 && s:CharType(a:line[l:idx-1])
+        let idx -= 1
+    endwhile
+
+    let l:base = a:line[(l:idx): (col('.')-2)]    " the key seq
+    let l:col  = l:idx + 1                        " the col of key seq
+
+    if has_key(g:boshiamy#boshiamy#table, l:base)
+        call complete(l:col, g:boshiamy#boshiamy#table[l:base])
+        return ''
+    endif
+
+    let char_type = s:CharType(l:base[0])
+    while strlen(l:base) > 0
+        let new_char_type = s:CharType(l:base[0])
+        if l:new_char_type != l:char_type
+            if has_key( g:boshiamy#boshiamy#table, l:base )
+                call complete(l:col, g:boshiamy#boshiamy#table[ (l:base) ])
+                return ''
+            endif
+        endif
+
+        " Boshiamy char not found, cut off one char and keep trying
+        let l:col = l:col + 1
+        let l:base = l:base[1:]
+        let l:char_type = l:new_char_type
+    endwhile
+
+    " There is nothing I can do, just return a space
+    return ' '
+endfunction

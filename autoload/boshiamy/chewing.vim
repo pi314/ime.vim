@@ -1394,3 +1394,15 @@ let boshiamy#chewing#table[';zp4'] = ['分', '份', '奮', '噴', '憤', '糞', 
 let boshiamy#chewing#table[';zp6'] = ['頒', '墳', '焚', '汾', '賁', '棼', '濆', '鼢', '坟', '妢', '幩', '弅', '枌', '梤', '橨', '炃', '燌', '燓', '秎', '羒', '羵', '肦', '蒶', '蕡', '蚠', '蚡', '豶', '轒', '鐼', '隫', '馚', '馩', '黂', '鼖']
 let boshiamy#chewing#table[';zul4'] = ['覅']
 echom "Done"
+
+function! boshiamy#chewing#handler (line, chewing_str)
+    let l:idx = strlen(a:line) - strlen(a:chewing_str)
+    let l:col  = l:idx + 1
+
+    if has_key(g:boshiamy#chewing#table, a:chewing_str)
+        call complete(l:col, g:boshiamy#chewing#table[a:chewing_str])
+        return 0
+    endif
+
+    return 1
+endfunction

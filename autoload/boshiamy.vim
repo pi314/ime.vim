@@ -10,200 +10,6 @@
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 " ============================================================================
 
-function! s:CharType (c) " {{{
-    if a:c =~# "[a-zA-Z0-9]"
-        return 1
-
-    elseif a:c == "[" || a:c == "]"
-        return 2
-
-    elseif a:c == "," || a:c == "."
-        return 3
-
-    elseif a:c == "'"
-        return 4
-
-    endif
-
-    return 0
-endfunction " }}}
-
-function! s:HandleChewing (line, chewing_str) " {{{
-    let l:idx = strlen(a:line) - strlen(a:chewing_str)
-    let l:col  = l:idx + 1
-
-    if has_key(g:boshiamy#chewing#table, a:chewing_str)
-        call complete(l:col, g:boshiamy#chewing#table[a:chewing_str])
-        return 0
-    endif
-
-    return 1
-endfunction " }}}
-
-function! s:HandleKana (line, kana_str) " {{{
-    let l:idx = strlen(a:line) - strlen(a:kana_str)
-    let l:col  = l:idx + 1
-
-    let kana_str_length = strlen(a:kana_str)
-    if l:kana_str_length == 0
-        return ' '
-    endif
-
-    if has_key(g:boshiamy#kana#table, a:kana_str)
-        call complete(l:col, g:boshiamy#kana#table[ (a:kana_str) ])
-        return ''
-    endif
-
-    let ret_hiragana = ''
-    let ret_katakana = ''
-    let i = 0
-    let j = 4
-    while l:i <= l:j
-        let t = a:kana_str[ (l:i) : (l:j) ]
-        echom l:t
-
-        if has_key(g:boshiamy#kana#table, l:t)
-            let ret_hiragana = l:ret_hiragana . g:boshiamy#kana#table[(l:t)][0]
-            if has_key(g:boshiamy#kana#table, l:t .'.')
-                let ret_katakana = l:ret_katakana . g:boshiamy#kana#table[(l:t .'.')][0]
-            else
-                let ret_katakana = l:ret_katakana . g:boshiamy#kana#table[(l:t)][0]
-            endif
-            let i = l:j + 1
-            let j = l:i + 4
-        else
-            let j = l:j - 1
-        endif
-
-    endwhile
-    let remain = a:kana_str[(l:j + 1) : ]
-
-    call complete(l:col, [l:ret_hiragana . l:remain, l:ret_katakana . l:remain] )
-    return ''
-endfunction " }}}
-
-function! s:HandleWide (line, wide_str) " {{{
-    let l:idx = strlen(a:line) - strlen(a:wide_str)
-    let l:col  = l:idx + 1
-
-    let wide_str_length = strlen(a:wide_str)
-    if l:wide_str_length == 0
-        return ' '
-    endif
-
-    let p = 0
-    let ret = ''
-    echom a:wide_str
-    echom strlen(a:wide_str)
-    while l:p < strlen(a:wide_str)
-        echom l:p
-        echom a:wide_str[(l:p)]
-        let l:ret = l:ret . g:boshiamy#wide#table[a:wide_str[(l:p)]]
-        let l:p = l:p + 1
-    endwhile
-
-    call complete(l:col, [l:ret] )
-    return ''
-endfunction " }}}
-
-function! s:HandleUnicodeEncode (line, unicode_pattern) " {{{
-    let l:idx = strlen(a:line) - strlen(a:unicode_pattern)
-    let l:col  = l:idx + 1
-
-    let unicode_codepoint = str2nr(a:unicode_pattern[2:], 16)
-    call complete(l:col, [nr2char(l:unicode_codepoint)])
-
-    return 0
-endfunction " }}}
-
-function! s:HandleUnicodeDecode (line, unicode_pattern) " {{{
-    let l:idx = strlen(a:line) - strlen(a:unicode_pattern)
-    let l:col  = l:idx + 1
-
-    let utf8_str = a:unicode_pattern[3:-2]
-    let unicode_codepoint = char2nr(l:utf8_str)
-    let unicode_codepoint_str = printf('\u%x', unicode_codepoint)
-    let html_code_str = printf('&#%d;', unicode_codepoint)
-    call complete(l:col, [unicode_codepoint_str, html_code_str])
-
-    return 0
-endfunction " }}}
-
-function! s:HandleHTMLCode (line, htmlcode_pattern) " {{{
-    let l:idx = strlen(a:line) - strlen(a:htmlcode_pattern)
-    let l:col  = l:idx + 1
-
-    if a:htmlcode_pattern[2] == 'x'
-        let utf8_str = a:htmlcode_pattern[3:-2]
-        let unicode_codepoint = str2nr(l:utf8_str, 16)
-    else
-        let utf8_str = a:htmlcode_pattern[2:-2]
-        let unicode_codepoint = str2nr(l:utf8_str, 10)
-    endif
-    echom l:unicode_codepoint
-    call complete(l:col, [nr2char(l:unicode_codepoint)])
-
-    return 0
-endfunction " }}}
-
-function! s:HandleRunes (line, runes_str) " {{{
-    let l:idx = strlen(a:line) - strlen(a:runes_str)
-    let l:col  = l:idx + 1
-
-    let runes_str_length = strlen(a:runes_str)
-    if l:runes_str_length == 0
-        return ' '
-    endif
-
-    if has_key(g:boshiamy#runes#table, a:runes_str)
-        call complete(l:col, g:boshiamy#runes#table[ (a:runes_str) ])
-        return ''
-    endif
-
-    let ret_runes = ''
-    let i = 0
-    let j = 2
-    while l:i <= l:j
-        let t = a:runes_str[ (l:i) : (l:j) ]
-        echom l:t
-
-        if has_key(g:boshiamy#runes#table, l:t)
-            let ret_runes = l:ret_runes . g:boshiamy#runes#table[(l:t)][0]
-            let i = l:j + 1
-            let j = l:i + 2
-        else
-            let j = l:j - 1
-        endif
-
-    endwhile
-    let remain = a:runes_str[(l:j + 1) : ]
-
-    call complete(l:col, [l:ret_runes . l:remain] )
-    return ''
-endfunction " }}}
-
-function! s:HandleBraille (line, braille_pattern) " {{{
-    let l:idx = strlen(a:line) - strlen(a:braille_pattern)
-    let l:col  = l:idx + 1
-    let l:braille_input_set = [0, 0, 0, 0, 0, 0, 0, 0]
-    let l:boshiamy_braille_keys_list = split(g:boshiamy_braille_keys, '\zs')
-    for i in range(strlen(a:braille_pattern))
-        let l:braille_input_set[index(l:boshiamy_braille_keys_list, a:braille_pattern[i])] = 1
-    endfor
-    " call reverse(l:braille_input_set)
-
-    let l:braille_value = 0
-    let l:probe = 1
-    for i in l:braille_input_set
-        if i == 1
-            let l:braille_value += l:probe
-        endif
-        let l:probe = l:probe * 2
-    endfor
-    call complete(l:col, [nr2char(l:braille_value + 0x2800)])
-    return ''
-endfunction " }}}
-
 " 0: English
 " 1: Boshiamy
 " 2: Kana (Japanese alphabet)
@@ -263,23 +69,23 @@ function! boshiamy#send_key () " {{{
     endfor
 
     if s:boshiamy_status == s:IM_WIDE
-        let l:wide_str = matchstr(l:line, '\([a-zA-Z0-9]\|[-=,./;:<>?_+\\|!@#$%^&*(){}"]\|\[\|\]\|'."'".'\)\+$')
-        return s:HandleWide(l:line, l:wide_str)
+        let l:wide_str = matchstr(l:line, '\([ a-zA-Z0-9]\|[-=,./;:<>?_+\\|!@#$%^&*(){}"]\|\[\|\]\|'."'".'\)\+$')
+        return boshiamy#wide#handler(l:line, l:wide_str)
     endif
 
     if s:boshiamy_status == s:IM_KANA
         let l:kana_str = matchstr(l:line, '[.a-z]\+$')
-        return s:HandleKana(l:line, l:kana_str)
+        return boshiamy#kana#handler(l:line, l:kana_str)
     endif
 
     if s:boshiamy_status == s:IM_RUNES
         let l:runes_str = matchstr(l:line, '[.a-z,]\+$')
-        return s:HandleRunes(l:line, l:runes_str)
+        return boshiamy#runes#handler(l:line, l:runes_str)
     endif
 
     if s:boshiamy_status == s:IM_BRAILLE
         let l:braille_str = matchstr(l:line, '\v['. g:boshiamy_braille_keys .']*$')
-        return s:HandleBraille(l:line, l:braille_str)
+        return boshiamy#braille#handler(l:line, l:braille_str)
     endif
 
     " Try chewing
@@ -290,14 +96,14 @@ function! boshiamy#send_key () " {{{
 
     if l:chewing_str != ''
         " Found chewing pattern
-        if s:HandleChewing(l:line, l:chewing_str) == 0
+        if boshiamy#chewing#handler(l:line, l:chewing_str) == 0
             return ''
         endif
     endif
 
     let unicode_pattern = matchstr(l:line, '\\[Uu][0-9a-fA-F]\+$')
     if l:unicode_pattern != ''
-        if s:HandleUnicodeEncode(l:line, l:unicode_pattern) == 0
+        if boshiamy#unicode#handler_encode(l:line, l:unicode_pattern) == 0
             return ''
         endif
     endif
@@ -307,50 +113,19 @@ function! boshiamy#send_key () " {{{
         let unicode_pattern = matchstr(l:line, '\\[Uu]\[\]\]$')
     endif
     if l:unicode_pattern != ''
-        if s:HandleUnicodeDecode(l:line, l:unicode_pattern) == 0
+        if boshiamy#unicode#handler_decode(l:line, l:unicode_pattern) == 0
             return ''
         endif
     endif
 
     let htmlcode_pattern = matchstr(l:line, '&#x\?[0-9a-fA-F]\+;$')
     if l:htmlcode_pattern != ''
-        if s:HandleHTMLCode(l:line, l:htmlcode_pattern) == 0
+        if boshiamy#html#handler(l:line, l:htmlcode_pattern) == 0
             return ''
         endif
     endif
 
-    " Locate the starting idx of the boshiamy key sequence
-    let idx = col('.') - 1
-    while l:idx > 0 && s:CharType(l:line[l:idx-1])
-        let idx -= 1
-    endwhile
-
-    let l:base = l:line[(l:idx): (col('.')-2)]    " the key seq
-    let l:col  = l:idx + 1                        " the col of key seq
-
-    if has_key(g:boshiamy#boshiamy#table, l:base)
-        call complete(l:col, g:boshiamy#boshiamy#table[l:base])
-        return ''
-    endif
-
-    let char_type = s:CharType(l:base[0])
-    while strlen(l:base) > 0
-        let new_char_type = s:CharType(l:base[0])
-        if l:new_char_type != l:char_type
-            if has_key( g:boshiamy#boshiamy#table, l:base )
-                call complete(l:col, g:boshiamy#boshiamy#table[ (l:base) ])
-                return ''
-            endif
-        endif
-
-        " Boshiamy char not found, cut off one char and keep trying
-        let l:col = l:col + 1
-        let l:base = l:base[1:]
-        let l:char_type = l:new_char_type
-    endwhile
-
-    " There is nothing I can do, just return a space
-    return ' '
+    return boshiamy#boshiamy#handler(l:line)
 endfunction " }}}
 
 function! boshiamy#status () " {{{

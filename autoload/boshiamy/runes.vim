@@ -35,3 +35,38 @@ let boshiamy#runes#table['x'] = ['ᛉ', 'ᛪ']
 let boshiamy#runes#table['y'] = ['ᚣ', 'ᚤ']
 let boshiamy#runes#table['z'] = ['ᛉ', 'ᛎ']
 echom "Done"
+
+function! boshiamy#runes#handler (line, runes_str)
+    if strlen(a:runes_str) == 0
+        return ' '
+    endif
+
+    let l:idx = strlen(a:line) - strlen(a:runes_str)
+    let l:col  = l:idx + 1
+
+    if has_key(g:boshiamy#runes#table, a:runes_str)
+        call complete(l:col, g:boshiamy#runes#table[ (a:runes_str) ])
+        return ''
+    endif
+
+    let ret_runes = ''
+    let i = 0
+    let j = 2
+    while l:i <= l:j
+        let t = a:runes_str[ (l:i) : (l:j) ]
+        echom l:t
+
+        if has_key(g:boshiamy#runes#table, l:t)
+            let ret_runes = l:ret_runes . g:boshiamy#runes#table[(l:t)][0]
+            let i = l:j + 1
+            let j = l:i + 2
+        else
+            let j = l:j - 1
+        endif
+
+    endwhile
+    let remain = a:runes_str[(l:j + 1) : ]
+
+    call complete(l:col, [l:ret_runes . l:remain] )
+    return ''
+endfunction

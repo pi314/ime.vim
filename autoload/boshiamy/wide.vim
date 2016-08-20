@@ -92,4 +92,28 @@ let boshiamy#wide#table['"'] = "〝"
 let boshiamy#wide#table["<"] = "＜"
 let boshiamy#wide#table[">"] = "＞"
 let boshiamy#wide#table["?"] = "？"
+let boshiamy#wide#table[" "] = "　"
 echom "Done"
+
+function! boshiamy#wide#handler (line, wide_str)
+    if strlen(a:wide_str) == 0
+        return '　'
+    endif
+
+    let l:idx = strlen(a:line) - strlen(a:wide_str)
+    let l:col  = l:idx + 1
+
+    let p = 0
+    let ret = ''
+    echom a:wide_str
+    echom strlen(a:wide_str)
+    while l:p < strlen(a:wide_str)
+        echom l:p
+        echom a:wide_str[(l:p)]
+        let l:ret = l:ret . g:boshiamy#wide#table[a:wide_str[(l:p)]]
+        let l:p = l:p + 1
+    endwhile
+
+    call complete(l:col, [l:ret] )
+    return ''
+endfunction
