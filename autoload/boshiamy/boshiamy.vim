@@ -27529,6 +27529,10 @@ function! s:load_custom_table ()
     let l:custom_table = {}
     let l:custom_file = readfile(glob(g:boshiamy_custom_table))
     for l:line in l:custom_file
+        if l:line[0] == '#'
+            continue
+        endif
+
         let l:entry = split(l:line)
         if len(l:entry) != 2
             echom 'Entry format incorrect: ['. l:line .']'
