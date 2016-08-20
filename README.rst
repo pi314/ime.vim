@@ -1,12 +1,12 @@
-==================
-pi314.boshiamy.vim
-==================
+============
+boshiamy.vim
+============
 
 安裝
 -----
-pi314.boshiamy.vim 可以使用 Vundle_ 安裝，請參考 Vundle_ 的安裝教學，在你的 ``~/.vim/vimrc`` 中加上 ::
+boshiamy.vim 可以使用 Vundle_ 安裝，請參考 Vundle_ 的安裝教學，在你的 ``~/.vim/vimrc`` 中加上 ::
 
-  Bundle 'pi314/pi314.boshiamy.vim'
+  Bundle 'pi314/boshiamy.vim'
 
 並在 Vim 裡面執行 ``:PluginInstall``
 
