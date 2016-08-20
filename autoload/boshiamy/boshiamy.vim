@@ -27534,18 +27534,16 @@ function! s:load_custom_table ()
         endif
 
         let l:entry = split(l:line)
-        if len(l:entry) != 2
-            echom 'Entry format incorrect: ['. l:line .']'
-        endif
-
         let l:seq = l:entry[0]
-        let l:key = l:entry[1]
+        let l:keys = l:entry[1:]
 
-        if !has_key(l:custom_table, l:key)
-            let l:custom_table[(l:key)] = []
-        endif
+        for l:key in l:keys
+            if !has_key(l:custom_table, l:key)
+                let l:custom_table[(l:key)] = []
+            endif
 
-        call add(l:custom_table[(l:key)], l:seq)
+            call add(l:custom_table[(l:key)], l:seq)
+        endfor
     endfor
 
     for l:item in items(l:custom_table)
