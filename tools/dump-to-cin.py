@@ -23,6 +23,7 @@ def readfile(filename, prefix):
 def main():
     liu_table = readfile('boshiamy.vim', 'let g:boshiamy#boshiamy#table')
     chewing_table = readfile('chewing.vim', 'let g:boshiamy#chewing#table')
+    kana_table = readfile('kana.vim', 'let g:boshiamy#kana#table')
     assert '測' in liu_table['wmbr']
     assert '測' in chewing_table[';hk4']
     liu_table.update(chewing_table)
@@ -72,6 +73,13 @@ def main():
         for char in liu_table[key]:
             if char not in ('　', '	'):
                 print(key, char)
+
+    for key in sorted(kana_table.keys()):
+        for char in kana_table[key]:
+            if key.endswith('.') or key.endswith(','):
+                print(key, char)
+            else:
+                print(key + ',', char)
 
     print("%chardef end")
 
