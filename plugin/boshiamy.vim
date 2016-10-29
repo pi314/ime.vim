@@ -5,6 +5,7 @@ if !exists('g:boshiamy_toggle_key') || type(g:boshiamy_toggle_key) != type('')
     let g:boshiamy_toggle_key = ',,'
 endif
 execute 'inoremap <expr> '. g:boshiamy_toggle_key .' boshiamy#toggle()'
+inoremap ,m <C-R>=boshiamy#show_mode_menu()<CR>
 
 inoremap <space> <C-R>=boshiamy#send_key()<CR>
 
