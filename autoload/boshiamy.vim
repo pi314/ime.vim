@@ -12,41 +12,51 @@
 let s:true = 1
 let s:false = 0
 
-let s:IM_MODE_TABLE = {}
-let s:IM_MODE_TABLE['BOSHIAMY'] = {'menu': '[嘸]'}
-let s:IM_MODE_TABLE['KANA'] =     {'menu': '[あ]'}
-let s:IM_MODE_TABLE['WIDE'] =     {'menu': '[Ａ]'}
-let s:IM_MODE_TABLE['RUNES'] =    {'menu': '[ᚱ]'}
-let s:IM_MODE_TABLE['BRAILLE'] =  {'menu': '[⢝]'}
+let s:mode_list = [
+            \['BOSHIAMY',   '[嘸]'],
+            \['KANA',       '[あ]'],
+            \['WIDE',       '[Ａ]'],
+            \['RUNES',      '[ᚱ]'],
+            \['BRAILLE',    '[⢝]'],
+            \]
 
 let s:boshiamy_english_enable = s:true
-let s:boshiamy_mode = 'BOSHIAMY'
+let s:boshiamy_mode = s:mode_list[0][0]
 
-
-for [s:mode, s:mode_item] in items(s:IM_MODE_TABLE)
-    let s:mode_item['word'] = ''
-    let s:mode_item['dup'] = s:true
-    let s:mode_item['empty'] = s:true
+let s:__mode2icon = {}
+let s:__icon2mode = {}
+let s:__mode_order = []
+for [s:mode, s:icon] in s:mode_list
+    let s:__mode2icon[s:mode] = {}
+    let s:__mode2icon[s:mode]['menu'] = s:icon
+    let s:__mode2icon[s:mode]['word'] = ''
+    let s:__mode2icon[s:mode]['dup'] = s:true
+    let s:__mode2icon[s:mode]['empty'] = s:true
+    let s:__icon2mode[s:icon] = s:mode
+    call add(s:__mode_order, s:mode)
 endfor
 
 
-function! s:SwitchMode (new_mode) " {{{
-    let s:boshiamy_mode = a:new_mode
-    let s:boshiamy_english_enable = 0
+function! s:SelectMode (new_mode) " {{{
+    echom 'new_mode: [' . a:new_mode . ']'
+
+    if a:new_mode == 'ENGLISH'
+        let s:boshiamy_english_enable = 1
+    else
+        let s:boshiamy_mode = a:new_mode
+        let s:boshiamy_english_enable = 0
+    endif
+
+    if s:boshiamy_english_enable == s:false
+        inoremap <space> <C-R>=boshiamy#send_key()<CR>
+    elseif !empty(maparg('<space>', 'i'))
+        iunmap <space>
+    endif
+
     redrawstatus!
     redraw!
 endfunction " }}}
 
-" ==============
-" Apply Settings
-" ==============
-
-let s:switch_table = {}
-" let s:switch_table[g:boshiamy_switch_boshiamy .'$'] = s:IM_BOSHIAMY
-" let s:switch_table[g:boshiamy_switch_kana .'$'] = s:IM_KANA
-" let s:switch_table[g:boshiamy_switch_wide .'$'] = s:IM_WIDE
-" let s:switch_table[g:boshiamy_switch_runes .'$'] = s:IM_RUNES
-" let s:switch_table[g:boshiamy_switch_braille .'$'] = s:IM_BRAILLE
 
 " ================
 " Public Functions
@@ -54,6 +64,9 @@ let s:switch_table = {}
 
 function! boshiamy#send_key () " {{{
     if s:boshiamy_english_enable
+        if !empty(maparg('<space>', 'i'))
+            iunmap <space>
+        endif
         return ' '
     endif
 
@@ -119,42 +132,48 @@ function! boshiamy#send_key () " {{{
     return boshiamy#boshiamy#handler(l:line)
 endfunction " }}}
 
+
 function! boshiamy#mode () " {{{
     if s:boshiamy_english_enable
         return '[英]'
-    elseif has_key(s:IM_MODE_TABLE, s:boshiamy_mode)
-        return s:IM_MODE_TABLE[s:boshiamy_mode]['menu']
+    elseif has_key(s:__mode2icon, s:boshiamy_mode)
+        return s:__mode2icon[s:boshiamy_mode]['menu']
     endif
     return '[？]'
 endfunction " }}}
 
+
 function! boshiamy#toggle () " {{{
-    let s:boshiamy_english_enable = 1 - s:boshiamy_english_enable
-    redrawstatus!
-    redraw!
+    if s:boshiamy_english_enable
+        call s:SelectMode(s:boshiamy_mode)
+    else
+        call s:SelectMode('ENGLISH')
+    endif
+
     return ''
 endfunction " }}}
+
 
 function! boshiamy#show_mode_menu () " {{{
     augroup boshiamy
         autocmd! boshiamy CompleteDone
         autocmd boshiamy CompleteDone * call boshiamy#select_mode()
     augroup end
-    call complete(col('.'), values(s:IM_MODE_TABLE))
+    let l:tmp = []
+    for l:mode in s:__mode_order
+        call add(l:tmp, s:__mode2icon[(l:mode)])
+    endfor
+    call complete(col('.'), l:tmp)
     return ''
 endfunction " }}}
+
 
 function! boshiamy#select_mode () " {{{
     augroup boshiamy
         autocmd! boshiamy CompleteDone
-        let l:new_mode = ''
-        for [s:mode, s:mode_item] in items(s:IM_MODE_TABLE)
-            if s:mode_item['menu'] ==# v:completed_item['menu']
-                let l:new_mode = s:mode
-                break
-            endif
-        endfor
-        echom string(l:new_mode)
-        call s:SwitchMode(l:new_mode)
+        echom string(v:completed_item)
+        if has_key(s:__icon2mode, v:completed_item['menu'])
+            call s:SelectMode(s:__icon2mode[v:completed_item['menu']])
+        endif
     augroup end
 endfunction " }}}
