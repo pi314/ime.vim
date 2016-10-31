@@ -38,8 +38,6 @@ endfor
 
 
 function! s:SelectMode (new_mode) " {{{
-    echom 'new_mode: [' . a:new_mode . ']'
-
     if a:new_mode == 'ENGLISH'
         let s:boshiamy_english_enable = 1
     else
@@ -171,7 +169,6 @@ endfunction " }}}
 function! boshiamy#select_mode () " {{{
     augroup boshiamy
         autocmd! boshiamy CompleteDone
-        echom string(v:completed_item)
         if has_key(s:__icon2mode, v:completed_item['menu'])
             call s:SelectMode(s:__icon2mode[v:completed_item['menu']])
         endif
