@@ -27558,17 +27558,20 @@ call s:load_custom_table()
 echom "Done"
 
 function! s:CharType (c) " {{{
-    if a:c =~# "[a-zA-Z0-9]"
+    if a:c =~# "[a-zA-Z]"
         return 1
 
-    elseif a:c == "[" || a:c == "]"
+    elseif a:c =~# "[0-9]"
         return 2
 
-    elseif a:c == "," || a:c == "."
+    elseif a:c == "[" || a:c == "]"
         return 3
 
-    elseif a:c == "'"
+    elseif a:c == "," || a:c == "."
         return 4
+
+    elseif a:c == "'"
+        return 5
 
     endif
 
@@ -27590,10 +27593,10 @@ function! boshiamy#boshiamy#handler (line)
         return ''
     endif
 
-    let char_type = s:CharType(l:base[0])
+    let l:prev_char_type = s:CharType(l:base[0])
     while strlen(l:base) > 0
-        let new_char_type = s:CharType(l:base[0])
-        if l:new_char_type != l:char_type
+        let curr_char_type = s:CharType(l:base[0])
+        if l:curr_char_type != l:prev_char_type
             if has_key( g:boshiamy#boshiamy#table, l:base )
                 call complete(l:col, g:boshiamy#boshiamy#table[ (l:base) ])
                 return ''
@@ -27603,7 +27606,7 @@ function! boshiamy#boshiamy#handler (line)
         " Boshiamy char not found, cut off one char and keep trying
         let l:col = l:col + 1
         let l:base = l:base[1:]
-        let l:char_type = l:new_char_type
+        let l:prev_char_type = l:curr_char_type
     endwhile
 
     " There is nothing I can do, just return a space
