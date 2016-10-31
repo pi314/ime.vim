@@ -9,81 +9,83 @@
 "              Want To Public License, Version 2, as published by Sam Hocevar.
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 " ============================================================================
+let s:true = 1
+let s:false = 0
 
-" 0: English
-" 1: Boshiamy
-" 2: Kana (Japanese alphabet)
-" 3: Wide characters
-" 4: Runes
-" 5: Braille
-let s:IM_ENGLISH = 0
-let s:IM_BOSHIAMY = 1
-let s:IM_KANA = 2
-let s:IM_WIDE = 3
-let s:IM_RUNES = 4
-let s:IM_BRAILLE = 5
+let s:mode_list = [
+            \['BOSHIAMY',   '[嘸]'],
+            \['KANA',       '[あ]'],
+            \['WIDE',       '[Ａ]'],
+            \['RUNES',      '[ᚱ]'],
+            \['BRAILLE',    '[⢝]'],
+            \]
 
-let s:boshiamy_sub_status = s:IM_BOSHIAMY
-let s:boshiamy_status = s:IM_ENGLISH
+let s:boshiamy_english_enable = s:true
+let s:boshiamy_mode = s:mode_list[0][0]
 
-function! s:UpdateIMStatus (new_status) " {{{
-    let s:boshiamy_status = a:new_status
-    if a:new_status != s:IM_ENGLISH
-        let s:boshiamy_sub_status = a:new_status
+let s:__mode2icon = {}
+let s:__icon2mode = {}
+let s:__mode_order = []
+for [s:mode, s:icon] in s:mode_list
+    let s:__mode2icon[s:mode] = {}
+    let s:__mode2icon[s:mode]['menu'] = s:icon
+    let s:__mode2icon[s:mode]['word'] = ''
+    let s:__mode2icon[s:mode]['dup'] = s:true
+    let s:__mode2icon[s:mode]['empty'] = s:true
+    let s:__icon2mode[s:icon] = s:mode
+    call add(s:__mode_order, s:mode)
+endfor
+
+
+function! s:SelectMode (new_mode) " {{{
+    if a:new_mode == 'ENGLISH'
+        let s:boshiamy_english_enable = 1
+    else
+        let s:boshiamy_mode = a:new_mode
+        let s:boshiamy_english_enable = 0
     endif
+
+    if s:boshiamy_english_enable == s:false
+        inoremap <space> <C-R>=boshiamy#send_key()<CR>
+    elseif !empty(maparg('<space>', 'i'))
+        iunmap <space>
+    endif
+
     redrawstatus!
     redraw!
 endfunction " }}}
 
-" ==============
-" Apply Settings
-" ==============
-
-let s:switch_table = {}
-let s:switch_table[g:boshiamy_switch_boshiamy .'$'] = s:IM_BOSHIAMY
-let s:switch_table[g:boshiamy_switch_kana .'$'] = s:IM_KANA
-let s:switch_table[g:boshiamy_switch_wide .'$'] = s:IM_WIDE
-let s:switch_table[g:boshiamy_switch_runes .'$'] = s:IM_RUNES
-let s:switch_table[g:boshiamy_switch_braille .'$'] = s:IM_BRAILLE
 
 " ================
 " Public Functions
 " ================
 
 function! boshiamy#send_key () " {{{
-    if s:boshiamy_status == s:IM_ENGLISH
+    if s:boshiamy_english_enable
+        if !empty(maparg('<space>', 'i'))
+            iunmap <space>
+        endif
         return ' '
     endif
 
     let l:line = strpart(getline('.'), 0, (col('.')-1) )
 
-    " Switch input mode
-    for [switch, switch_type] in items(s:switch_table)
-        if l:line =~# switch
-            let c = col('.')
-            call setline('.', l:line[:(0-strlen(switch))] . getline('.')[ (l:c-1) : ] )
-            call cursor(line('.'), l:c-( strlen(switch)-1 ) )
-            call s:UpdateIMStatus(switch_type)
-            return ''
-        endif
-    endfor
-
-    if s:boshiamy_status == s:IM_WIDE
+    if s:boshiamy_mode == 'WIDE'
         let l:wide_str = matchstr(l:line, '\([ a-zA-Z0-9]\|[-=,./;:<>?_+\\|!@#$%^&*(){}"]\|\[\|\]\|'."'".'\)\+$')
         return boshiamy#wide#handler(l:line, l:wide_str)
     endif
 
-    if s:boshiamy_status == s:IM_KANA
+    if s:boshiamy_mode == 'KANA'
         let l:kana_str = matchstr(l:line, '[.a-z]\+$')
         return boshiamy#kana#handler(l:line, l:kana_str)
     endif
 
-    if s:boshiamy_status == s:IM_RUNES
+    if s:boshiamy_mode == 'RUNES'
         let l:runes_str = matchstr(l:line, '[.a-z,]\+$')
         return boshiamy#runes#handler(l:line, l:runes_str)
     endif
 
-    if s:boshiamy_status == s:IM_BRAILLE
+    if s:boshiamy_mode == 'BRAILLE'
         let l:braille_str = matchstr(l:line, '\v['. g:boshiamy_braille_keys .']*$')
         return boshiamy#braille#handler(l:line, l:braille_str)
     endif
@@ -128,30 +130,47 @@ function! boshiamy#send_key () " {{{
     return boshiamy#boshiamy#handler(l:line)
 endfunction " }}}
 
-function! boshiamy#status () " {{{
-    if s:boshiamy_status == s:IM_ENGLISH
+
+function! boshiamy#mode () " {{{
+    if s:boshiamy_english_enable
         return '[英]'
-    elseif s:boshiamy_status == s:IM_BOSHIAMY
-        return '[嘸]'
-    elseif s:boshiamy_status == s:IM_KANA
-        return '[あ]'
-    elseif s:boshiamy_status == s:IM_WIDE
-        return '[Ａ]'
-    elseif s:boshiamy_status == s:IM_RUNES
-        return '[ᚱ]'
-    elseif s:boshiamy_status == s:IM_BRAILLE
-        return '[⢝]'
+    elseif has_key(s:__mode2icon, s:boshiamy_mode)
+        return s:__mode2icon[s:boshiamy_mode]['menu']
     endif
     return '[？]'
 endfunction " }}}
 
+
 function! boshiamy#toggle () " {{{
-    if s:boshiamy_status
-        call s:UpdateIMStatus(s:IM_ENGLISH)
-
+    if s:boshiamy_english_enable
+        call s:SelectMode(s:boshiamy_mode)
     else
-        call s:UpdateIMStatus(s:boshiamy_sub_status)
-
+        call s:SelectMode('ENGLISH')
     endif
+
     return ''
+endfunction " }}}
+
+
+function! boshiamy#show_mode_menu () " {{{
+    augroup boshiamy
+        autocmd! boshiamy CompleteDone
+        autocmd boshiamy CompleteDone * call boshiamy#select_mode()
+    augroup end
+    let l:tmp = []
+    for l:mode in s:__mode_order
+        call add(l:tmp, s:__mode2icon[(l:mode)])
+    endfor
+    call complete(col('.'), l:tmp)
+    return ''
+endfunction " }}}
+
+
+function! boshiamy#select_mode () " {{{
+    augroup boshiamy
+        autocmd! boshiamy CompleteDone
+        if has_key(s:__icon2mode, v:completed_item['menu'])
+            call s:SelectMode(s:__icon2mode[v:completed_item['menu']])
+        endif
+    augroup end
 endfunction " }}}
