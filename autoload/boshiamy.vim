@@ -59,17 +59,6 @@ function! boshiamy#send_key () " {{{
 
     let l:line = strpart(getline('.'), 0, (col('.')-1) )
 
-    " Switch input mode
-    for [switch, switch_type] in items(s:switch_table)
-        if l:line =~# switch
-            let c = col('.')
-            call setline('.', l:line[:(0-strlen(switch))] . getline('.')[ (l:c-1) : ] )
-            call cursor(line('.'), l:c-( strlen(switch)-1 ) )
-            call s:SwitchMode(switch_type)
-            return ''
-        endif
-    endfor
-
     if s:boshiamy_mode == 'WIDE'
         let l:wide_str = matchstr(l:line, '\([ a-zA-Z0-9]\|[-=,./;:<>?_+\\|!@#$%^&*(){}"]\|\[\|\]\|'."'".'\)\+$')
         return boshiamy#wide#handler(l:line, l:wide_str)
