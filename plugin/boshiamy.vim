@@ -2,22 +2,22 @@
 setlocal completeopt+=menuone
 
 
-if !exists('g:boshiamy_toggle_key') || type(g:boshiamy_toggle_key) != type('')
-    let g:boshiamy_toggle_key = ',,'
+if !exists('g:boshiamy_toggle_english') || type(g:boshiamy_toggle_english) != type('')
+    let g:boshiamy_toggle_english = ',,'
 endif
-execute 'inoremap <expr> '. g:boshiamy_toggle_key .' (pumvisible() ? "<C-Y>" : "") . boshiamy#toggle()'
+execute 'inoremap <expr> '. g:boshiamy_toggle_english .' (pumvisible() ? "<C-Y>" : "") . boshiamy#toggle()'
 
 
-if !exists('g:boshiamy_select_key') || type(g:boshiamy_select_key) != type('')
-    let g:boshiamy_select_key = ',m'
+if !exists('g:boshiamy_select_mode') || type(g:boshiamy_select_mode) != type('')
+    let g:boshiamy_select_mode = ',m'
 endif
-execute 'inoremap <expr> '. g:boshiamy_select_key .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=boshiamy#show_mode_menu()<CR>"'
+execute 'inoremap <expr> '. g:boshiamy_select_mode .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=boshiamy#show_mode_menu()<CR>"'
 
 
-if !exists('g:boshiamy_cancel_key') || type(g:boshiamy_cancel_key) != type('')
-    let g:boshiamy_cancel_key = '<C-h>'
+if !exists('g:boshiamy_cancel_input') || type(g:boshiamy_cancel_input) != type('')
+    let g:boshiamy_cancel_input = '<C-h>'
 endif
-execute 'inoremap <expr> '. g:boshiamy_cancel_key .' pumvisible() ? "<C-E> " : "'. g:boshiamy_cancel_key .'"'
+execute 'inoremap <expr> '. g:boshiamy_cancel_input .' pumvisible() ? "<C-E> " : "'. g:boshiamy_cancel_input .'"'
 
 
 let s:cr_imap_save = maparg("<CR>", "i")
