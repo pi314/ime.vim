@@ -66,35 +66,32 @@ boshiamy-cue 則是年代久遠，在 2013 年初發佈第一個版本後就沒�
 
 使用
 -----
-本 Plugin 提供 API 可供使用。
+* ``boshiamy#mode()`` 函式回傳輸入法當前的狀態，你可以在自己的 statusline 中顯示這個資訊 ::
 
-* ``boshiamy#status()`` 函式回傳輸入法當前的狀態，你可以在自己的 statusline 中顯示這個資訊 ::
-
-    set statusline=%<%{boshiamy#status()}%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+    set statusline=%<%{boshiamy#mode()}%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 
   - 這行 statusline 看起來會像 ``[嘸]README.rst [+]      75,67-59  53%``
 
 * 切換輸入法/英文 ::
 
-    let g:boshiamy_toggle_key = ',,'
+    let g:boshiamy_toggle_english = ',,'
 
-  - 我正計畫加入其他種類的輸入法，這個 Plugin 會在英文和這些輸入法之間做切換
   - 離開 Vim 的 Insert Mode 會將輸入法的狀態保留，下次進入 Insert Mode 後不會被還原回預設的模式
 
-* ``boshiamy#send_key()`` 送字 ::
+* 在不同輸入模式之間切換 ::
 
-    inoremap <space> <C-R>=boshiamy#send_key()<CR>
+    let g:boshiamy_select_mode = ',m'
 
-* ``g:boshiamy_cancel_key`` 指定 "取消輸入" 的按鍵 ::
+* 取消輸入，回復為輸入前的字串 ::
 
-    let g:boshiamy_cancel_key = '<C-h>'
-    let g:boshiamy_cancel_key = ['<C-h>', '<F1>']
+    let g:boshiamy_cancel_input = '<C-h>'
 
-  - 有些英文單字如 ``user`` 是某些字的字根，如果開著中文模式輸入英文，會讓這些英文單字變成中文，此時按下 ``<C-h>`` 就可以把字打回英文，並在後方加上一個空白字元
+  - 有些英文單字如 ``are`` 是某些字的字根，如果開著中文模式輸入英文，會讓這些英文單字變成中文，此時按下 ``<C-h>`` 就可以把字打回英文，並在後方加上一個空白字元
 
-* 目前這個 Plugin 提供一些輸入模式
+* 按下空白鍵送字
+* 各種輸入模式
 
-  - 中文
+  - 中文 ``[嘸]``
 
     + 可直接輸入嘸蝦米
     + 輸入 ``;`` 後可直接以注音輸入（有些字真的臨時忘了怎麼寫）
@@ -104,55 +101,35 @@ boshiamy-cue 則是年代久遠，在 2013 年初發佈第一個版本後就沒�
     + 輸入 ``\u`` 後可使用 Unicode Code Point 輸入 Unicode 字元
     + ``\u[字]`` 可把 ``字`` 解碼為 ``\u5b57`` 或是 ``&#23383;``
     + 輸入 ``&#28204;`` 或 ``&#x6e2c;`` 可轉換為 ``測``
+    + 輸入 ``:pudding:`` 可產生 ``🍮`` 字元
 
-  - 日文假名
-  - 全型字
-  - 盧恩字母
-  - 點字
+      * 輸入 ``:pu`` 可用選單選擇相同開頭的 emoji 字串
 
-* 在不同輸入模式之間切換
+  - 日文假名 ``[あ]``
 
-  - 在中文模式下，輸入一特定字串後按下空白鍵送字，可以在不同輸入模式之間切換
+    + 平假名可以直接用羅馬拼音輸入
+    + 片假名需在字根後加上一個 ``.``
+    + 下標字需在字根後加上一個 ``v``
+    + 範例
 
-    + 切換為嘸蝦米的預設值為 ::
+      * ``a`` -> ``あ``
+      * ``a.`` -> ``ア``
+      * ``a.v`` -> ``ァ``
+      * ``av.`` -> ``ァ``
+      * ``buiaiemu`` -> ``ぶいあいえむ``
+      * ``buiaiemu`` -> ``ぶいあいえむ``
 
-        let g:boshiamy_switch_boshiamy = ',t,'
+  - 全型字 ``[Ａ]``
 
-    + 切換為日文假名的預設值為 ::
+    + 按下空白鍵送字會把前面連續的半型字元都換成全型字元
+    + 全型空白請在嘸蝦米模式下用 ``,space`` 輸入
 
-        let g:boshiamy_switch_kana = ',j,'
+  - 盧恩字母 ``[ᚱ]``
+  - 點字 ``[⢝]`` ::
 
-      * 平假名可以直接用羅馬拼音輸入
-      * 片假名需在字根後加上一個 ``.``
-      * 下標字需在字根後加上一個 ``v``
-      * 範例
+      let g:boshiamy_braille_keys = '7uj8ikm,'
 
-        - ``a`` -> ``あ``
-        - ``a.`` -> ``ア``
-        - ``a.v`` -> ``ァ``
-        - ``av.`` -> ``ァ``
-        - ``buiaiemu`` -> ``ぶいあいえむ``
-        - ``buiaiemu`` -> ``ぶいあいえむ``
-
-    + 切換為全型字的預設值為 ::
-
-        let g:boshiamy_switch_wide = ',w,'
-
-      * 之後按下空白鍵送字，會把前面連續的半型字元都換成全型字元
-      * 全型空白請在嘸蝦米模式下用 ``,space`` 輸入
-
-    + 切換為盧恩字母的預設值為 ::
-
-        let g:boshiamy_switch_rune = ',r,'
-
-    + 切換為點字的預設值為 ::
-
-        let g:boshiamy_switch_rune = ',b,'
-        let g:boshiamy_braille_keys = '7uj8ikm,'
-
-      * ``7uj8ikm,`` 分別為點字的 ``12345678`` ，請參考 https://en.wikipedia.org/wiki/Braille_Patterns
-
-    + 若需要自行設定，請注意不要包含 ``g:boshiamy_toggle_key`` 的按鍵序列，因為 ``imap`` 的效果比較優先
+    + ``7uj8ikm,`` 分別為點字的 ``12345678`` ，請參考 https://en.wikipedia.org/wiki/Braille_Patterns
 
 * 自訂字根表
 
@@ -213,4 +190,4 @@ boshiamy-cue 則是年代久遠，在 2013 年初發佈第一個版本後就沒�
 
 ----
 
-2016/08/20 pi314 (cychih) @ nctu
+2016/11/01 pi314 (cychih) @ nctu
