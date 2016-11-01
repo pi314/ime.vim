@@ -1,4 +1,5 @@
 echom "Loading emoji table..."
+echom "Data from https://github.com/Ranks/emoji-alpha-codes/blob/39d1ee1a486fb084d144f3db290a8cf46790bd4e/eac.json"
 let g:boshiamy#emoji#table = {}
 let g:boshiamy#emoji#table[':+1:'] = '👍'
 let g:boshiamy#emoji#table[':+1_tone1:'] = '👍🏻'
@@ -2396,6 +2397,7 @@ function! boshiamy#emoji#handler (line, emoji_str)
             endif
         endfor
         if len(l:candidates)
+            call sort(l:candidates)
             call complete(l:col, l:candidates)
             return 0
         endif
