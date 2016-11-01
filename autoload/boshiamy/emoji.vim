@@ -2383,7 +2383,6 @@ function! boshiamy#emoji#handler (line, emoji_str)
     if a:emoji_str[-1:-1] ==# ':'
         " A completed emoji alpha code
         if has_key(g:boshiamy#emoji#table, a:emoji_str)
-            echom g:boshiamy#emoji#table[(a:emoji_str)]
             call complete(l:col, [g:boshiamy#emoji#table[(a:emoji_str)]])
             return 0
         endif
@@ -2392,7 +2391,6 @@ function! boshiamy#emoji#handler (line, emoji_str)
         let l:candidates = []
         for [l:alpha_code, l:emoji] in items(g:boshiamy#emoji#table)
             if strpart(l:alpha_code, 0, strlen(a:emoji_str)) ==# a:emoji_str
-                echom l:alpha_code .' '. a:emoji_str
                 call add(l:candidates, {'word': l:alpha_code, 'menu': l:emoji})
             endif
         endfor

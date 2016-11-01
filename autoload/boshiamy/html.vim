@@ -9,7 +9,6 @@ function! boshiamy#html#handler (line, htmlcode_pattern)
         let utf8_str = a:htmlcode_pattern[2:-2]
         let unicode_codepoint = str2nr(l:utf8_str, 10)
     endif
-    echom l:unicode_codepoint
     call complete(l:col, [nr2char(l:unicode_codepoint)])
 
     return 0

@@ -54,7 +54,6 @@ function! boshiamy#runes#handler (line, runes_str)
     let j = 2
     while l:i <= l:j
         let t = a:runes_str[ (l:i) : (l:j) ]
-        echom l:t
 
         if has_key(g:boshiamy#runes#table, l:t)
             let ret_runes = l:ret_runes . g:boshiamy#runes#table[(l:t)][0]

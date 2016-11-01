@@ -269,7 +269,6 @@ function! boshiamy#kana#handler (line, kana_str)
     let j = 4
     while l:i <= l:j
         let t = a:kana_str[ (l:i) : (l:j) ]
-        echom l:t
 
         if has_key(g:boshiamy#kana#table, l:t)
             let ret_hiragana = l:ret_hiragana . g:boshiamy#kana#table[(l:t)][0]
