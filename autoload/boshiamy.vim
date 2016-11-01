@@ -95,14 +95,13 @@ function! boshiamy#send_key () " {{{
     if l:chewing_str == ''
         let chewing_str = matchstr(l:line, ';[^;]\+$')
     endif
-
     if l:chewing_str != ''
-        " Found chewing pattern
         if boshiamy#chewing#handler(l:line, l:chewing_str) == 0
             return ''
         endif
     endif
 
+    " Translating code point to unicode character
     let unicode_pattern = matchstr(l:line, '\\[Uu][0-9a-fA-F]\+$')
     if l:unicode_pattern != ''
         if boshiamy#unicode#handler_encode(l:line, l:unicode_pattern) == 0
@@ -110,6 +109,7 @@ function! boshiamy#send_key () " {{{
         endif
     endif
 
+    " Reverse lookup for code point
     let unicode_pattern = matchstr(l:line, '\\[Uu]\[[^]]*\]$')
     if l:unicode_pattern == ''
         let unicode_pattern = matchstr(l:line, '\\[Uu]\[\]\]$')
@@ -123,6 +123,14 @@ function! boshiamy#send_key () " {{{
     let htmlcode_pattern = matchstr(l:line, '&#x\?[0-9a-fA-F]\+;$')
     if l:htmlcode_pattern != ''
         if boshiamy#html#handler(l:line, l:htmlcode_pattern) == 0
+            return ''
+        endif
+    endif
+
+    let emoji_pattern = matchstr(l:line, ':[0-9a-z_+-]\+:\?')
+    " +-0123456789:_abcdefghijklmnopqrstuvwxyz
+    if emoji_pattern != ''
+        if boshiamy#emoji#handler(l:line, l:emoji_pattern) == 0
             return ''
         endif
     endif
