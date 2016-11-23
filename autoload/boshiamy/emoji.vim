@@ -2380,7 +2380,7 @@ function! boshiamy#emoji#handler (line, emoji_str)
     let l:idx = strlen(a:line) - strlen(a:emoji_str)
     let l:col  = l:idx + 1
 
-    if a:emoji_str[-1:-1] ==# ':'
+    if a:emoji_str !=# ':' && a:emoji_str[-1:-1] ==# ':'
         " A completed emoji alpha code
         if has_key(g:boshiamy#emoji#table, a:emoji_str)
             call complete(l:col, [g:boshiamy#emoji#table[(a:emoji_str)]])

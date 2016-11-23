@@ -127,7 +127,7 @@ function! boshiamy#send_key () " {{{
         endif
     endif
 
-    let emoji_pattern = matchstr(l:line, ':[0-9a-z_+-]\+:\?$')
+    let emoji_pattern = matchstr(l:line, ':\([0-9a-z_+-]\+:\?\)\?$')
     " +-0123456789:_abcdefghijklmnopqrstuvwxyz
     if emoji_pattern != ''
         if boshiamy#emoji#handler(l:line, l:emoji_pattern) == 0
