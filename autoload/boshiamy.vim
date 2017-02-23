@@ -182,3 +182,13 @@ function! boshiamy#_comp_select_mode () " {{{
         endif
     augroup end
 endfunction " }}}
+
+
+function! boshiamy#_input_show_mode_menu () " {{{
+    let l:prompt = ['Select input mode:'] + map(copy(s:mode_list), '(v:key + 1) ." - ". v:val[1]')
+    let l:user_input = inputlist(l:prompt)
+    if l:user_input
+        call s:SelectMode(s:__icon2mode[s:mode_list[l:user_input - 1][1]])
+    endif
+    return ''
+endfunction " }}}
