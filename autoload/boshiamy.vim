@@ -192,3 +192,13 @@ function! boshiamy#_input_show_mode_menu () " {{{
     endif
     return ''
 endfunction " }}}
+
+
+function! boshiamy#_dialog_show_mode_menu () " {{{
+    let l:prompt = ['Select input mode:'] + map(copy(s:mode_list), '(v:key + 1) ." - ". v:val[1]')
+    let l:user_input = str2nr(inputdialog(join(l:prompt, "\n") ."\n> "))
+    if 0 < l:user_input && l:user_input < len(l:prompt)
+        call s:SelectMode(s:__icon2mode[s:mode_list[l:user_input - 1][1]])
+    endif
+    return ''
+endfunction " }}}

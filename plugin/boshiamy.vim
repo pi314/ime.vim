@@ -8,7 +8,7 @@ endif
 execute 'inoremap <expr> '. g:boshiamy_toggle_english .' (pumvisible() ? "<C-Y>" : "") . boshiamy#toggle()'
 
 
-if !exists('g:boshiamy_select_mode_style') || index(['menu', 'input'], g:boshiamy_select_mode_style) == -1
+if !exists('g:boshiamy_select_mode_style') || index(['menu', 'input', 'dialog'], g:boshiamy_select_mode_style) == -1
     let g:boshiamy_select_mode_style = 'menu'
 endif
 if g:boshiamy_select_mode_style == 'menu' && !exists('##CompleteDone')
@@ -23,6 +23,8 @@ if g:boshiamy_select_mode_style == 'menu'
     execute 'inoremap <expr> '. g:boshiamy_select_mode .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=boshiamy#_comp_show_mode_menu()<CR>"'
 elseif g:boshiamy_select_mode_style == 'input'
     execute 'inoremap <expr> '. g:boshiamy_select_mode .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=boshiamy#_input_show_mode_menu()<CR>"'
+elseif g:boshiamy_select_mode_style == 'dialog'
+    execute 'inoremap <expr> '. g:boshiamy_select_mode .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=boshiamy#_dialog_show_mode_menu()<CR>"'
 endif
 
 
