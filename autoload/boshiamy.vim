@@ -160,10 +160,10 @@ function! boshiamy#toggle () " {{{
 endfunction " }}}
 
 
-function! boshiamy#show_mode_menu () " {{{
+function! boshiamy#_comp_show_mode_menu () " {{{
     augroup boshiamy
         autocmd! boshiamy CompleteDone
-        autocmd boshiamy CompleteDone * call boshiamy#select_mode()
+        autocmd boshiamy CompleteDone * call boshiamy#_comp_select_mode()
     augroup end
     let l:tmp = []
     for l:mode in s:__mode_order
@@ -174,7 +174,7 @@ function! boshiamy#show_mode_menu () " {{{
 endfunction " }}}
 
 
-function! boshiamy#select_mode () " {{{
+function! boshiamy#_comp_select_mode () " {{{
     augroup boshiamy
         autocmd! boshiamy CompleteDone
         if has_key(s:__icon2mode, v:completed_item['menu'])
