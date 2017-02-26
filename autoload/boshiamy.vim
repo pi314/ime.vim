@@ -160,6 +160,18 @@ function! boshiamy#toggle () " {{{
 endfunction " }}}
 
 
+function! boshiamy#_show_mode_menu ()
+    if g:boshiamy_select_mode_style == 'menu'
+        call boshiamy#_comp_show_mode_menu()
+    elseif g:boshiamy_select_mode_style == 'input'
+        call boshiamy#_input_show_mode_menu()
+    elseif g:boshiamy_select_mode_style == 'dialog'
+        call boshiamy#_dialog_show_mode_menu()
+    endif
+    return ''
+endfunction
+
+
 function! boshiamy#_comp_show_mode_menu () " {{{
     augroup boshiamy
         autocmd! boshiamy CompleteDone
@@ -170,7 +182,6 @@ function! boshiamy#_comp_show_mode_menu () " {{{
         call add(l:tmp, s:__mode2icon[(l:mode)])
     endfor
     call complete(col('.'), l:tmp)
-    return ''
 endfunction " }}}
 
 
@@ -190,7 +201,6 @@ function! boshiamy#_input_show_mode_menu () " {{{
     if l:user_input
         call s:SelectMode(s:__icon2mode[s:mode_list[l:user_input - 1][1]])
     endif
-    return ''
 endfunction " }}}
 
 
@@ -200,5 +210,4 @@ function! boshiamy#_dialog_show_mode_menu () " {{{
     if 0 < l:user_input && l:user_input < len(l:prompt)
         call s:SelectMode(s:__icon2mode[s:mode_list[l:user_input - 1][1]])
     endif
-    return ''
 endfunction " }}}

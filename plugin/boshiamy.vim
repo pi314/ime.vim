@@ -19,13 +19,7 @@ endif
 if !exists('g:boshiamy_select_mode') || type(g:boshiamy_select_mode) != type('')
     let g:boshiamy_select_mode = ',m'
 endif
-if g:boshiamy_select_mode_style == 'menu'
-    execute 'inoremap <expr> '. g:boshiamy_select_mode .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=boshiamy#_comp_show_mode_menu()<CR>"'
-elseif g:boshiamy_select_mode_style == 'input'
-    execute 'inoremap <expr> '. g:boshiamy_select_mode .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=boshiamy#_input_show_mode_menu()<CR>"'
-elseif g:boshiamy_select_mode_style == 'dialog'
-    execute 'inoremap <expr> '. g:boshiamy_select_mode .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=boshiamy#_dialog_show_mode_menu()<CR>"'
-endif
+execute 'inoremap <expr> '. g:boshiamy_select_mode .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=boshiamy#_show_mode_menu()<CR>"'
 
 
 if !exists('g:boshiamy_cancel_input') || type(g:boshiamy_cancel_input) != type('')
