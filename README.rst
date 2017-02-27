@@ -8,7 +8,7 @@ boshiamy.vim 可以使用 `Vundle <https://github.com/gmarik/Vundle.vim>`_ 或�
 
 在某些環境下，你可能沒有辦法使用 plugin manager，此時仍然可以手動安裝，以下以 Windows 7 gVim 作為範例。
 
-把這個 repository 裡的檔案按照以下目錄結構放好 ::
+把這個 repository 裡的檔案按照以下目錄結構放好： ::
 
   ~/vimfiles
   ├── LICENSE.txt
@@ -28,9 +28,9 @@ boshiamy.vim 可以使用 `Vundle <https://github.com/gmarik/Vundle.vim>`_ 或�
   └── plugin/
       └── boshiamy.vim
 
-重新開啟 gVim，就可以開始使用 boshiamy.vim
+重新開啟 gVim，就可以開始使用 boshiamy.vim。
 
-每個檔案請用 UTF-8 編碼儲存
+每個檔案請用 UTF-8 編碼儲存。
 
 **== 注意，手動安裝 plugin 時，請確定你知道自己在做什麼，避免把自己的設定檔覆蓋/刪除，必要時記得備份 ==**
 
@@ -47,17 +47,17 @@ boshiamy.vim 可以使用 `Vundle <https://github.com/gmarik/Vundle.vim>`_ 或�
 -----
 在 Vim 裡面輸入中文一直都是件麻煩事。
 
-有在使用中文輸入法的人都會知道，每個中文輸入法都有兩種狀態:
+有在使用中文輸入法的人都會知道，每個中文輸入法都有兩種狀態：
 
 * 英文
 * 中文
 
-Vim 也有兩種狀態:
+Vim 也有兩種狀態：
 
 * Insert mode (以及 replace 和類似的狀態)
 * 非 insert mode (例如 normal mode 和 command mode 等等)
 
-這些狀態在使用時會疊在一起，如下表:
+這些狀態在使用時會疊在一起，如下表：
 
 +----------------+------+------+
 | Vim \ 輸入法   | 英文 | 中文 |
@@ -92,24 +92,24 @@ boshiamy-cue 則是年代久遠，在 2013 年初發佈第一個版本後就沒�
 
 使用
 -----
-* ``boshiamy#mode()`` 函式回傳輸入法當前的狀態，你可以在自己的 statusline 中顯示這個資訊 ::
+* ``boshiamy#mode()`` 函式回傳輸入法當前的狀態，你可以在自己的 statusline 中顯示這個資訊： ::
 
     set statusline=%<%{boshiamy#mode()}%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 
   - 這行 statusline 看起來會像 ``[嘸]README.rst [+]      75,67-59  53%``
 
-* 切換輸入法/英文 ::
+* 切換輸入法/英文： ::
 
     let g:boshiamy_toggle_english = ',,'
 
   - 在英文與目前選定的輸入模式之間切換
   - 如果目前的模式是日文，用 ``,,`` 切換回英文再切換回來仍會是日文
 
-* 在不同輸入模式之間切換 ::
+* 在不同輸入模式之間切換： ::
 
     let g:boshiamy_select_mode = ',m'
 
-* 取消輸入，回復為輸入前的字串 ::
+* 取消輸入，回復為輸入前的字串： ::
 
     let g:boshiamy_cancel_input = '<C-h>'
 
@@ -161,13 +161,13 @@ boshiamy-cue 則是年代久遠，在 2013 年初發佈第一個版本後就沒�
 * 自訂字根表
 
   - 使用者可以自訂字根表，這個字根表的優先度比內建的表格高，使用者可以用來新增甚至修改組字規則
-  - 檔名 ::
+  - 自訂字根表的檔名： ::
 
       let g:boshiamy_custom_table = '~/.boshiamy.table'
 
     + 此全城變數 *沒有* 預設值，請在需要使用時再設定
 
-  - 自訂字根表格式為 ``字串 字根 字根 ...`` ，中間以空白字元分隔 ::
+  - 自訂字根表格式為 ``字串 字根 字根 ...`` ，中間以空白字元分隔： ::
 
       (((°Д°;))  ,face
       (ಥ_ಥ)      ,face
@@ -184,7 +184,7 @@ boshiamy-cue 則是年代久遠，在 2013 年初發佈第一個版本後就沒�
 
 對嘸蝦米字表的改動
 -------------------
-為了方便，我自己更改了嘸蝦米的字表，新增/刪除了一些項目，此處不細述，只大概列出一些比較重要的改動
+為了方便，我自己更改了嘸蝦米的字表，新增/刪除了一些項目，此處不細述，只大概列出一些比較重要的改動。
 
 * 全型格線的輸入都使用 ``,g`` 開頭，接上形狀： ``t`` / ``l`` / ``i`` / ``c``
 
