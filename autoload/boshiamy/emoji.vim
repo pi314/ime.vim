@@ -2387,7 +2387,7 @@ function! boshiamy#emoji#handler (line, emoji_str)
             return 0
         endif
     else
-        " A incomplete emoju alpha code
+        " An incomplete emoju alpha code
         let l:candidates = []
         for [l:alpha_code, l:emoji] in items(g:boshiamy#emoji#table)
             if strpart(l:alpha_code, 0, strlen(a:emoji_str)) ==# a:emoji_str
@@ -2396,7 +2396,7 @@ function! boshiamy#emoji#handler (line, emoji_str)
         endfor
         if len(l:candidates)
             call sort(l:candidates)
-            call complete(l:col, l:candidates)
+            call complete(l:col, [': '] + l:candidates)
             return 0
         endif
     endif
