@@ -27558,7 +27558,7 @@ call s:load_custom_table()
 echom "Done"
 
 function! s:CharType (c) " {{{
-    if a:c =~# "[a-zA-Z]"
+    if a:c =~# "[a-zA-Z_]"
         return 1
 
     elseif a:c =~# "[0-9]"
