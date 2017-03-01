@@ -160,16 +160,26 @@ function! boshiamy#toggle () " {{{
 endfunction " }}}
 
 
-function! boshiamy#_show_mode_menu ()
-    if g:boshiamy_select_mode_style == 'menu'
+function! boshiamy#_show_mode_menu () " {{{
+    let l:fallback_style = g:boshiamy_select_mode_style
+
+    if index(['menu', 'input', 'dialog'], l:fallback_style) == -1
+        let l:fallback_style = 'menu'
+    endif
+
+    if l:fallback_style == 'menu' && !exists('##CompleteDone')
+        let l:fallback_style = 'input'
+    endif
+
+    if l:fallback_style == 'menu'
         call boshiamy#_comp_show_mode_menu()
-    elseif g:boshiamy_select_mode_style == 'input'
+    elseif l:fallback_style == 'input'
         call boshiamy#_input_show_mode_menu()
-    elseif g:boshiamy_select_mode_style == 'dialog'
+    elseif l:fallback_style == 'dialog'
         call boshiamy#_dialog_show_mode_menu()
     endif
     return ''
-endfunction
+endfunction " }}}
 
 
 function! boshiamy#_comp_show_mode_menu () " {{{
