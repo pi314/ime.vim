@@ -160,25 +160,64 @@ function! boshiamy#toggle () " {{{
 endfunction " }}}
 
 
-function! boshiamy#show_mode_menu () " {{{
+function! boshiamy#_show_mode_menu () " {{{
+    let l:fallback_style = g:boshiamy_select_mode_style
+
+    if index(['menu', 'input', 'dialog'], l:fallback_style) == -1
+        let l:fallback_style = 'menu'
+    endif
+
+    if l:fallback_style == 'menu' && !exists('##CompleteDone')
+        let l:fallback_style = 'input'
+    endif
+
+    if l:fallback_style == 'menu'
+        call boshiamy#_comp_show_mode_menu()
+    elseif l:fallback_style == 'input'
+        call boshiamy#_input_show_mode_menu()
+    elseif l:fallback_style == 'dialog'
+        call boshiamy#_dialog_show_mode_menu()
+    endif
+    return ''
+endfunction " }}}
+
+
+function! boshiamy#_comp_show_mode_menu () " {{{
     augroup boshiamy
         autocmd! boshiamy CompleteDone
-        autocmd boshiamy CompleteDone * call boshiamy#select_mode()
+        autocmd boshiamy CompleteDone * call boshiamy#_comp_select_mode()
     augroup end
     let l:tmp = []
     for l:mode in s:__mode_order
         call add(l:tmp, s:__mode2icon[(l:mode)])
     endfor
     call complete(col('.'), l:tmp)
-    return ''
 endfunction " }}}
 
 
-function! boshiamy#select_mode () " {{{
+function! boshiamy#_comp_select_mode () " {{{
     augroup boshiamy
         autocmd! boshiamy CompleteDone
         if has_key(s:__icon2mode, v:completed_item['menu'])
             call s:SelectMode(s:__icon2mode[v:completed_item['menu']])
         endif
     augroup end
+endfunction " }}}
+
+
+function! boshiamy#_input_show_mode_menu () " {{{
+    let l:prompt = ['Select input mode:'] + map(copy(s:mode_list), '(v:key + 1) ." - ". v:val[1]')
+    let l:user_input = inputlist(l:prompt)
+    if l:user_input
+        call s:SelectMode(s:__icon2mode[s:mode_list[l:user_input - 1][1]])
+    endif
+endfunction " }}}
+
+
+function! boshiamy#_dialog_show_mode_menu () " {{{
+    let l:prompt = ['Select input mode:'] + map(copy(s:mode_list), '(v:key + 1) ." - ". v:val[1]')
+    let l:user_input = str2nr(inputdialog(join(l:prompt, "\n") ."\n> "))
+    if 0 < l:user_input && l:user_input < len(l:prompt)
+        call s:SelectMode(s:__icon2mode[s:mode_list[l:user_input - 1][1]])
+    endif
 endfunction " }}}
