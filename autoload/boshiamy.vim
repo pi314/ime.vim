@@ -52,16 +52,13 @@ call insert(s:standalone_plugin_list, {
             \ 'type': 'standalone',
             \ 'icon': '[嘸]',
             \ 'description': 'Chinese mode',
-            \ 'pattern': '.*$',
-            \ 'handler': function('boshiamy#boshiamy#handler'),
             \ }, 0)
 
 call add(s:embedded_plugin_list, {
             \ 'type': 'embedded',
-            \ 'pattern': '.*$',
+            \ 'pattern': '\v(;[^;]+|;[^;]*;[346]?)$',
             \ 'handler': function('boshiamy#chewing#handler'),
             \ })
-
 
 for s:plugin in s:standalone_plugin_list
     let s:plugin['menu'] = s:plugin['icon'] .' - '. s:plugin['description']
@@ -122,6 +119,23 @@ function! boshiamy#send_key () " {{{
         call complete(col('.') - strlen(l:matchobj[0]), l:ret)
         return ''
     endif
+
+    for l:plugin in s:embedded_plugin_list
+        let l:matchobj = matchlist(l:line, l:plugin['pattern'])
+        if len(l:matchobj) == 0
+            continue
+        endif
+
+        let l:ret = l:plugin['handler'](l:matchobj)
+        if len(l:ret) == 0 || type(l:ret) != type([])
+            continue
+        endif
+
+        call complete(col('.') - strlen(l:matchobj[0]), l:ret)
+        return ''
+    endfor
+
+    return boshiamy#boshiamy#handler(l:line)
 
     " if s:boshiamy_mode == 'WIDE'
     "    let l:wide_str = matchstr(l:line, '\([ a-zA-Z0-9]\|[-=,./;:<>?_+\\|!@#$%^&*(){}"]\|\[\|\]\|'."'".'\)\+$')
@@ -187,8 +201,6 @@ function! boshiamy#send_key () " {{{
     "         return ''
     "     endif
     " endif
-
-    return boshiamy#boshiamy#handler(l:line)
 endfunction " }}}
 
 

@@ -1395,14 +1395,6 @@ let g:boshiamy#chewing#table[';zp6'] = ['頒', '墳', '焚', '汾', '賁', '棼'
 let g:boshiamy#chewing#table[';zul4'] = ['覅']
 echom "Done"
 
-function! boshiamy#chewing#handler (line, chewing_str)
-    let l:idx = strlen(a:line) - strlen(a:chewing_str)
-    let l:col  = l:idx + 1
-
-    if has_key(g:boshiamy#chewing#table, a:chewing_str)
-        call complete(l:col, g:boshiamy#chewing#table[a:chewing_str])
-        return 0
-    endif
-
-    return 1
+function! boshiamy#chewing#handler (matchobj)
+    return get(g:boshiamy#chewing#table, a:matchobj[0], [])
 endfunction
