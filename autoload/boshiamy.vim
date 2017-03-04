@@ -11,38 +11,76 @@
 " ============================================================================
 let s:true = 1
 let s:false = 0
+let s:plugin_list = []
+" Plugin struct
+" {
+"   'type': 'standalone' / 'embedded'
+"   'icon': <icon>
+"   'description': <description>
+"   'pattern': <pattern>
+"   'handler': <handler-function-reference>
+"   'id': <id>
+" }
 
-let s:mode_list = [
-            \['BOSHIAMY',   '[嘸]'],
-            \['KANA',       '[あ]'],
-            \['WIDE',       '[Ａ]'],
-            \['RUNES',      '[ᚱ]'],
-            \['BRAILLE',    '[⢝]'],
-            \]
 
-let s:boshiamy_english_enable = s:true
-let s:boshiamy_mode = s:mode_list[0][0]
+" Load plugins
+let s:standalone_plugin_list = []
+let s:embedded_plugin_list = []
+for s:plugin in g:boshiamy_plugins
+    try
+        execute 'let s:plugin_type = boshiamy#'. s:plugin .'#type'
+        let s:plugin_metadata = {'type': s:plugin_type}
+        if s:plugin_type == 'standalone'
+            execute 'let s:plugin_metadata["icon"] = boshiamy#'. s:plugin .'#icon'
+            execute 'let s:plugin_metadata["description"] = boshiamy#'. s:plugin .'#description'
+        endif
+        execute 'let s:plugin_metadata["pattern"] = boshiamy#'. s:plugin .'#pattern'
+        let s:plugin_metadata["handler"] = function('boshiamy#'. s:plugin .'#handler')
 
-let s:__mode2icon = {}
-let s:__icon2mode = {}
-let s:__mode_order = []
-for [s:mode, s:icon] in s:mode_list
-    let s:__mode2icon[s:mode] = {}
-    let s:__mode2icon[s:mode]['menu'] = s:icon
-    let s:__mode2icon[s:mode]['word'] = ''
-    let s:__mode2icon[s:mode]['dup'] = s:true
-    let s:__mode2icon[s:mode]['empty'] = s:true
-    let s:__icon2mode[s:icon] = s:mode
-    call add(s:__mode_order, s:mode)
+        if s:plugin_type == 'standalone'
+            call add(s:standalone_plugin_list, s:plugin_metadata)
+        else
+            call add(s:embedded_plugin_list, s:plugin_metadata)
+        endif
+    catch
+        echom v:exception
+    endtry
 endfor
 
 
+call insert(s:standalone_plugin_list, {
+            \ 'type': 'standalone',
+            \ 'icon': '[嘸]',
+            \ 'description': 'Chinese mode',
+            \ 'pattern': '.*$',
+            \ 'handler': function('boshiamy#boshiamy#handler'),
+            \ }, 0)
+
+call add(s:embedded_plugin_list, {
+            \ 'type': 'embedded',
+            \ 'pattern': '.*$',
+            \ 'handler': function('boshiamy#chewing#handler'),
+            \ })
+
+
+for s:plugin in s:standalone_plugin_list
+    let s:plugin['menu'] = s:plugin['icon'] .' - '. s:plugin['description']
+    let s:plugin['word'] = ''
+    let s:plugin['dup'] = s:true
+    let s:plugin['empty'] = s:true
+endfor
+
+
+let s:boshiamy_english_enable = s:true
+let s:boshiamy_mode = s:standalone_plugin_list[0]
+
+
 function! s:SelectMode (new_mode) " {{{
-    if a:new_mode == 'ENGLISH'
-        let s:boshiamy_english_enable = 1
+    if type(a:new_mode) == type('ENGLISH') && a:new_mode == 'ENGLISH'
+        let s:boshiamy_english_enable = s:true
     else
         let s:boshiamy_mode = a:new_mode
-        let s:boshiamy_english_enable = 0
+        let s:boshiamy_english_enable = s:false
     endif
 
     if s:boshiamy_english_enable == s:false
@@ -68,72 +106,87 @@ function! boshiamy#send_key () " {{{
         return ' '
     endif
 
-    let l:line = strpart(getline('.'), 0, (col('.')-1) )
+    let l:line = strpart(getline('.'), 0, (col('.') - 1) )
 
-    if s:boshiamy_mode == 'WIDE'
-        let l:wide_str = matchstr(l:line, '\([ a-zA-Z0-9]\|[-=,./;:<>?_+\\|!@#$%^&*(){}"]\|\[\|\]\|'."'".'\)\+$')
-        return boshiamy#wide#handler(l:line, l:wide_str)
-    endif
-
-    if s:boshiamy_mode == 'KANA'
-        let l:kana_str = matchstr(l:line, '[.a-z]\+$')
-        return boshiamy#kana#handler(l:line, l:kana_str)
-    endif
-
-    if s:boshiamy_mode == 'RUNES'
-        let l:runes_str = matchstr(l:line, '[.a-z,]\+$')
-        return boshiamy#runes#handler(l:line, l:runes_str)
-    endif
-
-    if s:boshiamy_mode == 'BRAILLE'
-        let l:braille_str = matchstr(l:line, '\v['. g:boshiamy_braille_keys .']*$')
-        return boshiamy#braille#handler(l:line, l:braille_str)
-    endif
-
-    " Try chewing
-    let chewing_str = matchstr(l:line, ';[^;]*;[346]\?$')
-    if l:chewing_str == ''
-        let chewing_str = matchstr(l:line, ';[^;]\+$')
-    endif
-    if l:chewing_str != ''
-        if boshiamy#chewing#handler(l:line, l:chewing_str) == 0
-            return ''
+    if s:boshiamy_mode['icon'] != '[嘸]'
+        let l:matchobj = matchlist(l:line, s:boshiamy_mode['pattern'])
+        if len(l:matchobj) == 0
+            return ' '
         endif
+
+        let l:ret = s:boshiamy_mode['handler'](l:matchobj)
+        if len(l:ret) == 0 || type(l:ret) != type([])
+            return ' '
+        endif
+
+        call complete(col('.') - strlen(l:matchobj[0]), l:ret)
+        return ''
     endif
 
-    " Translating code point to unicode character
-    let unicode_pattern = matchstr(l:line, '\\[Uu][0-9a-fA-F]\+$')
-    if l:unicode_pattern != ''
-        if boshiamy#unicode#handler_encode(l:line, l:unicode_pattern) == 0
-            return ''
-        endif
-    endif
+    " if s:boshiamy_mode == 'WIDE'
+    "    let l:wide_str = matchstr(l:line, '\([ a-zA-Z0-9]\|[-=,./;:<>?_+\\|!@#$%^&*(){}"]\|\[\|\]\|'."'".'\)\+$')
+    "    return boshiamy#wide#handler(l:line, l:wide_str)
+    " endif
 
-    " Reverse lookup for code point
-    let unicode_pattern = matchstr(l:line, '\\[Uu]\[[^]]*\]$')
-    if l:unicode_pattern == ''
-        let unicode_pattern = matchstr(l:line, '\\[Uu]\[\]\]$')
-    endif
-    if l:unicode_pattern != ''
-        if boshiamy#unicode#handler_decode(l:line, l:unicode_pattern) == 0
-            return ''
-        endif
-    endif
+    " if s:boshiamy_mode == 'KANA'
+    "    let l:kana_str = matchstr(l:line, '[.a-z]\+$')
+    "    return boshiamy#kana#handler(l:line, l:kana_str)
+    " endif
 
-    let htmlcode_pattern = matchstr(l:line, '&#x\?[0-9a-fA-F]\+;$')
-    if l:htmlcode_pattern != ''
-        if boshiamy#html#handler(l:line, l:htmlcode_pattern) == 0
-            return ''
-        endif
-    endif
+    " if s:boshiamy_mode == 'RUNES'
+    "    let l:runes_str = matchstr(l:line, '[.a-z,]\+$')
+    "    return boshiamy#runes#handler(l:line, l:runes_str)
+    " endif
 
-    let emoji_pattern = matchstr(l:line, ':\([0-9a-z_+-]\+:\?\)\?$')
-    " +-0123456789:_abcdefghijklmnopqrstuvwxyz
-    if emoji_pattern != ''
-        if boshiamy#emoji#handler(l:line, l:emoji_pattern) == 0
-            return ''
-        endif
-    endif
+    " if s:boshiamy_mode == 'BRAILLE'
+    "    let l:braille_str = matchstr(l:line, '\v['. g:boshiamy_braille_keys .']*$')
+    "    return boshiamy#braille#handler(l:line, l:braille_str)
+    " endif
+
+    " " Try chewing
+    " let chewing_str = matchstr(l:line, ';[^;]*;[346]\?$')
+    " if l:chewing_str == ''
+    "     let chewing_str = matchstr(l:line, ';[^;]\+$')
+    " endif
+    " if l:chewing_str != ''
+    "     if boshiamy#chewing#handler(l:line, l:chewing_str) == 0
+    "         return ''
+    "     endif
+    " endif
+    "
+    " " Translating code point to unicode character
+    " let unicode_pattern = matchstr(l:line, '\\[Uu][0-9a-fA-F]\+$')
+    " if l:unicode_pattern != ''
+    "     if boshiamy#unicode#handler_encode(l:line, l:unicode_pattern) == 0
+    "         return ''
+    "     endif
+    " endif
+    "
+    " " Reverse lookup for code point
+    " let unicode_pattern = matchstr(l:line, '\\[Uu]\[[^]]*\]$')
+    " if l:unicode_pattern == ''
+    "     let unicode_pattern = matchstr(l:line, '\\[Uu]\[\]\]$')
+    " endif
+    " if l:unicode_pattern != ''
+    "     if boshiamy#unicode#handler_decode(l:line, l:unicode_pattern) == 0
+    "         return ''
+    "     endif
+    " endif
+    "
+    " let htmlcode_pattern = matchstr(l:line, '&#x\?[0-9a-fA-F]\+;$')
+    " if l:htmlcode_pattern != ''
+    "     if boshiamy#html#handler(l:line, l:htmlcode_pattern) == 0
+    "         return ''
+    "     endif
+    " endif
+    "
+    " let emoji_pattern = matchstr(l:line, ':\([0-9a-z_+-]\+:\?\)\?$')
+    " " +-0123456789:_abcdefghijklmnopqrstuvwxyz
+    " if emoji_pattern != ''
+    "     if boshiamy#emoji#handler(l:line, l:emoji_pattern) == 0
+    "         return ''
+    "     endif
+    " endif
 
     return boshiamy#boshiamy#handler(l:line)
 endfunction " }}}
@@ -142,10 +195,8 @@ endfunction " }}}
 function! boshiamy#mode () " {{{
     if s:boshiamy_english_enable
         return '[英]'
-    elseif has_key(s:__mode2icon, s:boshiamy_mode)
-        return s:__mode2icon[s:boshiamy_mode]['menu']
     endif
-    return '[？]'
+    return get(s:boshiamy_mode, 'icon', '[？]')
 endfunction " }}}
 
 
@@ -155,7 +206,6 @@ function! boshiamy#toggle () " {{{
     else
         call s:SelectMode('ENGLISH')
     endif
-
     return ''
 endfunction " }}}
 
@@ -187,20 +237,22 @@ function! boshiamy#_comp_show_mode_menu () " {{{
         autocmd! boshiamy CompleteDone
         autocmd boshiamy CompleteDone * call boshiamy#_comp_select_mode()
     augroup end
-    let l:tmp = []
-    for l:mode in s:__mode_order
-        call add(l:tmp, s:__mode2icon[(l:mode)])
-    endfor
-    call complete(col('.'), l:tmp)
+    " let l:tmp = []
+    " for l:mode in s:__mode_order
+    "     call add(l:tmp, s:__mode2icon[(l:mode)])
+    " endfor
+    call complete(col('.'), s:standalone_plugin_list)
 endfunction " }}}
 
 
 function! boshiamy#_comp_select_mode () " {{{
     augroup boshiamy
         autocmd! boshiamy CompleteDone
-        if has_key(s:__icon2mode, v:completed_item['menu'])
-            call s:SelectMode(s:__icon2mode[v:completed_item['menu']])
-        endif
+        for l:plugin in s:standalone_plugin_list
+            if v:completed_item['menu'] == l:plugin['menu']
+                call s:SelectMode(l:plugin)
+            endif
+        endfor
     augroup end
 endfunction " }}}
 

@@ -38,3 +38,6 @@ execute 'inoremap <expr> <CR> pumvisible() ? "<C-Y>" : "' . s:cr_imap_save . '"'
 if !exists('g:boshiamy_braille_keys') || type(g:boshiamy_braille_keys) != type('') || len(g:boshiamy_braille_keys) != 8
     let g:boshiamy_braille_keys = '7uj8ikm,'
 endif
+
+" let g:boshiamy_plugins = ['runes', 'braille', 'wide', 'unicode', 'emoji', 'html']
+let g:boshiamy_plugins = ['wide']
