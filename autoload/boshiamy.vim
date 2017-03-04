@@ -19,53 +19,66 @@ let s:plugin_list = []
 "   'description': <description>
 "   'pattern': <pattern>
 "   'handler': <handler-function-reference>
-"   'id': <id>
 " }
 
 
 " Load plugins
 let s:standalone_plugin_list = []
 let s:embedded_plugin_list = []
-for s:plugin in g:boshiamy_plugins
-    try
-        execute 'let s:plugin_type = boshiamy#'. s:plugin .'#type'
-        let s:plugin_metadata = {'type': s:plugin_type}
-        if s:plugin_type == 'standalone'
-            execute 'let s:plugin_metadata["icon"] = boshiamy#'. s:plugin .'#icon'
-            execute 'let s:plugin_metadata["description"] = boshiamy#'. s:plugin .'#description'
+function! s:LoadPlugins ()
+    for l:plugin in g:boshiamy_plugins
+        try
+            let l:plugin_info = function('boshiamy_'. l:plugin .'#info')()
+        catch
+            echom v:exception
+            continue
+        endtry
+
+        " sanity check
+        if !has_key(l:plugin_info, 'type')
+            continue
         endif
-        execute 'let s:plugin_metadata["pattern"] = boshiamy#'. s:plugin .'#pattern'
-        let s:plugin_metadata["handler"] = function('boshiamy#'. s:plugin .'#handler')
 
-        if s:plugin_type == 'standalone'
-            call add(s:standalone_plugin_list, s:plugin_metadata)
-        else
-            call add(s:embedded_plugin_list, s:plugin_metadata)
+        if l:plugin_info['type'] == 'standalone' &&
+                \ (!has_key(l:plugin_info, 'icon') ||
+                \ !has_key(l:plugin_info, 'description'))
+            continue
         endif
-    catch
-        echom v:exception
-    endtry
-endfor
+
+        if !has_key(l:plugin_info, 'pattern')
+            continue
+        endif
+
+        if !has_key(l:plugin_info, 'handler')
+            continue
+        endif
+
+        if l:plugin_info['type'] == 'standalone'
+            call add(s:standalone_plugin_list, l:plugin_info)
+        elseif l:plugin_info['type'] == 'embedded'
+            call add(s:embedded_plugin_list, l:plugin_info)
+        endif
+    endfor
 
 
-call insert(s:standalone_plugin_list, {
-            \ 'type': 'standalone',
-            \ 'icon': '[嘸]',
-            \ 'description': 'Chinese mode',
-            \ }, 0)
+    call insert(s:standalone_plugin_list, {
+                \ 'icon': '[嘸]',
+                \ 'description': 'Chinese mode',
+                \ }, 0)
 
-call add(s:embedded_plugin_list, {
-            \ 'type': 'embedded',
-            \ 'pattern': '\v(;[^;]+|;[^;]*;[346]?)$',
-            \ 'handler': function('boshiamy#chewing#handler'),
-            \ })
+    call add(s:embedded_plugin_list, {
+                \ 'pattern': '\v(;[^;]+|;[^;]*;[346]?)$',
+                \ 'handler': function('boshiamy#chewing#handler'),
+                \ })
 
-for s:plugin in s:standalone_plugin_list
-    let s:plugin['menu'] = s:plugin['icon'] .' - '. s:plugin['description']
-    let s:plugin['word'] = ''
-    let s:plugin['dup'] = s:true
-    let s:plugin['empty'] = s:true
-endfor
+    for s:plugin in s:standalone_plugin_list
+        let s:plugin['menu'] = s:plugin['icon'] .' - '. s:plugin['description']
+        let s:plugin['word'] = ''
+        let s:plugin['dup'] = s:true
+        let s:plugin['empty'] = s:true
+    endfor
+endfunction
+call s:LoadPlugins()
 
 
 let s:boshiamy_english_enable = s:true

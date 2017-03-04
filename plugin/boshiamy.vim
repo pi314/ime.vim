@@ -39,5 +39,4 @@ if !exists('g:boshiamy_braille_keys') || type(g:boshiamy_braille_keys) != type('
     let g:boshiamy_braille_keys = '7uj8ikm,'
 endif
 
-" let g:boshiamy_plugins = ['runes', 'braille', 'wide', 'unicode', 'emoji', 'html']
-let g:boshiamy_plugins = ['wide']
+let g:boshiamy_plugins = ['wide', 'runes', 'braille', 'unincode', 'emoji', 'html']
