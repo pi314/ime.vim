@@ -9,9 +9,8 @@
 "              Want To Public License, Version 2, as published by Sam Hocevar.
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 " ============================================================================
-let s:true = 1
-let s:false = 0
 let s:plugin_list = []
+let s:logtag = '[boshiamy] '
 " Plugin struct
 " {
 "   'type': 'standalone' / 'embedded'
@@ -30,26 +29,30 @@ function! s:LoadPlugins ()
         try
             let l:plugin_info = function('boshiamy_'. l:plugin .'#info')()
         catch
-            echom v:exception
+            echom s:logtag . v:exception
             continue
         endtry
 
         " sanity check
         if !has_key(l:plugin_info, 'type')
+            echom s:logtag .'"'. l:plugin . '" plugin lacks "type" information'
             continue
         endif
 
         if l:plugin_info['type'] == 'standalone' &&
                 \ (!has_key(l:plugin_info, 'icon') ||
                 \ !has_key(l:plugin_info, 'description'))
+            echom s:logtag .'"'. l:plugin . '" plugin lacks "icon" or "description" information'
             continue
         endif
 
         if !has_key(l:plugin_info, 'pattern')
+            echom s:logtag .'"'. l:plugin . '" plugin lacks "pattern" information'
             continue
         endif
 
         if !has_key(l:plugin_info, 'handler')
+            echom s:logtag .'"'. l:plugin . '" plugin lacks "handler" information'
             continue
         endif
 
@@ -60,40 +63,56 @@ function! s:LoadPlugins ()
         endif
     endfor
 
-
+    " built-in plugin: boshiamy
     call insert(s:standalone_plugin_list, {
                 \ 'icon': '[嘸]',
                 \ 'description': 'Chinese mode',
                 \ }, 0)
 
+    " built-in plugin: kana
+    call add(s:standalone_plugin_list, {
+                \ 'icon': '[あ]',
+                \ 'description': 'Kana mode',
+                \ 'pattern': '\v[.a-z]+$',
+                \ 'handler': function('boshiamy#kana#handler')
+                \ })
+
+    " built-in plugin: chewing
     call add(s:embedded_plugin_list, {
                 \ 'pattern': '\v(;[^;]+|;[^;]*;[346]?)$',
                 \ 'handler': function('boshiamy#chewing#handler'),
                 \ })
 
+    " built-in plugin: unicode
+    " It's tiny, simple, no table lookup, and useful, so I keep it in the core
+    call add(s:embedded_plugin_list, {
+                \ 'pattern': '\v\\[Uu]%(([0-9a-fA-F]+)|(\[.+\]))$',
+                \ 'handler': function('boshiamy#unicode#handler'),
+                \ })
+
     for s:plugin in s:standalone_plugin_list
         let s:plugin['menu'] = s:plugin['icon'] .' - '. s:plugin['description']
         let s:plugin['word'] = ''
-        let s:plugin['dup'] = s:true
-        let s:plugin['empty'] = s:true
+        let s:plugin['dup'] = v:true
+        let s:plugin['empty'] = v:true
     endfor
 endfunction
 call s:LoadPlugins()
 
 
-let s:boshiamy_english_enable = s:true
+let s:boshiamy_english_enable = v:true
 let s:boshiamy_mode = s:standalone_plugin_list[0]
 
 
 function! s:SelectMode (new_mode) " {{{
     if type(a:new_mode) == type('ENGLISH') && a:new_mode == 'ENGLISH'
-        let s:boshiamy_english_enable = s:true
+        let s:boshiamy_english_enable = v:true
     else
         let s:boshiamy_mode = a:new_mode
-        let s:boshiamy_english_enable = s:false
+        let s:boshiamy_english_enable = v:false
     endif
 
-    if s:boshiamy_english_enable == s:false
+    if s:boshiamy_english_enable == v:false
         inoremap <space> <C-R>=boshiamy#send_key()<CR>
     elseif !empty(maparg('<space>', 'i'))
         iunmap <space>
@@ -124,12 +143,17 @@ function! boshiamy#send_key () " {{{
             return ' '
         endif
 
-        let l:ret = s:boshiamy_mode['handler'](l:matchobj)
-        if len(l:ret) == 0 || type(l:ret) != type([])
-            return ' '
-        endif
+        try
+            let l:ret = s:boshiamy_mode['handler'](l:matchobj)
+            if len(l:ret) == 0 || type(l:ret) != type([])
+                return ' '
+            endif
 
-        call complete(col('.') - strlen(l:matchobj[0]), l:ret)
+            call complete(col('.') - strlen(l:matchobj[0]), l:ret)
+        catch
+            echom s:logtag . s:boshiamy_mode['icon'] . v:exception
+            return ' '
+        endtry
         return ''
     endif
 
@@ -139,81 +163,21 @@ function! boshiamy#send_key () " {{{
             continue
         endif
 
-        let l:ret = l:plugin['handler'](l:matchobj)
-        if len(l:ret) == 0 || type(l:ret) != type([])
-            continue
-        endif
+        try
+            let l:ret = l:plugin['handler'](l:matchobj)
+            if len(l:ret) == 0 || type(l:ret) != type([])
+                continue
+            endif
 
-        call complete(col('.') - strlen(l:matchobj[0]), l:ret)
+            call complete(col('.') - strlen(l:matchobj[0]), l:ret)
+        catch
+            echom s:logtag . l:plugin['icon'] . v:exception
+            return ' '
+        endtry
         return ''
     endfor
 
     return boshiamy#boshiamy#handler(l:line)
-
-    " if s:boshiamy_mode == 'WIDE'
-    "    let l:wide_str = matchstr(l:line, '\([ a-zA-Z0-9]\|[-=,./;:<>?_+\\|!@#$%^&*(){}"]\|\[\|\]\|'."'".'\)\+$')
-    "    return boshiamy#wide#handler(l:line, l:wide_str)
-    " endif
-
-    " if s:boshiamy_mode == 'KANA'
-    "    let l:kana_str = matchstr(l:line, '[.a-z]\+$')
-    "    return boshiamy#kana#handler(l:line, l:kana_str)
-    " endif
-
-    " if s:boshiamy_mode == 'RUNES'
-    "    let l:runes_str = matchstr(l:line, '[.a-z,]\+$')
-    "    return boshiamy#runes#handler(l:line, l:runes_str)
-    " endif
-
-    " if s:boshiamy_mode == 'BRAILLE'
-    "    let l:braille_str = matchstr(l:line, '\v['. g:boshiamy_braille_keys .']*$')
-    "    return boshiamy#braille#handler(l:line, l:braille_str)
-    " endif
-
-    " " Try chewing
-    " let chewing_str = matchstr(l:line, ';[^;]*;[346]\?$')
-    " if l:chewing_str == ''
-    "     let chewing_str = matchstr(l:line, ';[^;]\+$')
-    " endif
-    " if l:chewing_str != ''
-    "     if boshiamy#chewing#handler(l:line, l:chewing_str) == 0
-    "         return ''
-    "     endif
-    " endif
-    "
-    " " Translating code point to unicode character
-    " let unicode_pattern = matchstr(l:line, '\\[Uu][0-9a-fA-F]\+$')
-    " if l:unicode_pattern != ''
-    "     if boshiamy#unicode#handler_encode(l:line, l:unicode_pattern) == 0
-    "         return ''
-    "     endif
-    " endif
-    "
-    " " Reverse lookup for code point
-    " let unicode_pattern = matchstr(l:line, '\\[Uu]\[[^]]*\]$')
-    " if l:unicode_pattern == ''
-    "     let unicode_pattern = matchstr(l:line, '\\[Uu]\[\]\]$')
-    " endif
-    " if l:unicode_pattern != ''
-    "     if boshiamy#unicode#handler_decode(l:line, l:unicode_pattern) == 0
-    "         return ''
-    "     endif
-    " endif
-    "
-    " let htmlcode_pattern = matchstr(l:line, '&#x\?[0-9a-fA-F]\+;$')
-    " if l:htmlcode_pattern != ''
-    "     if boshiamy#html#handler(l:line, l:htmlcode_pattern) == 0
-    "         return ''
-    "     endif
-    " endif
-    "
-    " let emoji_pattern = matchstr(l:line, ':\([0-9a-z_+-]\+:\?\)\?$')
-    " " +-0123456789:_abcdefghijklmnopqrstuvwxyz
-    " if emoji_pattern != ''
-    "     if boshiamy#emoji#handler(l:line, l:emoji_pattern) == 0
-    "         return ''
-    "     endif
-    " endif
 endfunction " }}}
 
 
