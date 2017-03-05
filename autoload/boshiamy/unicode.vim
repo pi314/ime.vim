@@ -16,7 +16,7 @@ endfunction
 function! boshiamy#unicode#info ()
     return {
     \ 'type': 'embedded',
-    \ 'pattern': '\v\\[Uu]%(([0-9a-fA-F]+)|(\[.+\]))$',
+    \ 'pattern': '\v\\[Uu]%(([0-9a-fA-F]+)|(\[[^\]]+\]|\[\]\]))$',
     \ 'handler': function('s:Handler'),
     \ }
 endfunction

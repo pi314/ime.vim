@@ -246,7 +246,9 @@ function! boshiamy#_dialog_show_mode_menu () " {{{
 endfunction " }}}
 
 
-function! boshiamy#plugins ()
-    echom string(map(copy(s:standalone_plugin_list), 'v:val[''icon'']'))
-    echom string(map(copy(s:embedded_plugin_list), 'v:val[''icon'']'))
-endfunction
+function! boshiamy#plugins () " {{{
+    return {
+    \ 'standalone': map(copy(s:standalone_plugin_list), 'v:val[''name'']'),
+    \ 'embedded': map(copy(s:embedded_plugin_list), 'v:val[''name'']'),
+    \ }
+endfunction " }}}
