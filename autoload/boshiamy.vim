@@ -9,10 +9,10 @@
 "              Want To Public License, Version 2, as published by Sam Hocevar.
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 " ============================================================================
-let s:plugin_list = []
 let s:logtag = '[boshiamy] '
 " Plugin struct
 " {
+"   'name': <name>
 "   'type': 'standalone' / 'embedded'
 "   'icon': <icon>
 "   'description': <description>
@@ -29,8 +29,12 @@ function! s:LoadPlugins ()
         try
             let l:plugin_info = function('boshiamy_'. l:plugin .'#info')()
         catch
-            echom s:logtag . v:exception
-            continue
+            try
+                let l:plugin_info = function('boshiamy#'. l:plugin .'#info')()
+            catch
+                echom s:logtag . v:exception
+                continue
+            endtry
         endtry
 
         " sanity check
@@ -56,39 +60,14 @@ function! s:LoadPlugins ()
             continue
         endif
 
+        let l:plugin_info['name'] = l:plugin
+
         if l:plugin_info['type'] == 'standalone'
             call add(s:standalone_plugin_list, l:plugin_info)
         elseif l:plugin_info['type'] == 'embedded'
             call add(s:embedded_plugin_list, l:plugin_info)
         endif
     endfor
-
-    " built-in plugin: boshiamy
-    call insert(s:standalone_plugin_list, {
-                \ 'icon': '[嘸]',
-                \ 'description': 'Chinese mode',
-                \ }, 0)
-
-    " built-in plugin: kana
-    call add(s:standalone_plugin_list, {
-                \ 'icon': '[あ]',
-                \ 'description': 'Kana mode',
-                \ 'pattern': '\v[.a-z]+$',
-                \ 'handler': function('boshiamy#kana#handler')
-                \ })
-
-    " built-in plugin: chewing
-    call add(s:embedded_plugin_list, {
-                \ 'pattern': '\v(;[^;]+|;[^;]*;[346]?)$',
-                \ 'handler': function('boshiamy#chewing#handler'),
-                \ })
-
-    " built-in plugin: unicode
-    " It's tiny, simple, no table lookup, and useful, so I keep it in the core
-    call add(s:embedded_plugin_list, {
-                \ 'pattern': '\v\\[Uu]%(([0-9a-fA-F]+)|(\[.+\]))$',
-                \ 'handler': function('boshiamy#unicode#handler'),
-                \ })
 
     for s:plugin in s:standalone_plugin_list
         let s:plugin['menu'] = s:plugin['icon'] .' - '. s:plugin['description']
@@ -137,7 +116,7 @@ function! boshiamy#send_key () " {{{
 
     let l:line = strpart(getline('.'), 0, (col('.') - 1) )
 
-    if s:boshiamy_mode['icon'] != '[嘸]'
+    if s:boshiamy_mode['name'] != g:boshiamy_plugins[0]
         let l:matchobj = matchlist(l:line, s:boshiamy_mode['pattern'])
         if len(l:matchobj) == 0
             return ' '
@@ -150,31 +129,34 @@ function! boshiamy#send_key () " {{{
             endif
 
             call complete(col('.') - strlen(l:matchobj[0]), l:ret)
+            return ''
         catch
-            echom s:logtag . s:boshiamy_mode['icon'] . v:exception
+            echom s:logtag . s:boshiamy_mode['name'] . v:exception
             return ' '
         endtry
-        return ''
     endif
 
+    " search for embedded plugins first
     for l:plugin in s:embedded_plugin_list
         let l:matchobj = matchlist(l:line, l:plugin['pattern'])
+        " no match, check next embedded plugin
         if len(l:matchobj) == 0
             continue
         endif
 
         try
             let l:ret = l:plugin['handler'](l:matchobj)
+            " the plugin said it has no result
             if len(l:ret) == 0 || type(l:ret) != type([])
                 continue
             endif
 
             call complete(col('.') - strlen(l:matchobj[0]), l:ret)
+            return ''
         catch
-            echom s:logtag . l:plugin['icon'] . v:exception
+            echom s:logtag .'['. l:plugin['name'] .'] '. v:exception
             return ' '
         endtry
-        return ''
     endfor
 
     return boshiamy#boshiamy#handler(l:line)
@@ -262,3 +244,9 @@ function! boshiamy#_dialog_show_mode_menu () " {{{
         call s:SelectMode(s:__icon2mode[s:mode_list[l:user_input - 1][1]])
     endif
 endfunction " }}}
+
+
+function! boshiamy#plugins ()
+    echom string(map(copy(s:standalone_plugin_list), 'v:val[''icon'']'))
+    echom string(map(copy(s:embedded_plugin_list), 'v:val[''icon'']'))
+endfunction
