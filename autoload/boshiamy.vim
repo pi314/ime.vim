@@ -102,6 +102,45 @@ function! s:SelectMode (new_mode) " {{{
 endfunction " }}}
 
 
+function! s:ShowModeMenuComp () " {{{
+    augroup boshiamy
+        autocmd! boshiamy CompleteDone
+        autocmd boshiamy CompleteDone * call s:CompSelectMode()
+    augroup end
+    call complete(col('.'), s:standalone_plugin_list)
+endfunction " }}}
+
+
+function! s:CompSelectMode () " {{{
+    augroup boshiamy
+        autocmd! boshiamy CompleteDone
+        for l:plugin in s:standalone_plugin_list
+            if v:completed_item['menu'] == l:plugin['menu']
+                call s:SelectMode(l:plugin)
+            endif
+        endfor
+    augroup end
+endfunction " }}}
+
+
+function! s:ShowModeMenuInput () " {{{
+    let l:prompt = ['Select input mode:'] + map(copy(s:standalone_plugin_list), '(v:key + 1) ." - ". v:val["menu"]')
+    let l:user_input = inputlist(l:prompt)
+    if l:user_input
+        call s:SelectMode(s:standalone_plugin_list[l:user_input - 1])
+    endif
+endfunction " }}}
+
+
+function! s:ShowModeMenuDialog () " {{{
+    let l:prompt = ['Select input mode:'] + map(copy(s:standalone_plugin_list), '(v:key + 1) ." - ". v:val["menu"]')
+    let l:user_input = str2nr(inputdialog(join(l:prompt, "\n") ."\n> "))
+    if 0 < l:user_input && l:user_input < len(l:prompt)
+        call s:SelectMode(s:standalone_plugin_list[l:user_input - 1])
+    endif
+endfunction " }}}
+
+
 " ================
 " Public Functions
 " ================
@@ -193,56 +232,13 @@ function! boshiamy#_show_mode_menu () " {{{
     endif
 
     if l:fallback_style == 'menu'
-        call ShowModeMenuComp()
+        call s:ShowModeMenuComp()
     elseif l:fallback_style == 'input'
-        call ShowModeMenuInput()
+        call s:ShowModeMenuInput()
     elseif l:fallback_style == 'dialog'
-        call ShowModeMenuDialog()
+        call s:ShowModeMenuDialog()
     endif
     return ''
-endfunction " }}}
-
-
-function! ShowModeMenuComp () " {{{
-    augroup boshiamy
-        autocmd! boshiamy CompleteDone
-        autocmd boshiamy CompleteDone * call boshiamy#_comp_select_mode()
-    augroup end
-    " let l:tmp = []
-    " for l:mode in s:__mode_order
-    "     call add(l:tmp, s:__mode2icon[(l:mode)])
-    " endfor
-    call complete(col('.'), s:standalone_plugin_list)
-endfunction " }}}
-
-
-function! boshiamy#_comp_select_mode () " {{{
-    augroup boshiamy
-        autocmd! boshiamy CompleteDone
-        for l:plugin in s:standalone_plugin_list
-            if v:completed_item['menu'] == l:plugin['menu']
-                call s:SelectMode(l:plugin)
-            endif
-        endfor
-    augroup end
-endfunction " }}}
-
-
-function! ShowModeMenuInput () " {{{
-    let l:prompt = ['Select input mode:'] + map(copy(s:standalone_plugin_list), '(v:key + 1) ." - ". v:val["menu"]')
-    let l:user_input = inputlist(l:prompt)
-    if l:user_input
-        call s:SelectMode(s:standalone_plugin_list[l:user_input - 1])
-    endif
-endfunction " }}}
-
-
-function! ShowModeMenuDialog () " {{{
-    let l:prompt = ['Select input mode:'] + map(copy(s:standalone_plugin_list), '(v:key + 1) ." - ". v:val["menu"]')
-    let l:user_input = str2nr(inputdialog(join(l:prompt, "\n") ."\n> "))
-    if 0 < l:user_input && l:user_input < len(l:prompt)
-        call s:SelectMode(s:standalone_plugin_list[l:user_input - 1])
-    endif
 endfunction " }}}
 
 
