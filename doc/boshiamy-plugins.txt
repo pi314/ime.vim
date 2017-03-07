@@ -8,6 +8,7 @@
     1.1 套件資訊............................|boshiamy-plugin-metadata|
 2.  目錄結構................................|boshiamy-plugin-structure|
     2.1 需要載入龐大資料的套件..............|boshiamy-plugin-with-huge-data|
+3.  套件核心 - handler......................|boshiamy-plugin-handler|
 
 ==============================================================================
 1.  介紹                                       *boshiamy-plugins-introduction*
@@ -25,14 +26,14 @@ boshiamy.vim 能夠載入第三方的套件，擴充自己的輸入能力。
 
 要讓 boshiamy.vim 正確載入，套件需要提供必要的資訊：
 
-- Type: `string` ，"standalone" 或是 "embedded"。                       *type*
-- Pattern: `regex` ，表示該套件所能處理的字串。                      *pattern*
-- Handler: `Funcref` ，根據比對到的字串回傳可用的選項。              *handler*
+- Type: `string`，"standalone" 或是 "embedded"。                       *type*
+- Pattern: `regex`，表示該套件所能處理的字串。                      *pattern*
+- Handler: `Funcref`，根據比對到的字串回傳可用的選項。              *handler*
 
 Standalone 套件需要額外提供兩項資訊：
 
-- Icon: `string` ，在選擇輸入模式時顯示，以及在 statusline 中顯示。     *icon*
-- Description: `string` ，在選擇輸入模式時顯示。                 *description*
+- Icon: `string`，在選擇輸入模式時顯示，以及在 statusline 中顯示。     *icon*
+- Description: `string`，在選擇輸入模式時顯示。                 *description*
 
 除此之外，套件需要訂定一個代號： plugin-name                     *plugin-name*
 讓使用者加在 |g:boshiamy_plugins| 之中。
@@ -61,7 +62,7 @@ boshiamy.vim 的套件建議依照以下的目錄結構放置檔案：
 <
 *boshiamy_<plugin-name>.vim* 為主要檔案，建議的內容為：
 >
-    function! s:Handler ()
+    function! s:Handler (matchobj)
         " plugin logic here
     endfunction
 
@@ -86,8 +87,8 @@ boshiamy.vim 的套件建議依照以下的目錄結構放置檔案：
 在 autoload/ 目錄裡增加一個 *boshiamy_<plugin-name>_table.vim* 檔案：
 >
     let s:table = {}
-    let s:table['key1'] = [...]
-    let s:table['key2'] = [...]
+    let s:table['key_1'] = [...]
+    let s:table['key_2'] = [...]
     ...
     let s:table['key_n'] = [...]
 
@@ -98,9 +99,9 @@ boshiamy.vim 的套件建議依照以下的目錄結構放置檔案：
 
 |boshiamy_<plugin-name>.vim| 檔案調整為：
 >
-    let s:table= {}
+    let s:table = {}
 
-    function! s:Handler ()
+    function! s:Handler (matchobj)
         if s:table == {}
             let s:table = boshiamy_<plugin-name>_table#table()
         endif
@@ -118,3 +119,13 @@ boshiamy.vim 的套件建議依照以下的目錄結構放置檔案：
             \ }
     endfunction
 <
+==============================================================================
+3.  套件核心 - handler                               *boshiamy-plugin-handler*
+
+套件的核心功能由 |handler| 提供。
+
+boshiamy.vim 會將套件提供的 |pattern| 傳入 `matchlist()` 進行比對。
+若比對成功，該結果會被傳入套件提供的 |handler|。
+
+|handler| 對比對結果進行處理及判斷，並回傳一個 `List`，包含可用的選項。
+回傳選項的順序可以由套件自行決定，詳細資訊請見 `complete-items`。
