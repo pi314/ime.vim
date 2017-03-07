@@ -1,6 +1,5 @@
-*boshiamy.txt* *boshiamy*
-
-                                                 一個嘸蝦米中文輸入法 vim 外掛
+*boshiamy.txt*
+                                               一個嘸蝦米中文輸入法的 vim 外掛
 
 ==============================================================================
 目錄
@@ -204,4 +203,4 @@ boshiamy.vim 透過 `inoremap` <space> 觸發送字，
 但切換到英文模式時這個 `inoremap` 會被 `:iunmap`，
 所以在英文模式下連續輸入空白鍵的效率會比較高。
 
-其他技術與開發細節請參考 |boshiamy-dev|
+boshiamy.vim 第三方套件的開發請參考 |boshiamy-plugins|
