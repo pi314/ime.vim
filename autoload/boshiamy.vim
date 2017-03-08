@@ -9,6 +9,8 @@
 "              Want To Public License, Version 2, as published by Sam Hocevar.
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 " ============================================================================
+let s:true = exists('v:true') ? v:true : 1
+let s:false = exists('v:false') ? v:false : 0
 let s:logtag = '[boshiamy] '
 " Plugin struct
 " {
@@ -72,26 +74,25 @@ function! s:LoadPlugins ()
     for s:plugin in s:standalone_plugin_list
         let s:plugin['menu'] = s:plugin['icon'] .' - '. s:plugin['description']
         let s:plugin['word'] = ''
-        let s:plugin['dup'] = v:true
-        let s:plugin['empty'] = v:true
+        let s:plugin['dup'] = s:true
+        let s:plugin['empty'] = s:true
     endfor
 endfunction
 call s:LoadPlugins()
 
-
-let s:boshiamy_english_enable = v:true
+let s:boshiamy_english_enable = s:true
 let s:boshiamy_mode = s:standalone_plugin_list[0]
 
 
 function! s:SelectMode (new_mode) " {{{
     if type(a:new_mode) == type('ENGLISH') && a:new_mode == 'ENGLISH'
-        let s:boshiamy_english_enable = v:true
+        let s:boshiamy_english_enable = s:true
     else
         let s:boshiamy_mode = a:new_mode
-        let s:boshiamy_english_enable = v:false
+        let s:boshiamy_english_enable = s:false
     endif
 
-    if s:boshiamy_english_enable == v:false
+    if s:boshiamy_english_enable == s:false
         inoremap <space> <C-R>=boshiamy#send_key()<CR>
     elseif !empty(maparg('<space>', 'i'))
         iunmap <space>
@@ -203,7 +204,7 @@ endfunction " }}}
 
 
 function! boshiamy#mode () " {{{
-    if s:boshiamy_english_enable
+    if s:boshiamy_english_enable == s:true
         return '[英]'
     endif
     return get(s:boshiamy_mode, 'icon', '[？]')
@@ -211,7 +212,7 @@ endfunction " }}}
 
 
 function! boshiamy#toggle () " {{{
-    if s:boshiamy_english_enable
+    if s:boshiamy_english_enable == s:true
         call s:SelectMode(s:boshiamy_mode)
     else
         call s:SelectMode('ENGLISH')
