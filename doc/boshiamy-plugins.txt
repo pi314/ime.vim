@@ -9,6 +9,7 @@
 2.  目錄結構................................|boshiamy-plugin-structure|
     2.1 需要載入龐大資料的套件..............|boshiamy-plugin-with-huge-data|
 3.  套件核心 - handler......................|boshiamy-plugin-handler|
+4.  Vim 7.3 的問題..........................|boshiamy-plugin-for-vim-7.3|
 
 ==============================================================================
 1.  介紹                                       *boshiamy-plugins-introduction*
@@ -38,15 +39,15 @@ Standalone 套件需要額外提供兩項資訊：
 除此之外，套件需要訂定一個代號： plugin-name                     *plugin-name*
 讓使用者加在 |g:boshiamy_plugins| 之中。
 
-這些資訊需要包裝成一個物件並透過 *boshiamy#<plugin-name>#info()* 回傳：
+這些資訊需要包裝成一個物件並透過 *boshiamy#{plugin-name}#info()* 回傳：
 >
-    function boshiamy#<plugin-name>#info()
+    function boshiamy#{plugin-name}#info()
         return {
             \ 'type': 'standalone' / 'embedded',
-            \ 'pattern': <regex>,
-            \ 'handler': <function>,
+            \ 'pattern': {regex},
+            \ 'handler': {function},
             \ 'icon': '[En]',
-            \ 'description': <description>,
+            \ 'description': {description},
             \ }
     endfunction
 <
@@ -55,18 +56,18 @@ Standalone 套件需要額外提供兩項資訊：
 
 boshiamy.vim 的套件建議依照以下的目錄結構放置檔案：
 >
-    <plugin-folder>/
+    {plugin-folder}/
     |-- autoload/
-    |   `-- boshiamy_<plugin-name>.vim
+    |   `-- boshiamy_{plugin-name}.vim
     `-- README
 <
-*boshiamy_<plugin-name>.vim* 為主要檔案，建議的內容為：
+*boshiamy_{plugin-name}.vim* 為主要檔案，建議的內容為：
 >
     function! s:Handler (matchobj)
         " plugin logic here
     endfunction
 
-    function! boshiamy_<plugin-name>#info()
+    function! boshiamy_{plugin-name}#info()
         return {
             \ 'type': 'standalone',
             \ 'icon': '[eg]',
@@ -84,7 +85,7 @@ boshiamy.vim 的套件建議依照以下的目錄結構放置檔案：
 
 若套件需要載入龐大的資料，可以利用 vim 的 `autoload` 功能
 
-在 autoload/ 目錄裡增加一個 *boshiamy_<plugin-name>_table.vim* 檔案：
+在 autoload/ 目錄裡增加一個 *boshiamy_{plugin-name}_table.vim* 檔案：
 >
     let s:table = {}
     let s:table['key_1'] = [...]
@@ -92,24 +93,24 @@ boshiamy.vim 的套件建議依照以下的目錄結構放置檔案：
     ...
     let s:table['key_n'] = [...]
 
-    function! boshiamy_<plugin-name>_table#table ()
+    function! boshiamy_{plugin-name}_table#table ()
         return s:table
     endfunction
 <
 
-|boshiamy_<plugin-name>.vim| 檔案調整為：
+|boshiamy_{plugin-name}.vim| 檔案調整為：
 >
     let s:table = {}
 
     function! s:Handler (matchobj)
         if s:table == {}
-            let s:table = boshiamy_<plugin-name>_table#table()
+            let s:table = boshiamy_{plugin-name}_table#table()
         endif
 
         " plugin logic here
     endfunction
 
-    function! boshiamy_<plugin-name>#info()
+    function! boshiamy_{plugin-name}#info()
         return {
             \ 'type': 'standalone',
             \ 'icon': '[eg]',
@@ -129,3 +130,14 @@ boshiamy.vim 會將套件提供的 |pattern| 傳入 `matchlist()` 進行比對�
 
 |handler| 對比對結果進行處理及判斷，並回傳一個 `List`，包含可用的選項。
 回傳選項的順序可以由套件自行決定，詳細資訊請見 `complete-items`。
+
+==============================================================================
+4.  Vim 7.3 的問題                               *boshiamy-plugin-for-vim-7.3*
+
+根據測試，在 Vim 7.3 使用
+>
+    function("s:Handler")
+<
+會在執行時找不到該函式，產生 |E117| 例外。
+
+解決的方式是把該函式改為全域宣告，建議使用 boshiamy_{plugin-name}#handler()

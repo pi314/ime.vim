@@ -7,7 +7,7 @@
 1.  介紹....................................|boshiamy-introduction|
     1.2 輸入模式............................|boshiamy-modes|
 2.  設定....................................|boshiamy-settings|
-    2.1 在 statusline 顯示輸入模式..........|boshiamy#mode()|
+    2.1 在 'statusline' 顯示輸入模式........|boshiamy#mode()|
     2.2 在英文與其他輸入模式之間切換........|g:boshiamy_toggle_english|
     2.3 選擇輸入模式........................|g:boshiamy_select_mode|
     2.4 選擇輸入模式的方式..................|g:boshiamy_select_mode_style|
@@ -86,16 +86,19 @@ boshiamy.vim 的目標之一是安裝以後不用設定即可使用，
 所以使用者會接觸到的大部份設定都以變數而不是函式的方式提供。
 
 ------------------------------------------------------------------------------
-2.1 在 statusline 顯示輸入模式                               *boshiamy#mode()*
+2.1 在 'statusline' 顯示輸入模式                             *boshiamy#mode()*
 
-|boshiamy#mode()| 回傳輸入法目前的狀態，你可以在 statusline 顯示這個資訊：
+|boshiamy#mode()| 回傳輸入法目前的狀態，你可以在 'statusline' 顯示這個資訊：
 >
     set statusline=%<%{boshiamy#mode()}%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 <
-這行 statusline 看起來會像
+這行 'statusline' 看起來會像
 >
     [嘸]README.rst [+]     75,67-59 53%
 <
+Note: 這個功能在 Vim 7.3 可能使 'statusline' 被設為空字串。
+      目前不確定是 boshiamy.vim 或是 Vim 7.3 導致的，
+      重新設定 'statusline' 以後就不會再被重設，你可以用 |autocmd| 達成。
 ------------------------------------------------------------------------------
 2.2 在英文與其他輸入模式之間切換                   *g:boshiamy_toggle_english*
 >
@@ -134,7 +137,7 @@ Note："menu" 需要依賴 |CompleteDone| 事件，若目前的環境不支援�
 這是為了讓使用者方便在輸入中文時嵌入英文單字，而不用來回切換模式。
 
 但有些常用的英文單字如 "id"、"user"、"are" 等等，剛好對應到嘸蝦米的字根，
-使得這些單字變成中文。
+使得這些單字變成中文。事實上，所有長度為二的英文單字都已被嘸蝦米使用。
 
 若使用者輸入了這樣的字根，可以在選單尚未消失時時用取消輸入功能，
 讓中文字變回字根。
@@ -200,7 +203,7 @@ Unicode 模式為 embedded 套件，能夠以 unicode 碼位（code point）輸�
 4.  技術細節                                 *boshiamy-implementation-details*
 
 boshiamy.vim 透過 `inoremap` <space> 觸發送字，
-但切換到英文模式時這個 `inoremap` 會被 `:iunmap`，
+但切換到英文模式時這個 `inoremap` 會被 `iunmap`，
 所以在英文模式下連續輸入空白鍵的效率會比較高。
 
 boshiamy.vim 第三方套件的開發請參考 |boshiamy-plugins|
