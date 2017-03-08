@@ -1,4 +1,4 @@
-echom "Loading kana table..."
+call boshiamy#log('kana', 'Loading kana table...')
 let s:table = {}
 let s:table['..'] = ['々']
 let s:table['a'] = ['あ', 'ぁ']
@@ -247,7 +247,7 @@ let s:table['zo.'] = ['ゾ']
 let s:table['zu'] = ['ず']
 let s:table['zu'] = ['づ']
 let s:table['zu.'] = ['ズ']
-echom "Done"
+call boshiamy#log('kana', 'Done')
 
 
 function! boshiamy#kana_table#table ()
