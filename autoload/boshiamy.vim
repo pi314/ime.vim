@@ -11,7 +11,12 @@
 " ============================================================================
 let s:true = exists('v:true') ? v:true : 1
 let s:false = exists('v:false') ? v:false : 0
-let s:logtag = '[boshiamy] '
+
+function! boshiamy#log (tag, msg)
+    echom substitute('[boshiamy]['. a:tag .'] '. a:msg, '] [', '][', '')
+endfunction
+
+
 " Plugin struct
 " {
 "   'name': <name>
@@ -34,31 +39,31 @@ function! s:LoadPlugins ()
             try
                 let l:plugin_info = function('boshiamy#'. l:plugin .'#info')()
             catch
-                echom s:logtag . v:exception
+                call boshiamy#log('core', v:exception)
                 continue
             endtry
         endtry
 
         " sanity check
         if !has_key(l:plugin_info, 'type')
-            echom s:logtag .'"'. l:plugin . '" plugin lacks "type" information'
+            call boshiamy#log('core', 'plugin "'. l:plugin . '" lacks "type" information')
             continue
         endif
 
         if l:plugin_info['type'] == 'standalone' &&
                 \ (!has_key(l:plugin_info, 'icon') ||
                 \ !has_key(l:plugin_info, 'description'))
-            echom s:logtag .'"'. l:plugin . '" plugin lacks "icon" or "description" information'
+            call boshiamy#log('core', 'plugin "'. l:plugin . '" lacks "icon" or "description" information')
             continue
         endif
 
         if !has_key(l:plugin_info, 'pattern')
-            echom s:logtag .'"'. l:plugin . '" plugin lacks "pattern" information'
+            call boshiamy#log('core', 'plugin "'. l:plugin . 'lacks "pattern" information')
             continue
         endif
 
         if !has_key(l:plugin_info, 'handler')
-            echom s:logtag .'"'. l:plugin . '" plugin lacks "handler" information'
+            call boshiamy#log('core', 'plugin "'. l:plugin . 'lacks "handler" information')
             continue
         endif
 
@@ -79,6 +84,7 @@ function! s:LoadPlugins ()
     endfor
 endfunction
 call s:LoadPlugins()
+
 
 let s:boshiamy_english_enable = s:true
 let s:boshiamy_mode = s:standalone_plugin_list[0]
@@ -171,7 +177,7 @@ function! boshiamy#send_key () " {{{
             call complete(col('.') - strlen(l:matchobj[0]), l:ret)
             return ''
         catch
-            echom s:logtag . s:boshiamy_mode['name'] . v:exception
+            call boshiamy#log(s:boshiamy_mode['name'], v:exception)
             return ' '
         endtry
     endif
@@ -194,7 +200,7 @@ function! boshiamy#send_key () " {{{
             call complete(col('.') - strlen(l:matchobj[0]), l:ret)
             return ''
         catch
-            echom s:logtag .'['. l:plugin['name'] .'] '. v:exception
+            call boshiamy#log(l:plugin['name'], v:exception)
             return ' '
         endtry
     endfor
