@@ -34,7 +34,7 @@ if empty(s:cr_imap_save)
 endif
 execute 'inoremap <expr> <CR> pumvisible() ? "<C-Y>" : "' . s:cr_imap_save . '"'
 
-
-if !exists('g:boshiamy_braille_keys') || type(g:boshiamy_braille_keys) != type('') || len(g:boshiamy_braille_keys) != 8
-    let g:boshiamy_braille_keys = '7uj8ikm,'
+if !exists('g:boshiamy_plugins') || type(g:boshiamy_plugins) != type([])
+    let g:boshiamy_plugins = []
 endif
+let g:boshiamy_plugins = ['boshiamy', 'kana', 'chewing', 'unicode'] + g:boshiamy_plugins

@@ -9,40 +9,93 @@
 "              Want To Public License, Version 2, as published by Sam Hocevar.
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 " ============================================================================
-let s:true = 1
-let s:false = 0
+let s:true = exists('v:true') ? v:true : 1
+let s:false = exists('v:false') ? v:false : 0
 
-let s:mode_list = [
-            \['BOSHIAMY',   '[嘸]'],
-            \['KANA',       '[あ]'],
-            \['WIDE',       '[Ａ]'],
-            \['RUNES',      '[ᚱ]'],
-            \['BRAILLE',    '[⢝]'],
-            \]
+function! boshiamy#log (tag, msg)
+    echom substitute('[boshiamy]['. a:tag .'] '. a:msg, '] [', '][', '')
+endfunction
+
+
+" Plugin struct
+" {
+"   'name': <name>
+"   'type': 'standalone' / 'embedded'
+"   'icon': <icon>
+"   'description': <description>
+"   'pattern': <pattern>
+"   'handler': <handler-function-reference>
+" }
+
+
+" Load plugins
+let s:standalone_plugin_list = []
+let s:embedded_plugin_list = []
+function! s:LoadPlugins ()
+    for l:plugin in g:boshiamy_plugins
+        try
+            let l:plugin_info = function('boshiamy_'. l:plugin .'#info')()
+        catch
+            try
+                let l:plugin_info = function('boshiamy#'. l:plugin .'#info')()
+            catch
+                call boshiamy#log('core', v:exception)
+                continue
+            endtry
+        endtry
+
+        " sanity check
+        if !has_key(l:plugin_info, 'type')
+            call boshiamy#log('core', 'plugin "'. l:plugin . '" lacks "type" information')
+            continue
+        endif
+
+        if l:plugin_info['type'] == 'standalone' &&
+                \ (!has_key(l:plugin_info, 'icon') ||
+                \ !has_key(l:plugin_info, 'description'))
+            call boshiamy#log('core', 'plugin "'. l:plugin . '" lacks "icon" or "description" information')
+            continue
+        endif
+
+        if !has_key(l:plugin_info, 'pattern')
+            call boshiamy#log('core', 'plugin "'. l:plugin . 'lacks "pattern" information')
+            continue
+        endif
+
+        if !has_key(l:plugin_info, 'handler')
+            call boshiamy#log('core', 'plugin "'. l:plugin . 'lacks "handler" information')
+            continue
+        endif
+
+        let l:plugin_info['name'] = l:plugin
+
+        if l:plugin_info['type'] == 'standalone'
+            call add(s:standalone_plugin_list, l:plugin_info)
+        elseif l:plugin_info['type'] == 'embedded'
+            call add(s:embedded_plugin_list, l:plugin_info)
+        endif
+    endfor
+
+    for s:plugin in s:standalone_plugin_list
+        let s:plugin['menu'] = s:plugin['icon'] .' - '. s:plugin['description']
+        let s:plugin['word'] = ''
+        let s:plugin['dup'] = s:true
+        let s:plugin['empty'] = s:true
+    endfor
+endfunction
+call s:LoadPlugins()
+
 
 let s:boshiamy_english_enable = s:true
-let s:boshiamy_mode = s:mode_list[0][0]
-
-let s:__mode2icon = {}
-let s:__icon2mode = {}
-let s:__mode_order = []
-for [s:mode, s:icon] in s:mode_list
-    let s:__mode2icon[s:mode] = {}
-    let s:__mode2icon[s:mode]['menu'] = s:icon
-    let s:__mode2icon[s:mode]['word'] = ''
-    let s:__mode2icon[s:mode]['dup'] = s:true
-    let s:__mode2icon[s:mode]['empty'] = s:true
-    let s:__icon2mode[s:icon] = s:mode
-    call add(s:__mode_order, s:mode)
-endfor
+let s:boshiamy_mode = s:standalone_plugin_list[0]
 
 
 function! s:SelectMode (new_mode) " {{{
-    if a:new_mode == 'ENGLISH'
-        let s:boshiamy_english_enable = 1
+    if type(a:new_mode) == type('ENGLISH') && a:new_mode == 'ENGLISH'
+        let s:boshiamy_english_enable = s:true
     else
         let s:boshiamy_mode = a:new_mode
-        let s:boshiamy_english_enable = 0
+        let s:boshiamy_english_enable = s:false
     endif
 
     if s:boshiamy_english_enable == s:false
@@ -53,6 +106,45 @@ function! s:SelectMode (new_mode) " {{{
 
     redrawstatus!
     redraw!
+endfunction " }}}
+
+
+function! s:ShowModeMenuComp () " {{{
+    augroup boshiamy
+        autocmd! boshiamy CompleteDone
+        autocmd boshiamy CompleteDone * call s:CompSelectMode()
+    augroup end
+    call complete(col('.'), s:standalone_plugin_list)
+endfunction " }}}
+
+
+function! s:CompSelectMode () " {{{
+    augroup boshiamy
+        autocmd! boshiamy CompleteDone
+        for l:plugin in s:standalone_plugin_list
+            if v:completed_item['menu'] == l:plugin['menu']
+                call s:SelectMode(l:plugin)
+            endif
+        endfor
+    augroup end
+endfunction " }}}
+
+
+function! s:ShowModeMenuInput () " {{{
+    let l:prompt = ['Select input mode:'] + map(copy(s:standalone_plugin_list), '(v:key + 1) ." - ". v:val["menu"]')
+    let l:user_input = inputlist(l:prompt)
+    if l:user_input
+        call s:SelectMode(s:standalone_plugin_list[l:user_input - 1])
+    endif
+endfunction " }}}
+
+
+function! s:ShowModeMenuDialog () " {{{
+    let l:prompt = ['Select input mode:'] + map(copy(s:standalone_plugin_list), '(v:key + 1) ." - ". v:val["menu"]')
+    let l:user_input = str2nr(inputdialog(join(l:prompt, "\n") ."\n> "))
+    if 0 < l:user_input && l:user_input < len(l:prompt)
+        call s:SelectMode(s:standalone_plugin_list[l:user_input - 1])
+    endif
 endfunction " }}}
 
 
@@ -68,94 +160,69 @@ function! boshiamy#send_key () " {{{
         return ' '
     endif
 
-    let l:line = strpart(getline('.'), 0, (col('.')-1) )
+    let l:line = strpart(getline('.'), 0, (col('.') - 1) )
 
-    if s:boshiamy_mode == 'WIDE'
-        let l:wide_str = matchstr(l:line, '\([ a-zA-Z0-9]\|[-=,./;:<>?_+\\|!@#$%^&*(){}"]\|\[\|\]\|'."'".'\)\+$')
-        return boshiamy#wide#handler(l:line, l:wide_str)
-    endif
-
-    if s:boshiamy_mode == 'KANA'
-        let l:kana_str = matchstr(l:line, '[.a-z]\+$')
-        return boshiamy#kana#handler(l:line, l:kana_str)
-    endif
-
-    if s:boshiamy_mode == 'RUNES'
-        let l:runes_str = matchstr(l:line, '[.a-z,]\+$')
-        return boshiamy#runes#handler(l:line, l:runes_str)
-    endif
-
-    if s:boshiamy_mode == 'BRAILLE'
-        let l:braille_str = matchstr(l:line, '\v['. g:boshiamy_braille_keys .']*$')
-        return boshiamy#braille#handler(l:line, l:braille_str)
-    endif
-
-    " Try chewing
-    let chewing_str = matchstr(l:line, ';[^;]*;[346]\?$')
-    if l:chewing_str == ''
-        let chewing_str = matchstr(l:line, ';[^;]\+$')
-    endif
-    if l:chewing_str != ''
-        if boshiamy#chewing#handler(l:line, l:chewing_str) == 0
-            return ''
+    if s:boshiamy_mode['name'] != g:boshiamy_plugins[0]
+        let l:matchobj = matchlist(l:line, s:boshiamy_mode['pattern'])
+        if len(l:matchobj) == 0
+            return ' '
         endif
+
+        try
+            let l:ret = s:boshiamy_mode['handler'](l:matchobj)
+            if len(l:ret) == 0 || type(l:ret) != type([])
+                return ' '
+            endif
+
+            call complete(col('.') - strlen(l:matchobj[0]), l:ret)
+            return ''
+        catch
+            call boshiamy#log(s:boshiamy_mode['name'], v:exception)
+            return ' '
+        endtry
     endif
 
-    " Translating code point to unicode character
-    let unicode_pattern = matchstr(l:line, '\\[Uu][0-9a-fA-F]\+$')
-    if l:unicode_pattern != ''
-        if boshiamy#unicode#handler_encode(l:line, l:unicode_pattern) == 0
-            return ''
+    " search for embedded plugins first
+    for l:plugin in s:embedded_plugin_list
+        let l:matchobj = matchlist(l:line, l:plugin['pattern'])
+        " no match, check next embedded plugin
+        if len(l:matchobj) == 0
+            continue
         endif
-    endif
 
-    " Reverse lookup for code point
-    let unicode_pattern = matchstr(l:line, '\\[Uu]\[[^]]*\]$')
-    if l:unicode_pattern == ''
-        let unicode_pattern = matchstr(l:line, '\\[Uu]\[\]\]$')
-    endif
-    if l:unicode_pattern != ''
-        if boshiamy#unicode#handler_decode(l:line, l:unicode_pattern) == 0
-            return ''
-        endif
-    endif
+        try
+            let l:ret = l:plugin['handler'](l:matchobj)
+            " the plugin said it has no result
+            if len(l:ret) == 0 || type(l:ret) != type([])
+                continue
+            endif
 
-    let htmlcode_pattern = matchstr(l:line, '&#x\?[0-9a-fA-F]\+;$')
-    if l:htmlcode_pattern != ''
-        if boshiamy#html#handler(l:line, l:htmlcode_pattern) == 0
+            call complete(col('.') - strlen(l:matchobj[0]), l:ret)
             return ''
-        endif
-    endif
-
-    let emoji_pattern = matchstr(l:line, ':\([0-9a-z_+-]\+:\?\)\?$')
-    " +-0123456789:_abcdefghijklmnopqrstuvwxyz
-    if emoji_pattern != ''
-        if boshiamy#emoji#handler(l:line, l:emoji_pattern) == 0
-            return ''
-        endif
-    endif
+        catch
+            call boshiamy#log(l:plugin['name'], v:exception)
+            return ' '
+        endtry
+    endfor
 
     return boshiamy#boshiamy#handler(l:line)
 endfunction " }}}
 
 
 function! boshiamy#mode () " {{{
-    if s:boshiamy_english_enable
+    if s:boshiamy_english_enable == s:true
         return '[英]'
-    elseif has_key(s:__mode2icon, s:boshiamy_mode)
-        return s:__mode2icon[s:boshiamy_mode]['menu']
     endif
-    return '[？]'
+    return get(s:boshiamy_mode, 'icon', '[？]')
 endfunction " }}}
 
 
 function! boshiamy#toggle () " {{{
-    if s:boshiamy_english_enable
+    if s:boshiamy_english_enable == s:true
         call s:SelectMode(s:boshiamy_mode)
     else
         call s:SelectMode('ENGLISH')
     endif
-
     return ''
 endfunction " }}}
 
@@ -172,52 +239,19 @@ function! boshiamy#_show_mode_menu () " {{{
     endif
 
     if l:fallback_style == 'menu'
-        call boshiamy#_comp_show_mode_menu()
+        call s:ShowModeMenuComp()
     elseif l:fallback_style == 'input'
-        call boshiamy#_input_show_mode_menu()
+        call s:ShowModeMenuInput()
     elseif l:fallback_style == 'dialog'
-        call boshiamy#_dialog_show_mode_menu()
+        call s:ShowModeMenuDialog()
     endif
     return ''
 endfunction " }}}
 
 
-function! boshiamy#_comp_show_mode_menu () " {{{
-    augroup boshiamy
-        autocmd! boshiamy CompleteDone
-        autocmd boshiamy CompleteDone * call boshiamy#_comp_select_mode()
-    augroup end
-    let l:tmp = []
-    for l:mode in s:__mode_order
-        call add(l:tmp, s:__mode2icon[(l:mode)])
-    endfor
-    call complete(col('.'), l:tmp)
-endfunction " }}}
-
-
-function! boshiamy#_comp_select_mode () " {{{
-    augroup boshiamy
-        autocmd! boshiamy CompleteDone
-        if has_key(s:__icon2mode, v:completed_item['menu'])
-            call s:SelectMode(s:__icon2mode[v:completed_item['menu']])
-        endif
-    augroup end
-endfunction " }}}
-
-
-function! boshiamy#_input_show_mode_menu () " {{{
-    let l:prompt = ['Select input mode:'] + map(copy(s:mode_list), '(v:key + 1) ." - ". v:val[1]')
-    let l:user_input = inputlist(l:prompt)
-    if l:user_input
-        call s:SelectMode(s:__icon2mode[s:mode_list[l:user_input - 1][1]])
-    endif
-endfunction " }}}
-
-
-function! boshiamy#_dialog_show_mode_menu () " {{{
-    let l:prompt = ['Select input mode:'] + map(copy(s:mode_list), '(v:key + 1) ." - ". v:val[1]')
-    let l:user_input = str2nr(inputdialog(join(l:prompt, "\n") ."\n> "))
-    if 0 < l:user_input && l:user_input < len(l:prompt)
-        call s:SelectMode(s:__icon2mode[s:mode_list[l:user_input - 1][1]])
-    endif
+function! boshiamy#plugins () " {{{
+    return {
+    \ 'standalone': map(copy(s:standalone_plugin_list), 'v:val[''name'']'),
+    \ 'embedded': map(copy(s:embedded_plugin_list), 'v:val[''name'']'),
+    \ }
 endfunction " }}}

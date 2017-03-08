@@ -1,22 +1,21 @@
-function! boshiamy#unicode#handler_encode (line, unicode_pattern)
-    let l:idx = strlen(a:line) - strlen(a:unicode_pattern)
-    let l:col  = l:idx + 1
+function! boshiamy#unicode#handler (matchobj)
+    if a:matchobj[1]
+        return [nr2char(str2nr(a:matchobj[1], 16))]
+    endif
 
-    let unicode_codepoint = str2nr(a:unicode_pattern[2:], 16)
-    call complete(l:col, [nr2char(l:unicode_codepoint)])
-
-    return 0
-endfunction
-
-function! boshiamy#unicode#handler_decode (line, unicode_pattern)
-    let l:idx = strlen(a:line) - strlen(a:unicode_pattern)
-    let l:col  = l:idx + 1
-
-    let utf8_str = a:unicode_pattern[3:-2]
+    let utf8_str = a:matchobj[2][1:-2]
     let unicode_codepoint = char2nr(l:utf8_str)
     let unicode_codepoint_str = printf('\u%x', unicode_codepoint)
-    let html_code_str = printf('&#%d;', unicode_codepoint)
-    call complete(l:col, [unicode_codepoint_str, html_code_str])
+    let html_entity_str = printf('&#%d;', unicode_codepoint)
+    return [unicode_codepoint_str, html_entity_str]
+endfunction
 
-    return 0
+
+" built-in plugin: unicode
+function! boshiamy#unicode#info ()
+    return {
+    \ 'type': 'embedded',
+    \ 'pattern': '\v\\[Uu]%(([0-9a-fA-F]+)|(\[[^\]]+\]|\[\]\]))$',
+    \ 'handler': function('boshiamy#unicode#handler'),
+    \ }
 endfunction
