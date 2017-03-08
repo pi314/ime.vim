@@ -1,6 +1,6 @@
 let s:table = {}
 
-function! s:Handler (matchobj)
+function! boshiamy#kana#handler (matchobj)
     if s:table == {}
         let s:table = boshiamy#kana_table#table()
     endif
@@ -48,6 +48,6 @@ function! boshiamy#kana#info ()
     \ 'icon': '[あ]',
     \ 'description': 'Kana mode',
     \ 'pattern': '\v[.a-z]+$',
-    \ 'handler': function('s:Handler'),
+    \ 'handler': function('boshiamy#kana#handler'),
     \ }
 endfunction
