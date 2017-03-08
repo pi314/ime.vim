@@ -1,5 +1,4 @@
-function! s:Handler (matchobj)
-    echom string(a:matchobj)
+function! boshiamy#unicode#handler (matchobj)
     if a:matchobj[1]
         return [nr2char(str2nr(a:matchobj[1], 16))]
     endif
@@ -17,6 +16,6 @@ function! boshiamy#unicode#info ()
     return {
     \ 'type': 'embedded',
     \ 'pattern': '\v\\[Uu]%(([0-9a-fA-F]+)|(\[[^\]]+\]|\[\]\]))$',
-    \ 'handler': function('s:Handler'),
+    \ 'handler': function('boshiamy#unicode#handler'),
     \ }
 endfunction
