@@ -211,7 +211,7 @@ endfunction " }}}
 
 function! boshiamy#mode () " {{{
     if s:boshiamy_english_enable == s:true
-        return '[英]'
+        return '[En]'
     endif
     return get(s:boshiamy_mode, 'icon', '[？]')
 endfunction " }}}
