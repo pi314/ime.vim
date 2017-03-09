@@ -31,7 +31,7 @@ endfunction
 " Load plugins
 let s:standalone_plugin_list = []
 let s:embedded_plugin_list = []
-function! s:LoadPlugins ()
+function! s:LoadPlugins () " {{{
     for l:plugin in g:boshiamy_plugins
         try
             let l:plugin_info = function('boshiamy_'. l:plugin .'#info')()
@@ -82,7 +82,7 @@ function! s:LoadPlugins ()
         let s:plugin['dup'] = s:true
         let s:plugin['empty'] = s:true
     endfor
-endfunction
+endfunction " }}}
 call s:LoadPlugins()
 
 
@@ -99,7 +99,7 @@ function! s:SelectMode (new_mode) " {{{
     endif
 
     if s:boshiamy_english_enable == s:false
-        inoremap <space> <C-R>=boshiamy#send_key()<CR>
+        inoremap <space> <C-R>=<SID>SendKey()<CR>
     elseif !empty(maparg('<space>', 'i'))
         iunmap <space>
     endif
@@ -148,11 +148,7 @@ function! s:ShowModeMenuDialog () " {{{
 endfunction " }}}
 
 
-" ================
-" Public Functions
-" ================
-
-function! boshiamy#send_key () " {{{
+function! s:SendKey () " {{{
     if s:boshiamy_english_enable
         if !empty(maparg('<space>', 'i'))
             iunmap <space>
@@ -209,6 +205,9 @@ function! boshiamy#send_key () " {{{
 endfunction " }}}
 
 
+" ================
+" Public Functions
+" ================
 function! boshiamy#mode () " {{{
     if s:boshiamy_english_enable == s:true
         return '[En]'
