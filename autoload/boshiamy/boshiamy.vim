@@ -66,7 +66,7 @@ function! boshiamy#boshiamy#info ()
     \ 'type': 'standalone',
     \ 'icon': '[嘸]',
     \ 'description': 'Chinese mode',
-    \ 'pattern': '.*',
+    \ 'pattern': '\v[\w,.''\[\]]*$',
     \ 'handler': function('boshiamy#boshiamy#handler'),
     \ }
 endfunction
