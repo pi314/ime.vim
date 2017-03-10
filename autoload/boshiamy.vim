@@ -158,26 +158,6 @@ function! s:SendKey () " {{{
 
     let l:line = strpart(getline('.'), 0, (col('.') - 1) )
 
-    if s:boshiamy_mode['name'] != g:boshiamy_plugins[0]
-        let l:matchobj = matchlist(l:line, s:boshiamy_mode['pattern'])
-        if len(l:matchobj) == 0
-            return ' '
-        endif
-
-        try
-            let l:ret = s:boshiamy_mode['handler'](l:matchobj)
-            if len(l:ret) == 0 || type(l:ret) != type([])
-                return ' '
-            endif
-
-            call complete(col('.') - strlen(l:matchobj[0]), l:ret)
-            return ''
-        catch
-            call boshiamy#log(s:boshiamy_mode['name'], v:exception)
-            return ' '
-        endtry
-    endif
-
     " search for embedded plugins first
     for l:plugin in s:embedded_plugin_list
         let l:matchobj = matchlist(l:line, l:plugin['pattern'])
@@ -201,7 +181,35 @@ function! s:SendKey () " {{{
         endtry
     endfor
 
-    return boshiamy#boshiamy#handler(l:line)
+    let l:matchobj = matchlist(l:line, s:boshiamy_mode['pattern'])
+    if len(l:matchobj) == 0
+        return ' '
+    endif
+
+    try
+        let l:len = strlen(l:matchobj[0])
+        let l:options = []
+        let l:ret = s:boshiamy_mode['handler'](l:matchobj)
+        if type(l:ret) == type({})
+            let l:len = l:ret['len']
+            let l:options = l:ret['options']
+        elseif type(l:ret) == type([])
+            let l:options = l:ret
+        else
+            return ' '
+        endif
+
+        if l:options == []
+            return ' '
+        endif
+
+        call complete(col('.') - l:len, l:options)
+        return ''
+    catch
+        call boshiamy#log(s:boshiamy_mode['name'], v:exception)
+        return ' '
+    endtry
+    return ' '
 endfunction " }}}
 
 
