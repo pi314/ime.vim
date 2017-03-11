@@ -18,7 +18,6 @@ endfunction
 
 
 function! boshiamy#boshiamy#handler (matchobj)
-    call boshiamy#log('boshiamy', string(a:matchobj))
     if s:table == {}
         let s:table = boshiamy#boshiamy_table#table()
     endif
