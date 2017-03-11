@@ -148,6 +148,38 @@ function! s:ShowModeMenuDialog () " {{{
 endfunction " }}}
 
 
+function! s:ExecutePlugin (line, plugin) " {{{
+    let l:matchobj = matchlist(a:line, a:plugin['pattern'])
+    if len(l:matchobj) == 0
+        return s:false
+    endif
+
+    try
+        let l:len = strlen(l:matchobj[0])
+        let l:options = []
+        let l:ret = a:plugin['handler'](l:matchobj)
+        if type(l:ret) == type({})
+            let l:len = l:ret['len']
+            let l:options = l:ret['options']
+        elseif type(l:ret) == type([])
+            let l:options = l:ret
+        else
+            return s:false
+        endif
+
+        if l:options == []
+            return s:false
+        endif
+
+        call complete(col('.') - l:len, l:options)
+        return s:true
+    catch
+        call boshiamy#log(a:plugin['name'], v:exception)
+    endtry
+    return s:false
+endfunction " }}}
+
+
 function! s:SendKey () " {{{
     if s:boshiamy_english_enable
         if !empty(maparg('<space>', 'i'))
@@ -160,56 +192,14 @@ function! s:SendKey () " {{{
 
     " search for embedded plugins first
     for l:plugin in s:embedded_plugin_list
-        let l:matchobj = matchlist(l:line, l:plugin['pattern'])
-        " no match, check next embedded plugin
-        if len(l:matchobj) == 0
-            continue
-        endif
-
-        try
-            let l:ret = l:plugin['handler'](l:matchobj)
-            " the plugin said it has no result
-            if len(l:ret) == 0 || type(l:ret) != type([])
-                continue
-            endif
-
-            call complete(col('.') - strlen(l:matchobj[0]), l:ret)
+        let l:result = s:ExecutePlugin(l:line, l:plugin)
+        if l:result == s:true
             return ''
-        catch
-            call boshiamy#log(l:plugin['name'], v:exception)
-            return ' '
-        endtry
+        endif
     endfor
 
-    let l:matchobj = matchlist(l:line, s:boshiamy_mode['pattern'])
-    if len(l:matchobj) == 0
-        return ' '
-    endif
-
-    try
-        let l:len = strlen(l:matchobj[0])
-        let l:options = []
-        let l:ret = s:boshiamy_mode['handler'](l:matchobj)
-        if type(l:ret) == type({})
-            let l:len = l:ret['len']
-            let l:options = l:ret['options']
-        elseif type(l:ret) == type([])
-            let l:options = l:ret
-        else
-            return ' '
-        endif
-
-        if l:options == []
-            return ' '
-        endif
-
-        call complete(col('.') - l:len, l:options)
-        return ''
-    catch
-        call boshiamy#log(s:boshiamy_mode['name'], v:exception)
-        return ' '
-    endtry
-    return ' '
+    let l:result = s:ExecutePlugin(l:line, s:boshiamy_mode)
+    return l:result == s:true ? '' : ' '
 endfunction " }}}
 
 
