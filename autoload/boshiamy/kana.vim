@@ -7,7 +7,7 @@ function! boshiamy#kana#handler (matchobj)
 
     let l:kana_str = a:matchobj[0]
     if strlen(l:kana_str) == 0
-        return ' '
+        return []
     endif
 
     if has_key(s:table, l:kana_str)
@@ -33,10 +33,12 @@ function! boshiamy#kana#handler (matchobj)
         else
             let j = l:j - 1
         endif
-
     endwhile
-    let remain = l:kana_str[(l:j + 1) : ]
+    let l:remain = l:kana_str[(l:j + 1) : ]
 
+    if strlen(l:ret_hiragana) == 0 && strlen(l:ret_katakana) == 0
+        return []
+    endif
     return [l:ret_hiragana . l:remain, l:ret_katakana . l:remain]
 endfunction
 
