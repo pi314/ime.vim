@@ -188,7 +188,7 @@ function! s:SendKey () " {{{
         return ' '
     endif
 
-    let l:line = strpart(getline('.'), 0, (col('.') - 1) )
+    let l:line = strpart(getline('.'), 0, (col('.') - 1))
 
     " search for embedded plugins first
     for l:plugin in s:embedded_plugin_list
