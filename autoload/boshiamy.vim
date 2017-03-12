@@ -88,13 +88,19 @@ call s:LoadPlugins()
 
 
 let s:boshiamy_english_enable = s:true
-let s:boshiamy_mode = s:standalone_plugin_list[0]
+if len(s:standalone_plugin_list) == 0
+    let s:boshiamy_mode = {}
+else
+    let s:boshiamy_mode = s:standalone_plugin_list[0]
+endif
 
 
 function! s:SelectMode (new_mode) " {{{
     if type(a:new_mode) == type('ENGLISH') && a:new_mode == 'ENGLISH'
         let s:boshiamy_english_enable = s:true
-    else
+    elseif type(a:new_mode) == type({}) && a:new_mode == {}
+        let s:boshiamy_english_enable = s:true
+    elseif type(a:new_mode) == type({})
         let s:boshiamy_mode = a:new_mode
         let s:boshiamy_english_enable = s:false
     endif
@@ -226,6 +232,11 @@ endfunction " }}}
 
 
 function! boshiamy#_show_mode_menu () " {{{
+    if s:boshiamy_mode == {}
+        call boshiamy#log('core', 'No input mode installed.')
+        return ''
+    endif
+
     let l:fallback_style = g:boshiamy_select_mode_style
 
     if index(['menu', 'input', 'dialog'], l:fallback_style) == -1
