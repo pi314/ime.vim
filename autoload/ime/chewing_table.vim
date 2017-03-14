@@ -1396,6 +1396,6 @@ let s:table[';zul4'] = ['覅']
 call ime#log('chewing', 'Loading chewing table... Done')
 
 
-function! ime#embedded_chewing_table#table ()
+function! ime#chewing_table#table ()
     return s:table
 endfunction

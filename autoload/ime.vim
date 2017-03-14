@@ -39,6 +39,7 @@ let s:standalone_plugin_list = []
 let s:embedded_plugin_list = []
 function! s:LoadPlugins () " {{{
     for l:plugin in g:ime_plugins
+        let l:plugin = substitute(l:plugin, '-', '_', 'g')
         try
             let l:plugin_info = function('ime_'. l:plugin .'#info')()
         catch

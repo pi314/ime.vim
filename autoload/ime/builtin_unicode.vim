@@ -1,4 +1,6 @@
-function! ime#unicode#handler (matchobj, trigger)
+" built-in plugin: builtin-unicode
+
+function! ime#builtin_unicode#handler (matchobj, trigger)
     if a:matchobj[1]
         return [nr2char(str2nr(a:matchobj[1], 16))]
     endif
@@ -11,12 +13,11 @@ function! ime#unicode#handler (matchobj, trigger)
 endfunction
 
 
-" built-in plugin: unicode
-function! ime#unicode#info ()
+function! ime#builtin_unicode#info ()
     return {
     \ 'type': 'embedded',
     \ 'pattern': '\v\\[Uu]%(([0-9a-fA-F]+)|(\[[^\]]+\]|\[\]\]))$',
-    \ 'handler': function('ime#unicode#handler'),
+    \ 'handler': function('ime#builtin_unicode#handler'),
     \ 'trigger': ['<space>'],
     \ }
 endfunction

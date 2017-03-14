@@ -1,6 +1,6 @@
 let s:table = {}
 
-function! ime#kana#handler (matchobj, trigger)
+function! ime#builtin_kana#handler (matchobj, trigger)
     if s:table == {}
         let s:table = ime#kana_table#table()
     endif
@@ -43,14 +43,14 @@ function! ime#kana#handler (matchobj, trigger)
 endfunction
 
 
-" built-in plugin: kana
-function! ime#kana#info ()
+" built-in plugin: builtin-kana
+function! ime#builtin_kana#info ()
     return {
     \ 'type': 'standalone',
     \ 'icon': '[あ]',
     \ 'description': 'Kana input mode',
     \ 'pattern': '\v[.a-z]+$',
-    \ 'handler': function('ime#kana#handler'),
+    \ 'handler': function('ime#builtin_kana#handler'),
     \ 'trigger': ['<space>'],
     \ }
 endfunction

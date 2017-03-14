@@ -17,7 +17,7 @@ function! s:fallback_str (arg)
 endfunction
 
 
-function! ime#boshiamy#handler (matchobj, trigger)
+function! ime#builtin_boshiamy#handler (matchobj, trigger)
     if s:table == {}
         let s:table = ime#boshiamy_table#table()
     endif
@@ -37,13 +37,13 @@ function! ime#boshiamy#handler (matchobj, trigger)
 endfunction
 
 
-function! ime#boshiamy#info ()
+function! ime#builtin_boshiamy#info ()
     return {
     \ 'type': 'standalone',
     \ 'icon': '[嘸]',
     \ 'description': 'Boshiamy input mode',
     \ 'pattern': '\v%(\w|[,.''\[\]])+$',
-    \ 'handler': function('ime#boshiamy#handler'),
+    \ 'handler': function('ime#builtin_boshiamy#handler'),
     \ 'trigger': ['<space>'],
     \ }
 
