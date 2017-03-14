@@ -1,7 +1,7 @@
 " vim:fdm=marker
 " ============================================================================
-" File:        boshiamy.vim
-" Description: A Boshiamy Chinese input method plugin for vim
+" File:        ime.vim
+" Description: A input method engine plugin for vim
 " Maintainer:  Pi314 <michael66230@gmail.com>
 " License:     This program is free software. It comes without any warranty,
 "              to the extent permitted by applicable law. You can redistribute
@@ -12,14 +12,14 @@
 let s:true = exists('v:true') ? v:true : 1
 let s:false = exists('v:false') ? v:false : 0
 
-function! boshiamy#log (tag, msg)
+function! ime#log (tag, msg)
     redraw
     if type(a:msg) == type('')
         let l:log_msg = a:msg
     else
         let l:log_msg = string(a:msg)
     endif
-    echom substitute('[boshiamy]['. a:tag .'] '. l:log_msg, '] [', '][', '')
+    echom substitute('[ime]['. a:tag .'] '. l:log_msg, '] [', '][', '')
 endfunction
 
 
@@ -38,43 +38,43 @@ endfunction
 let s:standalone_plugin_list = []
 let s:embedded_plugin_list = []
 function! s:LoadPlugins () " {{{
-    for l:plugin in g:boshiamy_plugins
+    for l:plugin in g:ime_plugins
         try
-            let l:plugin_info = function('boshiamy_'. l:plugin .'#info')()
+            let l:plugin_info = function('ime_'. l:plugin .'#info')()
         catch
             try
-                let l:plugin_info = function('boshiamy#'. l:plugin .'#info')()
+                let l:plugin_info = function('ime#'. l:plugin .'#info')()
             catch
-                call boshiamy#log('core', v:exception)
+                call ime#log('core', v:exception)
                 continue
             endtry
         endtry
 
         " sanity check
         if !has_key(l:plugin_info, 'type')
-            call boshiamy#log('core', 'plugin "'. l:plugin . '" lacks "type" information')
+            call ime#log('core', 'plugin "'. l:plugin . '" lacks "type" information')
             continue
         endif
 
         if l:plugin_info['type'] == 'standalone' &&
                 \ (!has_key(l:plugin_info, 'icon') ||
                 \ !has_key(l:plugin_info, 'description'))
-            call boshiamy#log('core', 'plugin "'. l:plugin . '" lacks "icon" or "description" information')
+            call ime#log('core', 'plugin "'. l:plugin . '" lacks "icon" or "description" information')
             continue
         endif
 
         if !has_key(l:plugin_info, 'pattern')
-            call boshiamy#log('core', 'plugin "'. l:plugin . '" lacks "pattern" information')
+            call ime#log('core', 'plugin "'. l:plugin . '" lacks "pattern" information')
             continue
         endif
 
         if !has_key(l:plugin_info, 'handler')
-            call boshiamy#log('core', 'plugin "'. l:plugin . '" lacks "handler" information')
+            call ime#log('core', 'plugin "'. l:plugin . '" lacks "handler" information')
             continue
         endif
 
         if !has_key(l:plugin_info, 'trigger')
-            call boshiamy#log('core', 'plugin "'. l:plugin . '" lacks "trigger" information')
+            call ime#log('core', 'plugin "'. l:plugin . '" lacks "trigger" information')
             continue
         endif
 
@@ -97,16 +97,16 @@ endfunction " }}}
 call s:LoadPlugins()
 
 
-let s:boshiamy_english_enable = s:true
+let s:ime_english_enable = s:true
 if len(s:standalone_plugin_list) == 0
-    let s:boshiamy_mode = {}
+    let s:ime_mode = {}
 else
-    let s:boshiamy_mode = s:standalone_plugin_list[0]
+    let s:ime_mode = s:standalone_plugin_list[0]
 endif
 
 
 function! s:SelectMode (new_mode) " {{{
-    for l:trigger in s:boshiamy_mode['trigger']
+    for l:trigger in s:ime_mode['trigger']
         try
             execute 'iunmap '. l:trigger
         catch
@@ -114,16 +114,16 @@ function! s:SelectMode (new_mode) " {{{
     endfor
 
     if type(a:new_mode) == type('ENGLISH') && a:new_mode == 'ENGLISH'
-        let s:boshiamy_english_enable = s:true
+        let s:ime_english_enable = s:true
     elseif type(a:new_mode) == type({}) && a:new_mode == {}
-        let s:boshiamy_english_enable = s:true
+        let s:ime_english_enable = s:true
     elseif type(a:new_mode) == type({})
-        let s:boshiamy_mode = a:new_mode
-        let s:boshiamy_english_enable = s:false
+        let s:ime_mode = a:new_mode
+        let s:ime_english_enable = s:false
     endif
 
-    if s:boshiamy_english_enable == s:false
-        for l:trigger in s:boshiamy_mode['trigger']
+    if s:ime_english_enable == s:false
+        for l:trigger in s:ime_mode['trigger']
             execute 'inoremap '. l:trigger .' <C-R>=<SID>SendKey("'.
                         \ substitute(l:trigger, '<', '<lt>', 'g') .'")<CR>'
         endfor
@@ -135,17 +135,17 @@ endfunction " }}}
 
 
 function! s:ShowModeMenuComp () " {{{
-    augroup boshiamy
-        autocmd! boshiamy CompleteDone
-        autocmd boshiamy CompleteDone * call s:CompSelectMode()
+    augroup ime
+        autocmd! ime CompleteDone
+        autocmd ime CompleteDone * call s:CompSelectMode()
     augroup end
     call complete(col('.'), s:standalone_plugin_list)
 endfunction " }}}
 
 
 function! s:CompSelectMode () " {{{
-    augroup boshiamy
-        autocmd! boshiamy CompleteDone
+    augroup ime
+        autocmd! ime CompleteDone
         for l:plugin in s:standalone_plugin_list
             if v:completed_item['menu'] == l:plugin['menu']
                 call s:SelectMode(l:plugin)
@@ -203,14 +203,14 @@ function! s:ExecutePlugin (line, plugin, trigger) " {{{
         call complete(col('.') - l:len, l:options)
         return s:true
     catch
-        call boshiamy#log(a:plugin['name'], v:exception)
+        call ime#log(a:plugin['name'], v:exception)
     endtry
     return s:false
 endfunction " }}}
 
 
 function! s:SendKey (trigger) " {{{
-    if s:boshiamy_english_enable
+    if s:ime_english_enable
         if !empty(maparg(a:trigger, 'i'))
             execute "iunmap ". a:trigger
         endif
@@ -227,7 +227,7 @@ function! s:SendKey (trigger) " {{{
         endif
     endfor
 
-    let l:result = s:ExecutePlugin(l:line, s:boshiamy_mode, a:trigger)
+    let l:result = s:ExecutePlugin(l:line, s:ime_mode, a:trigger)
     return l:result == s:true ? '' : ' '
 endfunction " }}}
 
@@ -235,17 +235,17 @@ endfunction " }}}
 " ================
 " Public Functions
 " ================
-function! boshiamy#mode () " {{{
-    if s:boshiamy_english_enable == s:true
+function! ime#mode () " {{{
+    if s:ime_english_enable == s:true
         return '[En]'
     endif
-    return get(s:boshiamy_mode, 'icon', '[？]')
+    return get(s:ime_mode, 'icon', '[？]')
 endfunction " }}}
 
 
-function! boshiamy#toggle () " {{{
-    if s:boshiamy_english_enable == s:true
-        call s:SelectMode(s:boshiamy_mode)
+function! ime#toggle () " {{{
+    if s:ime_english_enable == s:true
+        call s:SelectMode(s:ime_mode)
     else
         call s:SelectMode('ENGLISH')
     endif
@@ -253,13 +253,13 @@ function! boshiamy#toggle () " {{{
 endfunction " }}}
 
 
-function! boshiamy#_show_mode_menu () " {{{
-    if s:boshiamy_mode == {}
-        call boshiamy#log('core', 'No input mode installed.')
+function! ime#_show_mode_menu () " {{{
+    if s:ime_mode == {}
+        call ime#log('core', 'No input mode installed.')
         return ''
     endif
 
-    let l:fallback_style = g:boshiamy_select_mode_style
+    let l:fallback_style = g:ime_select_mode_style
 
     if index(['menu', 'input', 'dialog'], l:fallback_style) == -1
         let l:fallback_style = 'menu'
@@ -280,7 +280,7 @@ function! boshiamy#_show_mode_menu () " {{{
 endfunction " }}}
 
 
-function! boshiamy#plugins () " {{{
+function! ime#plugins () " {{{
     return {
     \ 'standalone': map(copy(s:standalone_plugin_list), 'v:val[''name'']'),
     \ 'embedded': map(copy(s:embedded_plugin_list), 'v:val[''name'']'),

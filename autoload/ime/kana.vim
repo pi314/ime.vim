@@ -1,8 +1,8 @@
 let s:table = {}
 
-function! boshiamy#kana#handler (matchobj, trigger)
+function! ime#kana#handler (matchobj, trigger)
     if s:table == {}
-        let s:table = boshiamy#kana_table#table()
+        let s:table = ime#kana_table#table()
     endif
 
     let l:kana_str = a:matchobj[0]
@@ -44,13 +44,13 @@ endfunction
 
 
 " built-in plugin: kana
-function! boshiamy#kana#info ()
+function! ime#kana#info ()
     return {
     \ 'type': 'standalone',
     \ 'icon': '[あ]',
-    \ 'description': 'Kana mode',
+    \ 'description': 'Kana input mode',
     \ 'pattern': '\v[.a-z]+$',
-    \ 'handler': function('boshiamy#kana#handler'),
+    \ 'handler': function('ime#kana#handler'),
     \ 'trigger': ['<space>'],
     \ }
 endfunction

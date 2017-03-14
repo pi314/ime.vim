@@ -1,4 +1,4 @@
-call boshiamy#log('kana', 'Loading kana table...')
+call ime#log('kana', 'Loading kana table...')
 let s:table = {}
 let s:table['..'] = ['々']
 let s:table['a'] = ['あ', 'ぁ']
@@ -247,9 +247,9 @@ let s:table['zo.'] = ['ゾ']
 let s:table['zu'] = ['ず']
 let s:table['zu'] = ['づ']
 let s:table['zu.'] = ['ズ']
-call boshiamy#log('kana', 'Done')
+call ime#log('kana', 'Done')
 
 
-function! boshiamy#kana_table#table ()
+function! ime#kana_table#table ()
     return s:table
 endfunction
