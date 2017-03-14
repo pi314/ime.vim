@@ -27507,6 +27507,7 @@ let s:table["zzrv"] = ["艞"]
 let s:table["zzw"] = ["籧"]
 let s:table["zzz"] = ["歮"]
 let s:table["zzzd"] = ["孴"]
+redraw
 call boshiamy#log('boshiamy', 'Loading boshiamy table... Done')
 
 function! s:load_custom_table ()
@@ -27556,8 +27557,10 @@ endfunction
 
 
 function! boshiamy#boshiamy_table#table ()
+    redraw
     call boshiamy#log('boshiamy', 'Loading custom table...')
     call s:load_custom_table()
+    redraw
     call boshiamy#log('boshiamy', 'Loading custom table... Done')
     return s:table
 endfunction
