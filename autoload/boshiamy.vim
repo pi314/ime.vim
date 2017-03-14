@@ -102,7 +102,10 @@ endif
 
 function! s:SelectMode (new_mode) " {{{
     for l:trigger in s:boshiamy_mode['trigger']
-        execute 'iunmap '. l:trigger .' <C-R>=<SID>SendKey()<CR>'
+        try
+            execute 'iunmap '. l:trigger
+        catch
+        endtry
     endfor
 
     if type(a:new_mode) == type('ENGLISH') && a:new_mode == 'ENGLISH'
@@ -116,7 +119,8 @@ function! s:SelectMode (new_mode) " {{{
 
     if s:boshiamy_english_enable == s:false
         for l:trigger in s:boshiamy_mode['trigger']
-            execute 'inoremap '. l:trigger .' <C-R>=<SID>SendKey()<CR>'
+            execute 'inoremap '. l:trigger .' <C-R>=<SID>SendKey("'.
+                        \ substitute(l:trigger, '<', '<lt>', 'g') .'")<CR>'
         endfor
     endif
 
@@ -164,7 +168,7 @@ function! s:ShowModeMenuDialog () " {{{
 endfunction " }}}
 
 
-function! s:ExecutePlugin (line, plugin) " {{{
+function! s:ExecutePlugin (line, plugin, trigger) " {{{
     let l:matchobj = matchlist(a:line, a:plugin['pattern'])
     if len(l:matchobj) == 0
         return s:false
@@ -173,7 +177,7 @@ function! s:ExecutePlugin (line, plugin) " {{{
     try
         let l:len = strlen(l:matchobj[0])
         let l:options = []
-        let l:ret = a:plugin['handler'](l:matchobj)
+        let l:ret = a:plugin['handler'](l:matchobj, a:trigger)
         if type(l:ret) == type({})
             let l:len = l:ret['len']
             let l:options = l:ret['options']
@@ -198,8 +202,8 @@ endfunction " }}}
 
 function! s:SendKey (trigger) " {{{
     if s:boshiamy_english_enable
-        if !empty(maparg('<space>', 'i'))
-            iunmap <space>
+        if !empty(maparg(a:trigger, 'i'))
+            execute "iunmap ". a:trigger
         endif
         return ' '
     endif
@@ -208,13 +212,13 @@ function! s:SendKey (trigger) " {{{
 
     " search for embedded plugins first
     for l:plugin in s:embedded_plugin_list
-        let l:result = s:ExecutePlugin(l:line, l:plugin)
+        let l:result = s:ExecutePlugin(l:line, l:plugin, a:trigger)
         if l:result == s:true
             return ''
         endif
     endfor
 
-    let l:result = s:ExecutePlugin(l:line, s:boshiamy_mode)
+    let l:result = s:ExecutePlugin(l:line, s:boshiamy_mode, a:trigger)
     return l:result == s:true ? '' : ' '
 endfunction " }}}
 
