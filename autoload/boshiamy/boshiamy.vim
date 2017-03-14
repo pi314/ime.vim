@@ -17,7 +17,7 @@ function! s:fallback_str (arg)
 endfunction
 
 
-function! boshiamy#boshiamy#handler (matchobj)
+function! boshiamy#boshiamy#handler (matchobj, trigger)
     if s:table == {}
         let s:table = boshiamy#boshiamy_table#table()
     endif
@@ -44,6 +44,7 @@ function! boshiamy#boshiamy#info ()
     \ 'description': 'Chinese mode',
     \ 'pattern': '\v%(\w|[,.''\[\]])+$',
     \ 'handler': function('boshiamy#boshiamy#handler'),
+    \ 'trigger': ['<space>'],
     \ }
 
     " Note: This plugin use ``\w`` in regex.

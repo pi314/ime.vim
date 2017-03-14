@@ -1,7 +1,7 @@
 let s:table = {}
 
 
-function! boshiamy#chewing#handler (matchobj)
+function! boshiamy#chewing#handler (matchobj, trigger)
     if s:table == {}
         let s:table = boshiamy#chewing_table#table()
     endif
@@ -15,5 +15,6 @@ function! boshiamy#chewing#info ()
     \ 'type': 'embedded',
     \ 'pattern': '\v(;[^;]+|;[^;]*;[346]?)$',
     \ 'handler': function('boshiamy#chewing#handler'),
+    \ 'trigger': ['<space>'],
     \ }
 endfunction

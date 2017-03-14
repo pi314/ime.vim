@@ -59,12 +59,17 @@ function! s:LoadPlugins () " {{{
         endif
 
         if !has_key(l:plugin_info, 'pattern')
-            call boshiamy#log('core', 'plugin "'. l:plugin . 'lacks "pattern" information')
+            call boshiamy#log('core', 'plugin "'. l:plugin . '" lacks "pattern" information')
             continue
         endif
 
         if !has_key(l:plugin_info, 'handler')
-            call boshiamy#log('core', 'plugin "'. l:plugin . 'lacks "handler" information')
+            call boshiamy#log('core', 'plugin "'. l:plugin . '" lacks "handler" information')
+            continue
+        endif
+
+        if !has_key(l:plugin_info, 'trigger')
+            call boshiamy#log('core', 'plugin "'. l:plugin . '" lacks "trigger" information')
             continue
         endif
 
@@ -96,6 +101,10 @@ endif
 
 
 function! s:SelectMode (new_mode) " {{{
+    for l:trigger in s:boshiamy_mode['trigger']
+        execute 'iunmap '. l:trigger .' <C-R>=<SID>SendKey()<CR>'
+    endfor
+
     if type(a:new_mode) == type('ENGLISH') && a:new_mode == 'ENGLISH'
         let s:boshiamy_english_enable = s:true
     elseif type(a:new_mode) == type({}) && a:new_mode == {}
@@ -106,9 +115,9 @@ function! s:SelectMode (new_mode) " {{{
     endif
 
     if s:boshiamy_english_enable == s:false
-        inoremap <space> <C-R>=<SID>SendKey()<CR>
-    elseif !empty(maparg('<space>', 'i'))
-        iunmap <space>
+        for l:trigger in s:boshiamy_mode['trigger']
+            execute 'inoremap '. l:trigger .' <C-R>=<SID>SendKey()<CR>'
+        endfor
     endif
 
     redrawstatus!
@@ -187,7 +196,7 @@ function! s:ExecutePlugin (line, plugin) " {{{
 endfunction " }}}
 
 
-function! s:SendKey () " {{{
+function! s:SendKey (trigger) " {{{
     if s:boshiamy_english_enable
         if !empty(maparg('<space>', 'i'))
             iunmap <space>

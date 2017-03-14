@@ -1,6 +1,6 @@
 let s:table = {}
 
-function! boshiamy#kana#handler (matchobj)
+function! boshiamy#kana#handler (matchobj, trigger)
     if s:table == {}
         let s:table = boshiamy#kana_table#table()
     endif
@@ -51,5 +51,6 @@ function! boshiamy#kana#info ()
     \ 'description': 'Kana mode',
     \ 'pattern': '\v[.a-z]+$',
     \ 'handler': function('boshiamy#kana#handler'),
+    \ 'trigger': ['<space>'],
     \ }
 endfunction

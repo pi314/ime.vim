@@ -1,4 +1,4 @@
-function! boshiamy#unicode#handler (matchobj)
+function! boshiamy#unicode#handler (matchobj, trigger)
     if a:matchobj[1]
         return [nr2char(str2nr(a:matchobj[1], 16))]
     endif
@@ -17,5 +17,6 @@ function! boshiamy#unicode#info ()
     \ 'type': 'embedded',
     \ 'pattern': '\v\\[Uu]%(([0-9a-fA-F]+)|(\[[^\]]+\]|\[\]\]))$',
     \ 'handler': function('boshiamy#unicode#handler'),
+    \ 'trigger': ['<space>'],
     \ }
 endfunction
