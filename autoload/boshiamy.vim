@@ -13,6 +13,7 @@ let s:true = exists('v:true') ? v:true : 1
 let s:false = exists('v:false') ? v:false : 0
 
 function! boshiamy#log (tag, msg)
+    redraw
     echom substitute('[boshiamy]['. a:tag .'] '. a:msg, '] [', '][', '')
 endfunction
 
