@@ -37,4 +37,4 @@ execute 'inoremap <expr> <CR> pumvisible() ? "<C-Y>" : "' . s:cr_imap_save . '"'
 if !exists('g:boshiamy_plugins') || type(g:boshiamy_plugins) != type([])
     let g:boshiamy_plugins = []
 endif
-let g:boshiamy_plugins = ['boshiamy', 'kana', 'chewing', 'unicode'] + g:boshiamy_plugins
+let g:boshiamy_plugins = ['boshiamy', 'kana', 'embedded_chewing', 'unicode'] + g:boshiamy_plugins

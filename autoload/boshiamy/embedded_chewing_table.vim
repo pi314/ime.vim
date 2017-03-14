@@ -1396,6 +1396,6 @@ let s:table[';zul4'] = ['覅']
 call boshiamy#log('chewing', 'Loading chewing table... Done')
 
 
-function! boshiamy#chewing_table#table ()
+function! boshiamy#embedded_chewing_table#table ()
     return s:table
 endfunction
