@@ -14,7 +14,12 @@ let s:false = exists('v:false') ? v:false : 0
 
 function! boshiamy#log (tag, msg)
     redraw
-    echom substitute('[boshiamy]['. a:tag .'] '. a:msg, '] [', '][', '')
+    if type(a:msg) == type('')
+        let l:log_msg = a:msg
+    else
+        let l:log_msg = string(a:msg)
+    endif
+    echom substitute('[boshiamy]['. a:tag .'] '. l:log_msg, '] [', '][', '')
 endfunction
 
 
