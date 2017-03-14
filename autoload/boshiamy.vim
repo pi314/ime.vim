@@ -169,6 +169,10 @@ endfunction " }}}
 
 
 function! s:ExecutePlugin (line, plugin, trigger) " {{{
+    if index(a:plugin['trigger'], a:trigger) == -1
+        return s:false
+    endif
+
     let l:matchobj = matchlist(a:line, a:plugin['pattern'])
     if len(l:matchobj) == 0
         return s:false
