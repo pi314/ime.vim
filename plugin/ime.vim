@@ -35,6 +35,5 @@ endif
 execute 'inoremap <expr> <CR> pumvisible() ? "<C-Y>" : "' . s:cr_imap_save . '"'
 
 if !exists('g:ime_plugins') || type(g:ime_plugins) != type([])
-    let g:ime_plugins = []
+    let g:ime_plugins = ['builtin-boshiamy', 'builtin-kana', 'builtin-chewing', 'builtin-unicode']
 endif
-let g:ime_plugins = ['builtin-boshiamy', 'builtin-kana', 'builtin-chewing', 'builtin-unicode'] + g:ime_plugins
