@@ -135,15 +135,6 @@ function! s:SelectMode (new_mode) " {{{
 endfunction " }}}
 
 
-function! s:ShowModeMenuComp () " {{{
-    augroup ime
-        autocmd! ime CompleteDone
-        autocmd ime CompleteDone * call s:CompSelectMode()
-    augroup end
-    call complete(col('.'), s:standalone_plugin_list)
-endfunction " }}}
-
-
 function! s:CompSelectMode () " {{{
     augroup ime
         autocmd! ime CompleteDone
@@ -153,24 +144,6 @@ function! s:CompSelectMode () " {{{
             endif
         endfor
     augroup end
-endfunction " }}}
-
-
-function! s:ShowModeMenuInput () " {{{
-    let l:prompt = ['Select input mode:'] + map(copy(s:standalone_plugin_list), '(v:key + 1) ." - ". v:val["menu"]')
-    let l:user_input = inputlist(l:prompt)
-    if l:user_input
-        call s:SelectMode(s:standalone_plugin_list[l:user_input - 1])
-    endif
-endfunction " }}}
-
-
-function! s:ShowModeMenuDialog () " {{{
-    let l:prompt = ['Select input mode:'] + map(copy(s:standalone_plugin_list), '(v:key + 1) ." - ". v:val["menu"]')
-    let l:user_input = str2nr(inputdialog(join(l:prompt, "\n") ."\n> "))
-    if 0 < l:user_input && l:user_input < len(l:prompt)
-        call s:SelectMode(s:standalone_plugin_list[l:user_input - 1])
-    endif
 endfunction " }}}
 
 
@@ -254,30 +227,49 @@ function! ime#toggle () " {{{
 endfunction " }}}
 
 
-function! ime#_show_mode_menu () " {{{
+function! ime#_comp_mode_menu () " {{{
     if s:ime_mode == {}
         call ime#log('core', 'No input mode installed.')
         return ''
     endif
 
-    let l:fallback_style = g:ime_select_mode_style
-
-    if index(['menu', 'input', 'dialog'], l:fallback_style) == -1
-        let l:fallback_style = 'menu'
-    endif
-
-    if l:fallback_style == 'menu' && !exists('##CompleteDone')
-        let l:fallback_style = 'input'
-    endif
-
-    if l:fallback_style == 'menu'
-        call s:ShowModeMenuComp()
-    elseif l:fallback_style == 'input'
-        call s:ShowModeMenuInput()
-    elseif l:fallback_style == 'dialog'
-        call s:ShowModeMenuDialog()
-    endif
+    augroup ime
+        autocmd! ime CompleteDone
+        autocmd ime CompleteDone * call s:CompSelectMode()
+    augroup end
+    call complete(col('.'), s:standalone_plugin_list)
     return ''
+endfunction " }}}
+
+
+function! ime#_fallback_mode_menu () " {{{
+    let l:cursor = index(s:standalone_plugin_list, s:ime_mode)
+    while s:true
+        redraw!
+        echo 'Select input mode: (j/Down/<C-n>) (k/Up/<C-p>) (enter) (c/Esc)'
+        for l:index in range(len(s:standalone_plugin_list))
+            if l:index == l:cursor
+                echo '> '. s:standalone_plugin_list[(l:index)]['menu']
+            else
+                echo '  '. s:standalone_plugin_list[(l:index)]['menu']
+            endif
+        endfor
+
+        let l:key = getchar()
+        if l:key == char2nr('j') || l:key == "\<Down>" || l:key == char2nr("\<C-n>")
+            let l:cursor = (l:cursor + 1) % len(s:standalone_plugin_list)
+        elseif l:key == char2nr('k') || l:key == "\<Up>" || l:key == char2nr("\<C-p>")
+            let l:cursor = (l:cursor + len(s:standalone_plugin_list) - 1) % len(s:standalone_plugin_list)
+        elseif l:key == char2nr("\<CR>")
+            break
+        elseif l:key == char2nr('c')
+            redraw!
+            return
+        endif
+    endwhile
+
+    redraw!
+    call s:SelectMode(s:standalone_plugin_list[(l:cursor)])
 endfunction " }}}
 
 

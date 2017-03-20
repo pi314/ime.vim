@@ -8,18 +8,15 @@ endif
 execute 'inoremap <expr> '. g:ime_toggle_english .' (pumvisible() ? "<C-Y>" : "") . ime#toggle()'
 
 
-if !exists('g:ime_select_mode_style') || index(['menu', 'input', 'dialog'], g:ime_select_mode_style) == -1
-    let g:ime_select_mode_style = 'menu'
-endif
-if g:ime_select_mode_style == 'menu' && !exists('##CompleteDone')
-    let g:ime_select_mode_style = 'input'
-endif
-
-
 if !exists('g:ime_select_mode') || type(g:ime_select_mode) != type('')
     let g:ime_select_mode = ',m'
 endif
-execute 'inoremap <expr> '. g:ime_select_mode .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=ime#_show_mode_menu()<CR>"'
+
+if exists('##CompleteDone')
+    execute 'inoremap <expr> '. g:ime_select_mode .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=ime#_comp_mode_menu()<CR>"'
+else
+    execute 'inoremap '. g:ime_select_mode .' <C-\><C-o>:call ime#_fallback_mode_menu()<CR>'
+endif
 
 
 if !exists('g:ime_cancel_input') || type(g:ime_cancel_input) != type('')
