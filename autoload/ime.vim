@@ -229,7 +229,7 @@ function! s:SendKey (trigger) " {{{
     endfor
 
     let l:result = s:ExecutePlugin(l:line, s:ime_mode, a:trigger)
-    return l:result == s:true ? '' : ' '
+    return l:result == s:true ? '' : a:trigger
 endfunction " }}}
 
 
