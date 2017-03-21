@@ -244,31 +244,37 @@ endfunction " }}}
 
 function! ime#_fallback_mode_menu () " {{{
     let l:cursor = index(s:standalone_plugin_list, s:ime_mode)
-    while s:true
-        redraw!
-        echo 'Select input mode: (j/Down/<C-n>) (k/Up/<C-p>) (enter) (c/Esc)'
-        for l:index in range(len(s:standalone_plugin_list))
-            if l:index == l:cursor
-                echo '> '. s:standalone_plugin_list[(l:index)]['menu']
-            else
-                echo '  '. s:standalone_plugin_list[(l:index)]['menu']
-            endif
-        endfor
-
-        let l:key = getchar()
-        if l:key == char2nr('j') || l:key == "\<Down>" || l:key == char2nr("\<C-n>")
-            let l:cursor = (l:cursor + 1) % len(s:standalone_plugin_list)
-        elseif l:key == char2nr('k') || l:key == "\<Up>" || l:key == char2nr("\<C-p>")
-            let l:cursor = (l:cursor + len(s:standalone_plugin_list) - 1) % len(s:standalone_plugin_list)
-        elseif l:key == char2nr("\<CR>")
-            break
-        elseif l:key == char2nr('c')
+    try
+        let l:more = &more
+        set nomore
+        while s:true
             redraw!
-            return
-        endif
-    endwhile
+            echo 'Select input mode: (j/Down/<C-n>) (k/Up/<C-p>) (enter) (c/Esc)'
+            for l:index in range(len(s:standalone_plugin_list))
+                if l:index == l:cursor
+                    echo '> '. s:standalone_plugin_list[(l:index)]['menu']
+                else
+                    echo '  '. s:standalone_plugin_list[(l:index)]['menu']
+                endif
+            endfor
 
-    redraw!
+            let l:key = getchar()
+            if l:key == char2nr('j') || l:key == "\<Down>" || l:key == char2nr("\<C-n>")
+                let l:cursor = (l:cursor + 1) % len(s:standalone_plugin_list)
+            elseif l:key == char2nr('k') || l:key == "\<Up>" || l:key == char2nr("\<C-p>")
+                let l:cursor = (l:cursor + len(s:standalone_plugin_list) - 1) % len(s:standalone_plugin_list)
+            elseif l:key == char2nr("\<CR>")
+                break
+            elseif l:key == char2nr('c')
+                redraw!
+                return
+            endif
+        endwhile
+    finally
+        let &more = l:more
+        redraw!
+    endtry
+
     call s:SelectMode(s:standalone_plugin_list[(l:cursor)])
 endfunction " }}}
 
