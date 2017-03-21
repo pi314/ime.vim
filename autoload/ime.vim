@@ -46,7 +46,8 @@ function! s:LoadPlugins () " {{{
             try
                 let l:plugin_info = function('ime#'. l:plugin .'#info')()
             catch
-                call ime#log('core', v:exception)
+                call ime#log('core', '// '. v:throwpoint)
+                call ime#log('core', '\\ '. v:exception)
                 continue
             endtry
         endtry
@@ -177,7 +178,8 @@ function! s:ExecutePlugin (line, plugin, trigger) " {{{
         call complete(col('.') - l:len, l:options)
         return s:true
     catch
-        call ime#log(a:plugin['name'], v:exception)
+        call ime#log(a:plugin['name'], '// '. v:throwpoint)
+        call ime#log(a:plugin['name'], '\\ '. v:exception)
     endtry
     return s:false
 endfunction " }}}
