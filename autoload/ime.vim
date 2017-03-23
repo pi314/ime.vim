@@ -41,10 +41,10 @@ function! s:LoadPlugins () " {{{
     for l:plugin in g:ime_plugins
         let l:plugin = substitute(l:plugin, '-', '_', 'g')
         try
-            let l:plugin_info = function('ime_'. l:plugin .'#info')()
+            let l:plugin_info = function('ime#'. l:plugin .'#info')()
         catch
             try
-                let l:plugin_info = function('ime#'. l:plugin .'#info')()
+                let l:plugin_info = function('ime_'. l:plugin .'#info')()
             catch
                 call ime#log('core', '// '. v:throwpoint)
                 call ime#log('core', '\\ '. v:exception)
