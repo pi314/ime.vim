@@ -89,13 +89,14 @@ The built-in Boshiamy and kana mode are triggered by <space>.
 ==============================================================================
 2.  Settings                                                 *ime-settings.en*
 
-ime.vim 的目標之一是安裝以後不用設定即可使用，
-所以使用者會接觸到的大部份設定都以變數而不是函式的方式提供。
+One of the goals of ime.vim is plug-and-play,
+so most settings is provided in variable form instead of functions.
 
 ------------------------------------------------------------------------------
 2.1 Show input mode in 'statusline'                            *ime#mode().en*
 
-|ime#mode()| 回傳輸入法目前的狀態，你可以在 'statusline' 顯示這個資訊：
+|ime#mode()| returns the current status,
+you can show this information in 'statusline':
 >
     set statusline=%<%{ime#mode()}%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 <
