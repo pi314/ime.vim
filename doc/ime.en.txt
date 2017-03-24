@@ -1,0 +1,249 @@
+*ime.en.txt* *ime.vim.en*
+                                                           一個 vim 輸入法引擎
+
+==============================================================================
+Index
+
+1.  Introduction............................|ime-introduction.en|
+    1.2 Input modes.........................|ime-modes.en|
+2.  Settings................................|ime-settings.en|
+    2.1 Show input mode in 'statusline'.....|ime#mode().en|
+    2.2 Toggle English......................|g:ime_toggle_english.en|
+    2.3 Select input mode...................|g:ime_select_mode.en|
+    2.4 Cancel input text...................|g:ime_cancel_input.en|
+    2.5 Load plugins........................|g:ime_plugins.en|
+3.  Built-in plugins........................|ime-built-in-plugins.en|
+    3.1 Boshiamy mode.......................|ime-built-in-plugin-ime.en|
+    3.2 Kana mode...........................|ime-built-in-plugin-kana.en|
+    3.3 Phonetic mode.......................|ime-built-in-plugin-chewing.en|
+    3.4 Unicode mode........................|ime-built-in-plugin-unicode.en|
+4.  Tips that can be used with Vim..........|ime-tips.en|
+5.  Implementation details..................|ime-implementation-details.en|
+
+==============================================================================
+1.  Introduction                                         *ime-introduction.en*
+
+It's always a trouble to input Chinese characters in Vim.
+
+Everyone who uses Chinese Input Method knows that they have two states:
+
+- English
+- Chinese
+
+Vim has two states, too:
+
+- Insert mode (and similar modes)
+- Non-insert mode (like normal mode or command mode)
+
+So we have four combinations:
+>
+    +--------------------+---------+---------+
+    | Vim \ Input method | English | Chinese |
+    +--------------------+---------+---------+
+    | Insert mode        | :)      | :)      |
+    +--------------------+---------+---------+
+    | Non-insert mode    | :)      | :(      |
+    +--------------------+---------+---------+
+<
+The "Chinese / Non-insert mode" is very troublesome,
+your keyboard input will be intercepted
+by the input method and will not go into Vim.
+
+If we can get rid of this situation, we can avoid keep hitting
+"shift" or "control + space" to close input method.
+And the best way to do this is to embedded an input method in Vim.
+
+------------------------------------------------------------------------------
+1.2 Input modes                                                 *ime-modes.en*
+
+ime.vim 內建支援嘸蝦米輸入法、假名輸入以及注音輸入，
+還可以載入第三方套件。
+若有需要，內建的輸入法可以全部關閉。
+
+在這些模式之間切換時，ime.vim 會同時維護兩個狀態：
+>
+    是否在英文模式 ---.------.          選擇的輸入模式
+                      |      |              |
+                      v      v              |
+                    .----.--------.         |
+                    |    | 嘸蝦米 | <-------|
+                    |    |--------|         |
+                    | 英 | 日文   | <-------|
+                    | 文 |--------|         |
+                    |    | 套件 1 | <-------|
+                    |    |--------|         |
+                    |    | 套件 2 | <-------'
+                    '----'--------'
+<
+若 ime.vim 處於英文模式，則輸入的字串會直接進入編輯區不做處理；
+否則 ime.vim 會根據選擇的輸入模式將字串交給不同的引擎處理。
+
+|g:ime_toggle_english| 能夠將英文模式開啟/關閉；
+|g:ime_select_mode| 能夠選擇不同的輸入模式。
+
+每個輸入模式可以自訂各自的送字按鍵，請參考它們的文件。
+內建的嘸蝦米輸入模式以空白鍵送字。
+
+==============================================================================
+2.  Settings                                                 *ime-settings.en*
+
+ime.vim 的目標之一是安裝以後不用設定即可使用，
+所以使用者會接觸到的大部份設定都以變數而不是函式的方式提供。
+
+------------------------------------------------------------------------------
+2.1 Show input mode in 'statusline'                            *ime#mode().en*
+
+|ime#mode()| 回傳輸入法目前的狀態，你可以在 'statusline' 顯示這個資訊：
+>
+    set statusline=%<%{ime#mode()}%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+<
+這行 'statusline' 看起來會像
+>
+    [嘸]README.rst [+]     75,67-59 53%
+<
+Note: 這個功能在 Vim 7.3 可能使 'statusline' 被設為空字串。
+      目前不確定是 ime.vim 或是 Vim 7.3 導致的，
+      重新設定 'statusline' 以後就不會再被重設，
+      你可以用 |autocmd| 達成（例如 |VimResized|）。
+
+------------------------------------------------------------------------------
+2.2 Toggle English                                   *g:ime_toggle_english.en*
+>
+    let g:ime_toggle_english = ',,'
+<
+這個設定會被 |inoremap| 使用，請注意別設成自己常用的按鍵串或是輸入法的字根。
+
+在切換成英文模式時，先前選擇的模式會被保留。
+
+------------------------------------------------------------------------------
+2.3 Select input mode                                   *g:ime_select_mode.en*
+>
+    let g:ime_select_mode = ',m'
+<
+這個設定會被 |inoremap| 使用，請注意別設成自己常用的按鍵串或是輸入法的字根。
+
+------------------------------------------------------------------------------
+2.4 Cancel input text                                  *g:ime_cancel_input.en*
+>
+    let g:ime_cancel_input = '<C-h>'
+<
+在開啟嘸蝦米模式時，若輸入不正確的字根，ime.vim 會直接輸出一個空白字元，
+這是為了讓使用者方便在輸入中文時嵌入英文單字，而不用來回切換模式。
+
+但有些常用的英文單字如 "id"、"user"、"are" 等等，剛好對應到嘸蝦米的字根，
+使得這些單字變成中文。事實上，所有長度為二的英文單字都已被嘸蝦米使用。
+
+若使用者輸入了這樣的字根，可以在選單尚未消失時使用取消輸入功能，
+讓中文字變回字根。
+
+其他輸入模式亦同。
+
+------------------------------------------------------------------------------
+2.5 Load plugins                                            *g:ime_plugins.en*
+
+ime.vim 能夠載入符合格式的第三方套件，若你有安裝套件，
+請在你的 |vimrc| 裡將它們列出。例如：
+>
+    let g:ime_plugins = ['wide', 'runes', 'braille', 'emoji']
+<
+有一點需要注意，如果你設定了這個值，內建的套件將會全部被關閉。
+如果你希望內建的套件也開啟，請手動將它們列出：
+>
+    let g:ime_plugins = [
+        \ 'builtin-boshiamy',
+        \ 'builtin-kana',
+        \ 'builtin-chewing',
+        \ 'builtin-unicode',
+        \ 'wide', 'runes', 'braille', 'emoji']
+<
+你可以依照喜好決定套件的順序。
+
+==============================================================================
+3.  Built-in plugins                                 *ime-built-in-plugins.en*
+
+ime.vim 的套件分成兩種
+
+1)  Standalone 套件自成一個輸入模式，在選擇模式時會顯示在選單中，
+    有自己的圖示和說明。
+
+2)  Embedded 套件內嵌在各個輸入法中，優先於輸入法本身，
+    相當於對輸入法字根表的擴充。
+
+以下介紹已經內建在 ime.vim 之中的套件。
+
+------------------------------------------------------------------------------
+3.1 Boshiamy mode                            *ime-built-in-plugin-boshiamy.en*
+
+嘸蝦米模式為 standalone 套件，是 ime.vim 的開發動機。
+圖示為 [嘸]，套件名稱為 "builtin-boshiamy"。
+
+和大部份的系統輸入法不同，嘸蝦米模式會先取整段字串嘗試送字，
+若沒有結果，最開頭的一部份字串會被放棄，然後再次嘗試，
+直到所有字元都被放棄，或是有結果產生為止。
+
+範例：
+
+- 「wmbr」會輸出「測」
+
+- 「wmbr,id」會輸出「wmbr,誤」
+    1.  比對「wmbr,id」，無法輸出字根，於是「wmbr」被放棄
+    2.  比對「,id」，無法輸出字根，於是「,」被放棄
+    3.  比對「id」，得到「誤」
+
+------------------------------------------------------------------------------
+3.2 Kana mode                                    *ime-built-in-plugin-kana.en*
+
+日文模式為 standalone 套件，能夠輸入日文平假名及片假名，但無法輸入漢字。
+圖示為 [あ]，套件名稱為 "builtin-kana"。
+
+- 平假名可以直接用羅馬拼音輸入
+- 片假名需在字根後加上一個 "."
+- 下標字需在字根後加上一個 "v"
+- 範例：
+
+  - "a" --------------> "あ"
+  - "a." -------------> "ア"
+  - "a.v" ------------> "ァ"
+  - "av." ------------> "ァ"
+  - "buiaiemu" -------> "ぶいあいえむ"
+  - "bu.i.a.i.e.mu." -> "ブイアイエム"
+
+------------------------------------------------------------------------------
+3.3 Phonetic mode                            *ime-built-in-plugin-chewing.en*
+
+注音模式為 embedded 套件，能夠以注音輸入中文字，
+套件名稱為 "builtin-chewing"。
+
+注音的字根開頭一律為 ";"，並接上注音字根；
+輸入 ";hk4" 以後可以產生 "測" 的同音字選單。
+
+所有的注音符號都在選單的第一位；";;" 會優先補完 "ㄤ"。
+
+------------------------------------------------------------------------------
+3.4 Unicode mode                              *ime-built-in-plugin-unicode.en*
+
+Unicode 模式為 embedded 套件，能夠以 unicode 碼位（code point）輸入字元，
+也能查詢字元的碼位。
+套件名稱為 "builtin-unicode"。
+
+輸入 "\u" 後繼續輸入碼位，即可輸出對應的字元，例如 "\u5B57" -> "字"。
+輸入 "\u[字]" 可查詢 "字" 的碼位，例如 "\u[字]" -> "\u5b57"。
+
+==============================================================================
+4.  Tips that can be used with Vim                               *ime-tips.en*
+
+在取代模式中，一個字元只會覆蓋一個字元，無論寬度。
+
+在繪製 ASCII 圖片時，如果用中文字去覆蓋空白字元，會讓那行變得越來越長，
+因為一個兩格寬的中文字卻只覆蓋了一個空白字元。
+
+此時 vim 內建的 |gR| 變得很有用，它可以根據字元的寬度覆蓋字元。
+
+==============================================================================
+5.  Implementation details                     *ime-implementation-details.en*
+
+ime.vim 透過 |inoremap| 觸發送字，
+但切換到英文模式時這些 |inoremap| 會被 |iunmap|，
+所以在英文模式下連續輸入按鍵的效率會比較高。
+
+ime.vim 第三方套件的開發請參考 |ime-plugins|
