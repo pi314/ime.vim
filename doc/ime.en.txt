@@ -1,5 +1,5 @@
 *ime.en.txt* *ime.vim.en*
-                                                           一個 vim 輸入法引擎
+                                                    An Vim input method engine
 
 ==============================================================================
 Index
@@ -56,33 +56,35 @@ And the best way to do this is to embedded an input method in Vim.
 ------------------------------------------------------------------------------
 1.2 Input modes                                                 *ime-modes.en*
 
-ime.vim 內建支援嘸蝦米輸入法、假名輸入以及注音輸入，
-還可以載入第三方套件。
-若有需要，內建的輸入法可以全部關閉。
+ime.vim has built-in boshiamy, kana, and chewing (phonetic) input methods,
+it can even load third-party plugins.
+All built-in input methods can be disabled when necessary.
 
-在這些模式之間切換時，ime.vim 會同時維護兩個狀態：
+When the user switch between these modes, ime.vim maintains two states:
 >
-    是否在英文模式 ---.------.          選擇的輸入模式
-                      |      |              |
-                      v      v              |
-                    .----.--------.         |
-                    |    | 嘸蝦米 | <-------|
-                    |    |--------|         |
-                    | 英 | 日文   | <-------|
-                    | 文 |--------|         |
-                    |    | 套件 1 | <-------|
-                    |    |--------|         |
-                    |    | 套件 2 | <-------'
-                    '----'--------'
+    English enabled --.-----------.            User selected input mode
+                      |           |                |
+                      v           v                |
+                    .---------.----------.         |
+                    |         | Boshiamy | <-------|
+                    |         |----------|         |
+                    | English | Kana     | <-------|
+                    |         |----------|         |
+                    |         | Plugin 1 | <-------|
+                    |         |----------|         |
+                    |         | Plugin 2 | <-------'
+                    '---------'----------'
 <
-若 ime.vim 處於英文模式，則輸入的字串會直接進入編輯區不做處理；
-否則 ime.vim 會根據選擇的輸入模式將字串交給不同的引擎處理。
+If ime.vim is in English mode,
+the user's input will directly goes into buffer without being processed.
+Otherwise, ime.vim invokes different correcponding mode to process the string.
 
-|g:ime_toggle_english| 能夠將英文模式開啟/關閉；
-|g:ime_select_mode| 能夠選擇不同的輸入模式。
+|g:ime_toggle_english| enables/disables English mode;
+|g:ime_select_mode| selectes input mode.
 
-每個輸入模式可以自訂各自的送字按鍵，請參考它們的文件。
-內建的嘸蝦米輸入模式以空白鍵送字。
+Every input method has their own key-sending settings,
+please refer to their documents.
+The built-in Boshiamy and kana mode are triggered by <space>.
 
 ==============================================================================
 2.  Settings                                                 *ime-settings.en*
