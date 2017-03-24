@@ -10,7 +10,7 @@
     2.1 需要載入龐大資料的套件..............|ime-plugin-with-huge-data|
 3.  套件核心 - handler......................|ime-plugin-handler|
     3.1 Handler - 複雜的判斷................|ime-plugin-complex-handler|
-4.  Vim 7.3 的問題..........................|ime-plugin-for-vim-7.3|
+4.  Vim 7.3 的 script-local function 問題...|ime-plugin-for-vim-7.3-funcref|
 
 ==============================================================================
 1.  介紹                                             *ime-plugin-introduction*
@@ -41,9 +41,9 @@ Standalone 套件需要額外提供兩項資訊：
 除此之外，套件需要訂定一個名稱： plugin-name
 讓使用者加在 |g:ime_plugins| 之中。
 
-這些資訊需要包裝成一個物件並透過 *ime#{plugin-name}#info()* 回傳：
+這些資訊需要包裝成一個物件並透過 *ime_{plugin-name}#info()* 回傳：
 >
-    function ime#{plugin-name}#info()
+    function ime_{plugin-name}#info()
         return {
             \ 'type': 'standalone' / 'embedded',
             \ 'pattern': {regex},
@@ -66,7 +66,7 @@ ime.vim 的套件建議依照以下的目錄結構放置檔案：
 <
 *ime_{plugin-name}.vim* 為套件的主要檔案，建議的內容為：
 >
-    function! s:Handler (matchobj)
+    function! ime_{plugin-name}#handler (matchobj, trigger)
         " plugin logic here
     endfunction
 
@@ -76,7 +76,7 @@ ime.vim 的套件建議依照以下的目錄結構放置檔案：
             \ 'icon': '[eg]',
             \ 'description': 'An example',
             \ 'pattern': '.*$',
-            \ 'handler': function("s:Handler"),
+            \ 'handler': function('ime_{plugin-name}#handler'),
             \ 'trigger': ['<space>', '3', '4', '6', ...],
             \ }
     endfunction
@@ -106,7 +106,7 @@ ime.vim 的套件建議依照以下的目錄結構放置檔案：
 >
     let s:table = {}
 
-    function! s:Handler (matchobj)
+    function! ime_{plugin-name}#handler (matchobj)
         if s:table == {}
             let s:table = ime_{plugin-name}_table#table()
         endif
@@ -120,7 +120,7 @@ ime.vim 的套件建議依照以下的目錄結構放置檔案：
             \ 'icon': '[eg]',
             \ 'description': 'An example',
             \ 'pattern': '.*$',
-            \ 'handler': function("s:Handler"),
+            \ 'handler': function('ime_{plugin-name}#handler'),
             \ 'trigger': ['<space>', '3', '4', '6', ...],
             \ }
     endfunction
@@ -130,10 +130,13 @@ ime.vim 的套件建議依照以下的目錄結構放置檔案：
 
 套件的核心功能由 handler 提供。
 
-ime.vim 會將套件提供的 pattern 傳入 |matchlist()| 進行比對。
-若比對成功，該結果（一個 |List|）會被傳入套件提供的 handler。
+在切換到輸入法的時候，ime.vim 會根據套件提供的 trigger 資訊執行 |inoremap|。
+使用者若按下了其中一個 trigger 按鍵，
+ime.vim 會將編輯區該行的文字與套件提供的 pattern 傳入 |matchlist()| 進行比對。
+若比對成功，該結果（一個 |List|）和 trigger 按鍵會一起被傳入 handler。
 
-handler 需要對比對結果進行處理及判斷，並回傳一個 |List|，包含可用的選項。
+handler 需要針對 matchobj 以及 trigger 進行處理及判斷，
+並回傳一個 |List|，包含可用的選項。
 回傳選項的順序可以由套件自行決定。
 
 輸入時產生的選單透過 |complete()| 產生，每個選項可以帶有說明文字，
@@ -167,12 +170,20 @@ handler 需要對比對結果進行處理及判斷，並回傳一個 |List|，�
 若直接回傳 ['ಠ_ಠ']，ime.vim 會把 ".[,stare" 取代為 "ಠ_ಠ"。
 
 ==============================================================================
-4.  Vim 7.3 的問題                                    *ime-plugin-for-vim-7.3*
+4.  Vim 7.3 的 script-local function 問題     *ime-plugin-for-vim-7.3-funcref*
 
-根據測試，在 Vim 7.3 使用
+根據這個討論串：
+
+http://vim.1045645.n5.nabble.com/Funcref-and-script-local-functions-td1151686.html
+
+Script-local 的函式（s: 開頭的函式）是沒辦法正常在外部使用的。
+也就是說套件的 handler 不應該宣告為這樣的形式。
+
+但根據測試，在 Vim 7.4 以上，
 >
     function("s:Handler")
 <
-會在執行時找不到該函式，產生 |E117| 例外。
+可以成功的拿來宣告為套件的 handler。
 
-解決的方式是把該函式改為全域宣告，建議使用 ime_{plugin-name}#handler()
+如果你想要把 handler 用這個方式隱藏起來，
+請記得在文件中註明它和 Vim 7.3 不相容。
