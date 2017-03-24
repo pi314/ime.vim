@@ -194,10 +194,10 @@ ime.vim 能夠載入第三方套件，以擴充自己的輸入能力。
 
 目前已經有的套件有：
 
-* `ime-emoji <https://github.com/pi314/ime-emoji>`_ - 輸入 emoji 符號
-* `ime-runes <https://github.com/pi314/ime-runes>`_ - 輸入盧恩字母
-* `ime-wide <https://github.com/pi314/ime-wide>`_ - 輸入全型字
-* `ime-braille <https://github.com/pi314/ime-braille>`_ - 輸入點字
+* `ime-emoji.vim <https://github.com/pi314/ime-emoji.vim>`_ - 輸入 emoji 符號
+* `ime-runes.vim <https://github.com/pi314/ime-runes.vim>`_ - 輸入盧恩字母
+* `ime-wide.vim <https://github.com/pi314/ime-wide.vim>`_ - 輸入全型字
+* `ime-braille.vim <https://github.com/pi314/ime-braille.vim>`_ - 輸入點字
 
 這些套件原本都是 ime.vim 的一部份，現在拔出核心，更加彈性。
 
