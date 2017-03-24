@@ -267,7 +267,7 @@ function! ime#_fallback_mode_menu () " {{{
                 let l:cursor = (l:cursor + len(s:standalone_plugin_list) - 1) % len(s:standalone_plugin_list)
             elseif l:key == char2nr("\<CR>")
                 break
-            elseif l:key == char2nr('c')
+            elseif l:key == char2nr('c') || l:key == char2nr("\<Esc>")
                 redraw!
                 return
             endif
