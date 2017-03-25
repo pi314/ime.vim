@@ -244,4 +244,4 @@ ime.vim 透過 |inoremap| 觸發送字，
 但切換到英文模式時這些 |inoremap| 會被 |iunmap|，
 所以在英文模式下連續輸入按鍵的效率會比較高。
 
-ime.vim 第三方套件的開發請參考 |ime-plugins|
+ime.vim 第三方套件的開發請參考 |ime-plugin|
