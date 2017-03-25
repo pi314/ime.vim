@@ -200,7 +200,6 @@ function! s:ExecutePlugin (line, plugin, trigger) " {{{
             return s:false
         endif
 
-        call ime#log('core', (col('.') - l:len) .' '. string(l:options))
         call complete(col('.') - l:len, l:options)
         return s:true
     catch
