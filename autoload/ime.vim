@@ -107,6 +107,24 @@ else
 endif
 
 
+function! s:EscapeTriggerKey (key) " {{{
+    if a:key == '|'
+        return '<bar>'
+    endif
+    return a:key
+endfunction " }}}
+
+
+function! s:TriggerKeyRepr (key) " {{{
+    if a:key == '"'
+        return '\"'
+    elseif a:key == '\'
+        return '\\'
+    endif
+    return substitute(a:key, '<', '<lt>', 'g')
+endfunction " }}}
+
+
 function! s:SelectMode (new_mode) " {{{
     for l:trigger in s:ime_mode['trigger']
         try
@@ -125,9 +143,16 @@ function! s:SelectMode (new_mode) " {{{
     endif
 
     if s:ime_english_enable == s:false
-        for l:trigger in s:ime_mode['trigger']
-            execute 'inoremap '. l:trigger .' <C-R>=<SID>SendKey("'.
-                        \ substitute(l:trigger, '<', '<lt>', 'g') .'")<CR>'
+        for l:key in s:ime_mode['trigger']
+            try
+                execute 'inoremap '.
+                    \ s:EscapeTriggerKey(l:key) .
+                    \ ' <C-R>=<SID>SendKey("' .
+                        \ s:TriggerKeyRepr(l:key) .
+                        \ '")<CR>'
+            catch
+                call ime#log('core', '>> '. v:exception)
+            endtry
         endfor
     endif
 
