@@ -175,6 +175,7 @@ function! s:ExecutePlugin (line, plugin, trigger) " {{{
             return s:false
         endif
 
+        call ime#log('core', (col('.') - l:len) .' '. string(l:options))
         call complete(col('.') - l:len, l:options)
         return s:true
     catch
@@ -190,7 +191,7 @@ function! s:SendKey (trigger) " {{{
         if !empty(maparg(a:trigger, 'i'))
             execute "iunmap ". a:trigger
         endif
-        return ' '
+        return a:trigger == '<space>' ? ' ' : a:trigger
     endif
 
     let l:line = strpart(getline('.'), 0, (col('.') - 1))
