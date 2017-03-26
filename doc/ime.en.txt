@@ -269,4 +269,4 @@ and |iunmap| them after switching to English mode.
 So type in English mode is more effective.
 
 Further information about developing third party plugins for ime.vim:
-|ime-plugin|
+|ime-plugin.en|

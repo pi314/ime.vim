@@ -105,36 +105,38 @@ Usage
 
     let g:ime_toggle_english = ',,'
 
-  - 在英文與目前選定的輸入模式之間切換
-  - 如果目前的模式是日文，用 ``,,`` 切換回英文再切換回來仍會是日文
+  - The previous mode will be kept after switch to English mode.
 
-* 在不同輸入模式之間切換： ::
+* Switch between input modes ::
 
     let g:ime_select_mode = ',m'
 
-* 取消輸入，回復為輸入前的字串： ::
+* Cancel input text ::
 
     let g:ime_cancel_input = '<C-h>'
 
-  - 有些英文單字如 ``are`` 是某些字的字根，如果開著中文模式輸入英文，會讓這些英文單字變成中文，此時按下 ``<C-h>`` 就可以把字打回英文，並在後方加上一個空白字元
+  - Some English words (such as ``are``) are the roots of some Chinese characters.
+    If you type English in Chinese mode, these words become Chinese characters.
+    You can press ``<C-h>`` to turn them back to English.
 
-* 按下空白鍵送字
-* 內建輸入模式
+* Built-in input modes
 
-  - 中文 ``[嘸]``
+  - Built-in input modes are triggered with ``<space>``
+  - 嘸蝦米 input mode ``[嘸]``
 
-    + 可直接輸入嘸蝦米
-    + 輸入 ``;`` 後可直接以注音輸入（有些字真的臨時忘了怎麼寫）
+    + Type ``;`` and preceeding with phonetic roots
+      (in case you forgot how to write a Chinese character)
 
-      * 輸入 ``;hk4`` ，按下空白鍵送字以後會跳出 ``測`` 的同音字選單
+      * Type ``;hk4``, press ``<space>``,
+        all characters with same sound with ``測`` will pop up
 
-    + 輸入 ``\u`` 後可使用 Unicode Code Point 輸入 Unicode 字元
-    + ``\u[字]`` 可把 ``字`` 解碼為 ``\u5b57`` 或是 ``&#23383;``
+    + Type ``\u`` and proceeding with unicode code point
+    + ``\u[字]`` decodes ``字`` to ``\u5b57``
 
-  - 日文假名 ``[あ]``
+  - Kana mode ``[あ]``
 
-    + 平假名、片假名、促音（加上一個 ``v`` ）
-    + 範例
+    + Japanese Hiragana and Katakana
+    + Examples:
 
       * ``a`` -> ``あ``
       * ``a.`` -> ``ア``
@@ -143,16 +145,17 @@ Usage
       * ``buiaiemu`` -> ``ぶいあいえむ``
       * ``bu.i.a.i.e.mu.`` -> ``ブイアイエム``
 
-* 自訂字根表
+* Custom table
 
-  - 使用者可以自訂字根表，這個字根表的優先度比內建的表格高，使用者可以用來新增甚至修改組字規則
-  - 自訂字根表的檔名： ::
+  - You can customize your input table.
+    This table's priority is higher than the built-in one.
+  - Custom table filename ::
 
       let g:boshiamy_custom_table = '~/.boshiamy.table'
 
-    + 此全城變數 *沒有* 預設值，請在需要使用時再設定
+    + This global variable has *no* default value
 
-  - 自訂字根表格式為 ``字串 字根 字根 ...`` ，中間以空白字元分隔： ::
+  - The format of custom table is ``string root root ...``, separate with a space ::
 
       (((°Д°;))  ,face
       (ಥ_ಥ)      ,face
@@ -164,72 +167,72 @@ Usage
       (눈‸눈)    ,face
       ㅍ_ㅍ      ,face
 
-    + 先後順序和選字選單的順序相同
+    + The ordering in this table will be kept
 
-* 載入第三方套件（後述）::
+* Load third party plugins ::
 
     let g:ime_plugins = ['emoji', 'runes']
 
-詳細的文件請參考 ``:help ime.vim`` ，或是 ``doc/ime.txt``
+For further information please refer to ``:help ime.vim.en``
 
 
-對嘸蝦米字表的改動
+Changes to 嘸蝦米 table
 -------------------------------------------------------------------------------
-為了方便，我自己更改了嘸蝦米的字表，新增/刪除了一些項目，此處不細述，只大概列出一些比較重要的改動。
+* Box-drawing characters start with ``,g``, and proceed with their shape: ``t`` / ``l`` / ``i`` / ``c``
 
-* 全型格線的輸入都使用 ``,g`` 開頭，接上形狀： ``t`` / ``l`` / ``i`` / ``c``
-
-  - ``,gt`` -> ``┬`` （其他方向的符號在選單中會列出）
+  - ``,gt`` -> ``┬``
   - ``,gl`` -> ``┌``
   - ``,gi`` -> ``─``
   - ``,gc`` -> ``╭``
-  - 重覆形狀可以輸入雙線的格線符號，最多三次
+  - Repeat the shape to generate double-lined symbol, up to three times:
 
     + ``,gttt`` -> ``╦``
 
-* 嘸蝦米模式中的日文片假名、平假名被我刪除，否則 ``u，`` 會無法正常輸入
-* 新增 Mac OS X 相關的特殊符號
+* Katakana and Hiragana are removed in 嘸蝦米 table in order to allow ``u，`` to be typed
+* macOS related symbols are added:
 
   - ``,cmd`` / ``,command`` -> ``⌘``
   - ``,shift`` -> ``⇧``
   - ``,option`` / ``,alt`` -> ``⌥``
 
 
-第三方套件
+Third party plugins
 -------------------------------------------------------------------------------
-ime.vim 能夠載入第三方套件，以擴充自己的輸入能力。
+ime.vim is able to load third parth plugins.
 
-目前已經有的套件有：
+Currently these plugins are available:
 
-* `ime-emoji.vim <https://github.com/pi314/ime-emoji.vim>`_ - 輸入 emoji 符號
-* `ime-runes.vim <https://github.com/pi314/ime-runes.vim>`_ - 輸入盧恩字母
-* `ime-wide.vim <https://github.com/pi314/ime-wide.vim>`_ - 輸入全型字
-* `ime-braille.vim <https://github.com/pi314/ime-braille.vim>`_ - 輸入點字
+* `ime-emoji.vim <https://github.com/pi314/ime-emoji.vim>`_ - Emoji
+* `ime-runes.vim <https://github.com/pi314/ime-runes.vim>`_ - Runes
+* `ime-wide.vim <https://github.com/pi314/ime-wide.vim>`_ - Wide characters
+* `ime-braille.vim <https://github.com/pi314/ime-braille.vim>`_ - Braille
 
-這些套件原本都是 ime.vim 的一部份，現在拔出核心，更加彈性。
+All these plugins are part of ime.vim, now they are pluggable.
 
-要注意 ime.vim 本身並不管理套件，請手動安裝，或是透過
-`Vundle <https://github.com/gmarik/Vundle.vim>`_ 、
-`vim-plug <https://github.com/junegunn/vim-plug>`_ 等套件管理系統安裝。
+Note that ime.vim doesn't manage these plugins.
+Please install them manually or through `Vundle <https://github.com/gmarik/Vundle.vim>`_ or
+`vim-plug <https://github.com/junegunn/vim-plug>`_.
 
-第三方套件的開發請參考 ``:help ime-plugins``
-或是 ``doc/ime-plugins.txt``
+Further information about developing third party plugins for ime.vim:
+``:help ime-plugins.en``
 
 
 可以配合 vim 使用的技巧
 -------------------------------------------------------------------------------
-在取代模式中，一個字元只會覆蓋一個字元，無論寬度。
+In replace mode, one character override one character,
+no matter the width.
 
-在繪製 ASCII 圖片時，如果用中文字去覆蓋空白字元，會讓那行變得越來越長，
-因為一個兩格寬的中文字卻只覆蓋了一個空白字元。
+When drawing ASCII graphs, if you use Chinese characters to replace
+space characters, the line under cursor will be longer and longer,
+because a two-width Chinese character only replaces one space character.
 
-此時 vim 內建的 ``gR`` 變得很有用，它可以根據字元的寬度覆蓋字元。
+The vim built-in ``gR`` is very useful in this case.
 
 
-授權
+License
 -------------------------------------------------------------------------------
-本軟體使用 WTFPL version 2 發佈，請參考 LICENSE.txt
+This software is released under 2-clause BSD license, please refer to LICENSE.txt.
 
 --------
 
-2017/03/22 pi314 @ HsinChu
+2017/03/27 pi314 @ HsinChu
