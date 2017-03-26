@@ -15,6 +15,6 @@ function! ime#builtin_chewing#info ()
     \ 'type': 'embedded',
     \ 'pattern': '\v(;[^;]+|;[^;]*;[346]?)$',
     \ 'handler': function('ime#builtin_chewing#handler'),
-    \ 'trigger': ['<space>'],
+    \ 'trigger': [' '],
     \ }
 endfunction

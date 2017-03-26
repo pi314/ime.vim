@@ -44,7 +44,7 @@ function! ime#builtin_boshiamy#info ()
     \ 'description': 'Boshiamy input mode',
     \ 'pattern': '\v%(\w|[,.''\[\]])+$',
     \ 'handler': function('ime#builtin_boshiamy#handler'),
-    \ 'trigger': ['<space>'],
+    \ 'trigger': [' '],
     \ }
 
     " Note: This plugin use ``\w`` in regex.

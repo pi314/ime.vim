@@ -107,28 +107,24 @@ else
 endif
 
 
-function! s:EscapeTriggerKey (key) " {{{
+function s:EscapeKey (key) " {{{
     if a:key == '|'
         return '<bar>'
+    elseif a:key == ' '
+        return '<space>'
+    elseif a:key == '\'
+        return '<bslash>'
+    elseif a:key == '<'
+        return '<lt>'
     endif
     return a:key
 endfunction " }}}
 
 
-function! s:TriggerKeyRepr (key) " {{{
-    if a:key == '"'
-        return '\"'
-    elseif a:key == '\'
-        return '\\'
-    endif
-    return substitute(a:key, '<', '<lt>', 'g')
-endfunction " }}}
-
-
 function! s:SelectMode (new_mode) " {{{
-    for l:trigger in s:ime_mode['trigger']
+    for l:key in s:ime_mode['trigger']
         try
-            execute 'iunmap '. l:trigger
+            execute 'iunmap '. s:EscapeKey(l:key)
         catch
         endtry
     endfor
@@ -145,11 +141,9 @@ function! s:SelectMode (new_mode) " {{{
     if s:ime_english_enable == s:false
         for l:key in s:ime_mode['trigger']
             try
-                execute 'inoremap '.
-                    \ s:EscapeTriggerKey(l:key) .
-                    \ ' <C-R>=<SID>SendKey("' .
-                        \ s:TriggerKeyRepr(l:key) .
-                        \ '")<CR>'
+                let l:escaped_key = s:EscapeKey(l:key)
+                execute 'inoremap '. l:escaped_key . ' <C-R>=<SID>SendKey('''.
+                            \ (l:escaped_key == "'" ? "''" : l:escaped_key) .''')<CR>'
             catch
                 call ime#log('core', '>> '. v:exception)
             endtry
@@ -212,10 +206,10 @@ endfunction " }}}
 
 function! s:SendKey (trigger) " {{{
     if s:ime_english_enable
-        if !empty(maparg(a:trigger, 'i'))
-            execute "iunmap ". a:trigger
+        if !empty(maparg(s:EscapeKey(a:trigger), 'i'))
+            execute "iunmap ". s:EscapeKey(a:trigger)
         endif
-        return a:trigger == '<space>' ? ' ' : a:trigger
+        return a:trigger
     endif
 
     let l:line = strpart(getline('.'), 0, (col('.') - 1))

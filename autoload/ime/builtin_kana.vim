@@ -51,6 +51,6 @@ function! ime#builtin_kana#info ()
     \ 'description': 'Kana input mode',
     \ 'pattern': '\v[.a-z]+$',
     \ 'handler': function('ime#builtin_kana#handler'),
-    \ 'trigger': ['<space>'],
+    \ 'trigger': [' '],
     \ }
 endfunction
