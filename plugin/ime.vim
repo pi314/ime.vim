@@ -38,7 +38,7 @@ let s:cr_imap_save = maparg("<CR>", "i")
 if empty(s:cr_imap_save)
     let s:cr_imap_save = "<CR>"
 endif
-execute 'inoremap <expr> <CR> pumvisible() ? "<C-Y>" : "' . s:cr_imap_save . '"'
+execute 'inoremap <expr> <CR> (pumvisible() ? "<C-Y>" : "") . "' . s:cr_imap_save . '"'
 
 if !exists('g:ime_plugins') || type(g:ime_plugins) != type([])
     let g:ime_plugins = ['builtin-boshiamy', 'builtin-kana', 'builtin-chewing', 'builtin-unicode']
