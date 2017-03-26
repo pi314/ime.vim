@@ -2,56 +2,58 @@
 ime.vim
 ===============================================================================
 
-Read this document in `English <README.en.rst>`_.
+`這份文件的中文版。 <README.rst>`_
 
-介紹
+Introduction
 -------------------------------------------------------------------------------
-在 Vim 裡面輸入中文一直都是件麻煩事。
+It's always a trouble to input Chinese characters in Vim.
 
-有在使用中文輸入法的人都會知道，每個中文輸入法都有兩種狀態：
+Everyone who uses Chinese Input Method knows that they have two states:
 
-* 英文
-* 中文
+- English mode
+- Chinese mode
 
-Vim 也有兩種狀態：
+Vim has two states, too:
 
-* Insert mode (以及 replace 和類似的狀態)
-* 非 insert mode (例如 normal mode 和 command mode 等等)
+- Insert mode (and similar modes)
+- Non-insert mode (like normal mode or command mode)
 
-這些狀態在使用時會疊在一起，如下表：
+So we have four combinations:
 
-+----------------+------+------+
-| Vim \ 輸入法   | 英文 | 中文 |
-+----------------+------+------+
-| Insert Mode    | :)   | :)   |
-+----------------+------+------+
-| 非 Insert Mode | :)   | :(   |
-+----------------+------+------+
++--------------------+---------+---------+
+| Vim \ Input method | English | Chinese |
++--------------------+---------+---------+
+| Insert mode        | :)      | :)      |
++--------------------+---------+---------+
+| Non-insert mode    | :)      | :(      |
++--------------------+---------+---------+
 
-這四種狀況中，中文 + 非 insert mode 非常討厭，按下的按鍵是中文的字根，
-會被輸入法攔截下來，不會直接進入 Vim。
+The "Chinese / Non-insert mode" is very troublesome,
+your keyboard input will be intercepted
+by the input method and will not go into Vim.
 
-如果能把這個狀況去除，就可以避免
-「需要不斷的按下 ``shift`` 或是 ``ctrl`` + ``space`` 」
-（在 macOS 上也許是 ``⌘`` + ``space`` ）的狀況。
-要達到這個目標，最好的方式就是在 Vim 中嵌入一個中文輸入法。
+If we can get rid of this situation, we can avoid keep hitting
+``shift`` or ``ctrl`` + ``space`` to close input method
+(``⌘`` + ``space`` on macOS).
+And the best way to do this is to embedded an input method in Vim.
 
-ime.vim 透過純 VimScript 實作了一個嘸蝦米輸入法引擎，
-不需要外部程式，不需要網路，
-安裝以後就能馬上開始使用。
+ime.vim implements a Input Method Engine in pure VimScript.
+Not depends on external programs, not depends on network.
+After installing it, you can use it right the way.
 
 
-安裝
+Installation
 -------------------------------------------------------------------------------
-ime.vim 可以使用
+ime.vim can be installed with
 `Vundle <https://github.com/gmarik/Vundle.vim>`_
-或是 `vim-plug <https://github.com/junegunn/vim-plug>`_
-安裝，請參考它們的安裝教學。
+or `vim-plug <https://github.com/junegunn/vim-plug>`_.
+Please refer to their installation tutorial
 
-在某些環境下，你可能沒有辦法正常使用 plugin manager，
-此時仍然可以手動安裝，請參考 `手動安裝 ime.vim <README-install-manually.rst>`_
+Under some environment, plugin managers may not operate normally
+(e.g. Windows 7 without any of ``git``, ``curl``, ``fetch``, ``wget`` installed).
+You can still `install it manually <README-install-manually.en.rst>`_.
 
-ime.vim 在以下環境測試過：
+ime.vim is tested under these environments:
 
 * Vim 7.4 / Mac OS X
 * Vim 8.0 / macOS Sierra
@@ -60,43 +62,46 @@ ime.vim 在以下環境測試過：
 * gVim 7.3 / Windows 7
 
 
-相關前作
+Related works
 -------------------------------------------------------------------------------
-個人是嘸蝦米的使用者，但目前能力不足，不便購買行易公司的嘸蝦米輸入法，
-所以先尋找前人的作品。
+I'm a 嘸蝦米 input method user, but currently I'm unable to buy one,
+so I do a little survey first:
 
 * `VimIM <http://www.vim.org/scripts/script.php?script_id=2506>`_
 
-  - 據說很強大的中文輸入法
-  - 支援相當多的中文輸入法 (包含數種雲端輸入法)
+  - It's said that it is very powerful
+  - It supports many kind of Chinese input methods (including cloud input methods)
 
 * `boshiamy-cue <http://www.vim.org/scripts/script.php?script_id=4392>`_
 
-  - 感覺很輕量，但很老舊的 Plugin
+  - Light weight, but old
 
 * `vim-boshiamy <https://github.com/dm4/vim-boshiamy>`_
 
-  - 從 VimIM 0.9.9.9.6 fork 出來，並為嘸蝦米做了調整
+  - Fork from VimIM 0.9.9.9.6 and adjusted for 嘸蝦米
 
-VimIM 的功能非常強大，但個人覺得強大的軟體就會很肥大，所以沒有嘗試。
-我希望找到一個剛好符合需求，不要有太多彩蛋或不必要功能的軟體。
+VimIM is powerful, but I have a biased view that "powerful software is fat",
+so I haven't try it.
+I want a software that just fit my need.
 
-boshiamy-cue 則是年代久遠，在 2013 年初發佈第一個版本後就沒有再更新，
-也因此這個 Plugin 並沒有考慮 Pathogen/Vundle。
-此外嘸蝦米還是需要選字的，而 boshiamy-cue 沒有提供這個功能。
+boshiamy-cue is very old, and it doesn't update since first version in early 2013.
+This plugin doesn't consider Pathogen and Vundle.
+Besides, 嘸蝦米 still needs word-choosing,
+which is a feature that boshiamy-cue unable to provide.
 
-vim-boshiamy 是暫時的 work around，2012 年中釋出後就沒有再更新。
+vim-boshiamy is a temporary workaround, it doesn't update since middle 2012.
 
 
-使用
+Usage
 -------------------------------------------------------------------------------
-* ``ime#mode()`` 函式回傳輸入法當前的狀態，你可以在自己的 statusline 中顯示這個資訊： ::
+* ``ime#mode()`` returns the current status of ime.vim, you can show this
+  information in your ``statusline`` ::
 
     set statusline=%<%{ime#mode()}%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 
-  - 這行 statusline 看起來會像 ``[嘸]README.rst [+]      75,67-59  53%``
+  - This statusline looks like ``[嘸]README.rst [+]      75,67-59  53%``
 
-* 切換輸入法/英文： ::
+* Toggle English ::
 
     let g:ime_toggle_english = ',,'
 
