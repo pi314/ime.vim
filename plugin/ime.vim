@@ -12,7 +12,16 @@ if !exists('g:ime_select_mode') || type(g:ime_select_mode) != type('')
     let g:ime_select_mode = ',m'
 endif
 
-if exists('##CompleteDone')
+
+if !exists('g:ime_select_mode_style') || type(g:ime_select_mode_style) != type('')
+    let g:ime_select_mode_style = 'menu'
+endif
+if exists('##CompleteDone') && g:ime_select_mode_style == 'menu'
+    let g:ime_select_mode_style = 'fallback'
+endif
+
+
+if g:ime_select_mode_style == 'menu'
     execute 'inoremap <expr> '. g:ime_select_mode .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=ime#_comp_mode_menu()<CR>"'
 else
     execute 'inoremap '. g:ime_select_mode .' <C-\><C-o>:call ime#_fallback_mode_menu()<CR>'
