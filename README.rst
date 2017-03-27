@@ -141,7 +141,7 @@ vim-boshiamy 是暫時的 work around，2012 年中釋出後就沒有再更新�
   - 使用者可以自訂字根表，這個字根表的優先度比內建的表格高，使用者可以用來新增甚至修改組字規則
   - 自訂字根表的檔名： ::
 
-      let g:boshiamy_custom_table = '~/.boshiamy.table'
+      let g:ime_boshiamy_custom_table = '~/.boshiamy.table'
 
     + 此全城變數 *沒有* 預設值，請在需要使用時再設定
 

@@ -27510,23 +27510,23 @@ let s:table["zzzd"] = ["孴"]
 call ime#log('boshiamy', 'Loading boshiamy table... Done')
 
 function! s:load_custom_table ()
-    if !exists('g:boshiamy_custom_table') || g:boshiamy_custom_table == ''
-        call ime#log('boshiamy', 'Custom table is not configured (g:boshiamy_custom_table == "")')
+    if !exists('g:ime_boshiamy_custom_table') || g:ime_boshiamy_custom_table == ''
+        call ime#log('boshiamy', 'Custom table is not configured (g:ime_boshiamy_custom_table == "")')
         return
     endif
 
-    if type(g:boshiamy_custom_table) != type('')
-        call ime#log('boshiamy', 'The type of g:boshiamy_custom_table is not string, abort')
+    if type(g:ime_boshiamy_custom_table) != type('')
+        call ime#log('boshiamy', 'The type of g:ime_boshiamy_custom_table is not string, abort')
         return
     endif
 
-    if !filereadable(glob(g:boshiamy_custom_table))
-        call ime#log('boshiamy', 'Cannot read from "'. g:boshiamy_custom_table .'", abort')
+    if !filereadable(glob(g:ime_boshiamy_custom_table))
+        call ime#log('boshiamy', 'Cannot read from "'. g:ime_boshiamy_custom_table .'", abort')
         return
     endif
 
     let l:custom_table = {}
-    let l:custom_file = readfile(glob(g:boshiamy_custom_table))
+    let l:custom_file = readfile(glob(g:ime_boshiamy_custom_table))
     for l:line in l:custom_file
         if l:line[0] == '#'
             continue
