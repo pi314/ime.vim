@@ -12,8 +12,10 @@ Index
     2.1 Show input mode in 'statusline'.....|ime#mode().en|
     2.2 Toggle English......................|g:ime_toggle_english.en|
     2.3 Select input mode...................|g:ime_select_mode.en|
-    2.4 Cancel input text...................|g:ime_cancel_input.en|
-    2.5 Load plugins........................|g:ime_plugins.en|
+    2.4 Different mode select styles........|g:ime_select_mode_style.en|
+    2.5 Cancel input text...................|g:ime_cancel_input.en|
+    2.6 Custom table........................|g:ime_boshiamy_custom_table.en|
+    2.7 Load plugins........................|g:ime_plugins.en|
 3.  Built-in plugins........................|ime-built-in-plugins.en|
     3.1 Boshiamy mode.......................|ime-built-in-plugin-ime.en|
     3.2 Kana mode...........................|ime-built-in-plugin-kana.en|
@@ -130,7 +132,20 @@ This setting is used with |inoremap|, be careful not to override your mappings
 or set it to key sequences that generates a character.
 
 ------------------------------------------------------------------------------
-2.4 Cancel input text                                  *g:ime_cancel_input.en*
+2.4 Different mode select styles                  *g:ime_select_mode_style.en*
+>
+    let g:ime_select_mode_style = 'menu'
+<
+If this option is not set or set to "menu", the mode selection menu will be
+shown as a completion menu.
+If this option is set to "fallback", the mode selection menu will be
+shown in an interactive way.
+
+This option is disabled and treat as "fallback" when
+|CompleteDone| event is not available.
+
+------------------------------------------------------------------------------
+2.5 Cancel input text                                  *g:ime_cancel_input.en*
 >
     let g:ime_cancel_input = '<C-h>'
 <
@@ -149,7 +164,32 @@ to turn the character back to word again (before completion menu disappear).
 Same rules apply to other input modes.
 
 ------------------------------------------------------------------------------
-2.5 Load plugins                                            *g:ime_plugins.en*
+2.6 Custom table                             *g:ime_boshiamy_custom_table.en*
+>
+    let g:ime_boshiamy_custom_table = '~/.boshiamy.table'
+<
+This options can be used to customize 嘸蝦米 table.
+Add characters, words, or even emoji to this table.
+
+The format in the file is "string root root ...", separated by a space
+character. For example:
+>
+      (((°Д°;))  ,face
+      (ಥ_ಥ)      ,face
+      ಠ_ಠ        ,face ,stare
+      ఠ_ఠ        ,face ,stare
+      (ゝω・)    ,face
+      (〃∀〃)    ,face
+      (¦3[▓▓]    ,face ,sleep
+      (눈‸눈)    ,face
+      ㅍ_ㅍ      ,face
+<
+The order in this table will be kept.
+
+This option has NO default value.
+
+------------------------------------------------------------------------------
+2.7 Load plugins                                            *g:ime_plugins.en*
 
 ime.vim is able to load third party plugins if they fit certain structure.
 If you had installed some, please list them in your |vimrc|:
