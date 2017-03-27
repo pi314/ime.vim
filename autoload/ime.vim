@@ -12,13 +12,11 @@
 let s:true = exists('v:true') ? v:true : 1
 let s:false = exists('v:false') ? v:false : 0
 
-function! ime#log (tag, msg)
+function! ime#log (tag, ...)
     redraw
-    if type(a:msg) == type('')
-        let l:log_msg = a:msg
-    else
-        let l:log_msg = string(a:msg)
-    endif
+    let l:arguments = copy(a:000)
+    call map(l:arguments, 'type(v:val) == type("") ? (v:val) : string(v:val)')
+    let l:log_msg = join(l:arguments, ' ')
     echom substitute('[ime]['. a:tag .'] '. l:log_msg, '] [', '][', '')
 endfunction
 
@@ -107,10 +105,24 @@ else
 endif
 
 
+function s:EscapeKey (key) " {{{
+    if a:key == '|'
+        return '<bar>'
+    elseif a:key == ' '
+        return '<space>'
+    elseif a:key == '\'
+        return '<bslash>'
+    elseif a:key == '<'
+        return '<lt>'
+    endif
+    return a:key
+endfunction " }}}
+
+
 function! s:SelectMode (new_mode) " {{{
-    for l:trigger in s:ime_mode['trigger']
+    for l:key in s:ime_mode['trigger']
         try
-            execute 'iunmap '. l:trigger
+            execute 'iunmap '. s:EscapeKey(l:key)
         catch
         endtry
     endfor
@@ -125,9 +137,14 @@ function! s:SelectMode (new_mode) " {{{
     endif
 
     if s:ime_english_enable == s:false
-        for l:trigger in s:ime_mode['trigger']
-            execute 'inoremap '. l:trigger .' <C-R>=<SID>SendKey("'.
-                        \ substitute(l:trigger, '<', '<lt>', 'g') .'")<CR>'
+        for l:key in s:ime_mode['trigger']
+            try
+                let l:escaped_key = s:EscapeKey(l:key)
+                execute 'inoremap '. l:escaped_key . ' <C-R>=<SID>SendKey('''.
+                            \ (l:escaped_key == "'" ? "''" : l:escaped_key) .''')<CR>'
+            catch
+                call ime#log('core', '>> '. v:exception)
+            endtry
         endfor
     endif
 
@@ -163,11 +180,19 @@ function! s:ExecutePlugin (line, plugin, trigger) " {{{
         let l:options = []
         let l:ret = a:plugin['handler'](l:matchobj, a:trigger)
         if type(l:ret) == type({})
-            let l:len = l:ret['len']
-            let l:options = l:ret['options']
+            try
+                let l:len = l:ret['len']
+                let l:options = l:ret['options']
+            catch
+                call ime#log('core', '['. a:plugin['name'] .']', '// invalid return value:', string(l:ret))
+                call ime#log('core', '['. a:plugin['name'] .']', '\\ return value should contain ''len'' and ''options''')
+                return s:false
+            endtry
         elseif type(l:ret) == type([])
             let l:options = l:ret
         else
+            call ime#log('core', '['. a:plugin['name'] .']', '// invalid return value:', string(l:ret))
+            call ime#log('core', '['. a:plugin['name'] .']', '\\ return type should be {} or []')
             return s:false
         endif
 
@@ -178,8 +203,8 @@ function! s:ExecutePlugin (line, plugin, trigger) " {{{
         call complete(col('.') - l:len, l:options)
         return s:true
     catch
-        call ime#log(a:plugin['name'], '// '. v:throwpoint)
-        call ime#log(a:plugin['name'], '\\ '. v:exception)
+        call ime#log('core', '['. a:plugin['name'] .']', '// '. v:throwpoint)
+        call ime#log('core', '['. a:plugin['name'] .']', '\\ '. v:exception)
     endtry
     return s:false
 endfunction " }}}
@@ -187,10 +212,10 @@ endfunction " }}}
 
 function! s:SendKey (trigger) " {{{
     if s:ime_english_enable
-        if !empty(maparg(a:trigger, 'i'))
-            execute "iunmap ". a:trigger
+        if !empty(maparg(s:EscapeKey(a:trigger), 'i'))
+            execute "iunmap ". s:EscapeKey(a:trigger)
         endif
-        return ' '
+        return a:trigger
     endif
 
     let l:line = strpart(getline('.'), 0, (col('.') - 1))

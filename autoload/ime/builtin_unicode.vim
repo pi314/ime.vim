@@ -18,6 +18,6 @@ function! ime#builtin_unicode#info ()
     \ 'type': 'embedded',
     \ 'pattern': '\v\\[Uu]%(([0-9a-fA-F]+)|(\[[^\]]+\]|\[\]\]))$',
     \ 'handler': function('ime#builtin_unicode#handler'),
-    \ 'trigger': ['<space>'],
+    \ 'trigger': [' '],
     \ }
 endfunction
