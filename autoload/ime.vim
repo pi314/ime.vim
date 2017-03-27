@@ -12,13 +12,11 @@
 let s:true = exists('v:true') ? v:true : 1
 let s:false = exists('v:false') ? v:false : 0
 
-function! ime#log (tag, msg)
+function! ime#log (tag, ...)
     redraw
-    if type(a:msg) == type('')
-        let l:log_msg = a:msg
-    else
-        let l:log_msg = string(a:msg)
-    endif
+    let l:arguments = copy(a:000)
+    call map(l:arguments, 'type(v:val) == type("") ? (v:val) : string(v:val)')
+    let l:log_msg = join(l:arguments, ' ')
     echom substitute('[ime]['. a:tag .'] '. l:log_msg, '] [', '][', '')
 endfunction
 
@@ -182,11 +180,19 @@ function! s:ExecutePlugin (line, plugin, trigger) " {{{
         let l:options = []
         let l:ret = a:plugin['handler'](l:matchobj, a:trigger)
         if type(l:ret) == type({})
-            let l:len = l:ret['len']
-            let l:options = l:ret['options']
+            try
+                let l:len = l:ret['len']
+                let l:options = l:ret['options']
+            catch
+                call ime#log('core', '['. a:plugin['name'] .']', '// invalid return value:', string(l:ret))
+                call ime#log('core', '['. a:plugin['name'] .']', '\\ return value should contain ''len'' and ''options''')
+                return s:false
+            endtry
         elseif type(l:ret) == type([])
             let l:options = l:ret
         else
+            call ime#log('core', '['. a:plugin['name'] .']', '// invalid return value:', string(l:ret))
+            call ime#log('core', '['. a:plugin['name'] .']', '\\ return type should be {} or []')
             return s:false
         endif
 
@@ -197,8 +203,8 @@ function! s:ExecutePlugin (line, plugin, trigger) " {{{
         call complete(col('.') - l:len, l:options)
         return s:true
     catch
-        call ime#log(a:plugin['name'], '// '. v:throwpoint)
-        call ime#log(a:plugin['name'], '\\ '. v:exception)
+        call ime#log('core', '['. a:plugin['name'] .']', '// '. v:throwpoint)
+        call ime#log('core', '['. a:plugin['name'] .']', '\\ '. v:exception)
     endtry
     return s:false
 endfunction " }}}
