@@ -1,4 +1,9 @@
-call ime#log('boshiamy', 'Loading boshiamy table...')
+function! s:log (...)
+    call call(function('ime#log'), ['boshiamy'] + a:000)
+endfunction
+
+
+call s:log('Loading boshiamy table...')
 let s:table = {}
 let s:table["'"] = ["、", "．", "‧", "丶"]
 let s:table["''"] = ["“", "〝"]
@@ -27507,21 +27512,21 @@ let s:table["zzrv"] = ["艞"]
 let s:table["zzw"] = ["籧"]
 let s:table["zzz"] = ["歮"]
 let s:table["zzzd"] = ["孴"]
-call ime#log('boshiamy', 'Loading boshiamy table... Done')
+call s:log('Loading boshiamy table... Done')
 
 function! s:load_custom_table ()
     if !exists('g:ime_boshiamy_custom_table') || g:ime_boshiamy_custom_table == ''
-        call ime#log('boshiamy', 'Custom table is not configured (g:ime_boshiamy_custom_table == "")')
+        call s:log('boshiamy', 'Custom table is not configured (g:ime_boshiamy_custom_table == "")')
         return
     endif
 
     if type(g:ime_boshiamy_custom_table) != type('')
-        call ime#log('boshiamy', 'The type of g:ime_boshiamy_custom_table is not string, abort')
+        call s:log('boshiamy', 'The type of g:ime_boshiamy_custom_table is not string')
         return
     endif
 
     if !filereadable(glob(g:ime_boshiamy_custom_table))
-        call ime#log('boshiamy', 'Cannot read from "'. g:ime_boshiamy_custom_table .'", abort')
+        call s:log('boshiamy', 'Cannot read from "'. g:ime_boshiamy_custom_table .'"')
         return
     endif
 
@@ -27556,8 +27561,8 @@ endfunction
 
 
 function! ime#boshiamy_table#table ()
-    call ime#log('boshiamy', 'Loading custom table...')
+    call s:log('Loading custom table...')
     call s:load_custom_table()
-    call ime#log('boshiamy', 'Loading custom table... Done')
+    call s:log('Loading custom table... Done')
     return s:table
 endfunction

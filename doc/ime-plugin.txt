@@ -10,7 +10,8 @@
     2.1 需要載入龐大資料的套件..............|ime-plugin-with-huge-data|
 3.  套件核心 - handler......................|ime-plugin-handler|
     3.1 Handler - 複雜的判斷................|ime-plugin-complex-handler|
-4.  Vim 7.3 的 script-local function 問題...|ime-plugin-for-vim-7.3-funcref|
+4.  Log 訊息................................|ime#log()|
+5.  Vim 7.3 的 script-local function 問題...|ime-plugin-for-vim-7.3-funcref|
 
 ==============================================================================
 1.  介紹                                             *ime-plugin-introduction*
@@ -170,7 +171,28 @@ handler 需要針對 matchobj 以及 trigger 進行處理及判斷，
 若直接回傳 ['ಠ_ಠ']，ime.vim 會把 ".[,stare" 取代為 "ಠ_ಠ"。
 
 ==============================================================================
-4.  Vim 7.3 的 script-local function 問題     *ime-plugin-for-vim-7.3-funcref*
+4.  Log 訊息                                                       *ime#log()*
+
+人有失神，馬有亂蹄，吃飯哪有不掉飯米粒的，吃燒餅哪有不掉芝麻的，
+寫程式總會需要 debug，需要 log 訊息。
+
+ime#log({logtag}, {...})
+
+{logtag} log 訊息的標籤，會附在訊息的最前方。
+         這個參數沒有強制性，只要開發者方便識別即可。
+{...}    log 訊息，可傳入任意參數（實際上限為 20 個，請參考 |...|）
+         每個參數會被轉型為 |string| 以後，以空白字元分隔。
+
+為了使用方便，你可以自行將 |ime#log()| 包裝：
+>
+    function! s:log (...)
+        call call(function('ime#log'), ['my-tag'] + a:000)
+    endfunction
+<
+這樣就不需要在每次呼叫 |ime#log()| 時都要寫一次 {logtag}。
+
+==============================================================================
+5.  Vim 7.3 的 script-local function 問題     *ime-plugin-for-vim-7.3-funcref*
 
 根據這個討論串：
 
