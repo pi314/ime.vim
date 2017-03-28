@@ -1,50 +1,55 @@
-*ime-plugin.txt*
-                                                          ime.vim 套件開發文件
+*ime-plugin.en.txt*
+                                           ime.vim plugin development document
 
 ==============================================================================
-Read this document in English: |ime-plugin.en.txt|
+這份文件的中文版：|ime-plugin.txt|
 
-目錄
+Index
 
-1.  介紹....................................|ime-plugin-introduction|
-    1.1 套件資訊............................|ime-plugin-metadata|
-2.  目錄結構................................|ime-plugin-structure|
-    2.1 需要載入龐大資料的套件..............|ime-plugin-with-huge-data|
-3.  套件核心 - handler......................|ime-plugin-handler|
-    3.1 Handler - 複雜的判斷................|ime-plugin-complex-handler|
-4.  Log 訊息................................|ime#log()|
-5.  Vim 7.3 的 script-local function 問題...|ime-plugin-for-vim-7.3-funcref|
+1.  Introduction............................|ime-plugin-introduction.en|
+    1.1 Plugin metadata.....................|ime-plugin-metadata.en|
+2.  Folder structure........................|ime-plugin-structure.en|
+    2.1 Plugin with huge data...............|ime-plugin-with-huge-data.en|
+3.  Handler - the core of the plugin........|ime-plugin-handler.en|
+    3.1 Handler - complicated operations....|ime-plugin-complex-handler.en|
+4.  Log message.............................|ime#log().en|
+5.  Script-local function in Vim 7.3........|ime-plugin-for-vim-7.3-funcref.en|
 
 ==============================================================================
-1.  介紹                                             *ime-plugin-introduction*
+1.  Introduction                                  *ime-plugin-introduction.en*
 
-ime.vim 能夠載入第三方的套件，擴充自己的輸入能力。
+ime.vim is able to load third party plugins if they fit certain structure.
 
-1)  Standalone 套件自成一個輸入模式，
-    在選擇模式時會顯示在選單中，有自己的圖示和說明。
+There are two kinds ot ime.vim plugins:
 
-2)  Embedded 套件內嵌在各個輸入模式中，優先於各個輸入模式，
-    相當於對輸入法字根表的擴充。
+1)  Standalone plugins work as input modes, they show up in the menu when you
+    are choosing input mode. They have their own icons and descriptions.
+
+2)  Embedded plugins are embedded in every input mode,
+    prior to the input modes.
+    They can be considered as extensions to the input modes.
 
 ------------------------------------------------------------------------------
-1.1 套件資訊                                             *ime-plugin-metadata*
+1.1 Plugin metadata                                   *ime-plugin-metadata.en*
 
-要讓 ime.vim 正確載入，套件需要提供必要的資訊：
+To make your plugin recognizable to ime.vim, the plugin has to provide
+necessary informations:
 
-- Type: |string|，"standalone" 或是 "embedded"。
-- Pattern: |regex|，表示該套件所能處理的字串。
-- Handler: |Funcref|，根據比對到的字串回傳可用的選項。
-- Trigger: |List|[|string|]，列出能夠觸發該輸入模式的按鍵。
+- Type: |string|, "standalone" or "embedded"
+- Pattern: |regex|, the string pattern that can be processed by this plugin
+- Handler: |Funcref|, process the input string and returns the result
+- Trigger: |List|[|string|], what keys should trigger this plugin to work
 
-Standalone 套件需要額外提供兩項資訊：
+Standalone plugin should provide two additional informations:
 
-- Icon: |string|，在選擇輸入模式時顯示，以及在 'statusline' 中顯示。
-- Description: |string|，在選擇輸入模式時顯示。
+- Icon: |string|, shown in mode selection menu and 'statusline'
+- Description: |string|, shown in mode selection menu
 
-除此之外，套件需要訂定一個名稱： {plugin-name}
+Further more, this plugin should decide a name: {plugin-name}
+for user to add in |g:ime_plugins.en|.
 讓使用者加在 |g:ime_plugins| 之中。
 
-這些資訊需要包裝成一個物件並透過 *ime_{plugin-name}#info()* 回傳：
+這些資訊需要包裝成一個物件並透過 *ime_{plugin-name}#info().en* 回傳：
 >
     function ime_{plugin-name}#info()
         return {
@@ -58,7 +63,7 @@ Standalone 套件需要額外提供兩項資訊：
     endfunction
 <
 ==============================================================================
-2.  目錄結構                                            *ime-plugin-structure*
+2.  Folder structure                                 *ime-plugin-structure.en*
 
 ime.vim 的套件建議依照以下的目錄結構放置檔案：
 >
@@ -67,7 +72,7 @@ ime.vim 的套件建議依照以下的目錄結構放置檔案：
     |   `-- ime_{plugin-name}.vim
     `-- README
 <
-*ime_{plugin-name}.vim* 為套件的主要檔案，建議的內容為：
+*ime_{plugin-name}.vim.en* 為套件的主要檔案，建議的內容為：
 >
     function! ime_{plugin-name}#handler (matchobj, trigger)
         " plugin logic here
@@ -88,11 +93,11 @@ ime.vim 的套件建議依照以下的目錄結構放置檔案：
 注意 handler 的值為 function("s:Handler")，引號不可省略。
 
 ------------------------------------------------------------------------------
-2.1 需要載入龐大資料的套件                         *ime-plugin-with-huge-data*
+2.1 Plugin with huge data                       *ime-plugin-with-huge-data.en*
 
 若套件需要載入龐大的資料，可以利用 vim 的 |autoload| 功能
 
-在 {plugin-folder}/autoload/ 目錄裡增加一個 *ime_{plugin-name}_table.vim* 檔案：
+在 {plugin-folder}/autoload/ 目錄裡增加一個 *ime_{plugin-name}_table.vim.en* 檔案：
 >
     let s:table = {}
     let s:table['key_1'] = [...]
@@ -129,7 +134,7 @@ ime.vim 的套件建議依照以下的目錄結構放置檔案：
     endfunction
 <
 ==============================================================================
-3.  套件核心 - handler                                    *ime-plugin-handler*
+3.  Handler - the core of the plugin                   *ime-plugin-handler.en*
 
 套件的核心功能由 handler 提供。
 
@@ -149,7 +154,7 @@ handler 需要針對 matchobj 以及 trigger 進行處理及判斷，
 提供 handler 判斷使用。
 
 ------------------------------------------------------------------------------
-3.1 Handler - 複雜的判斷                          *ime-plugin-complex-handler*
+3.1 Handler - complicated operations           *ime-plugin-complex-handler.en*
 
 有些套件需要做很複雜的判斷，例如嘸蝦米模式會做多階段的比對，
 每次放棄一部份的字串，這樣複雜程度只靠 pattern 處理是非常困難的。
@@ -173,7 +178,7 @@ handler 需要針對 matchobj 以及 trigger 進行處理及判斷，
 若直接回傳 ['ಠ_ಠ']，ime.vim 會把 ".[,stare" 取代為 "ಠ_ಠ"。
 
 ==============================================================================
-4.  Log 訊息                                                       *ime#log()*
+4.  Log message                                                 *ime#log().en*
 
 人有失神，馬有亂蹄，吃飯哪有不掉飯米粒的，吃燒餅哪有不掉芝麻的，
 寫程式總會需要 debug，需要 log 訊息。
@@ -194,7 +199,7 @@ ime#log({logtag}, {...})
 這樣就不需要在每次呼叫 |ime#log()| 時都要寫一次 {logtag}。
 
 ==============================================================================
-5.  Vim 7.3 的 script-local function 問題     *ime-plugin-for-vim-7.3-funcref*
+5.  Script-local function in Vim 7.3        *ime-plugin-for-vim-7.3-funcref.en*
 
 根據這個討論串：
 
