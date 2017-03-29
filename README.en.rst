@@ -51,7 +51,7 @@ Please refer to their installation tutorial
 
 Under some environment, plugin managers may not operate normally
 (e.g. Windows 7 without any of ``git``, ``curl``, ``fetch``, ``wget`` installed).
-You can still `install it manually <README-install-manually.en.rst>`_.
+You can still `install it manually <README-manually-install.en.rst>`_.
 
 ime.vim is tested under these environments:
 

@@ -39,7 +39,8 @@
 使用 vim-plug 安裝
 -------------------------------------------------------------------------------
 即使沒有 ``git`` / ``curl`` / ``fetch`` / ``wget`` ，
-你仍然可以讓 vim-plug 幫你處理 ``runtimepath``
+你仍然可以讓 vim-plug 幫你處理 ``runtimepath`` 。
 
-手動安裝好 vim-plugin 以後，把 ime.vim 和第三方套件下載下來，
+手動安裝好 `vim-plug <https://github.com/junegunn/vim-plug>`_ 以後，
+把 ime.vim 和第三方套件下載下來，
 解壓縮後直接放在 ``~/vimfiles/plugged/`` 即可。

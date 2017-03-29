@@ -49,7 +49,7 @@ ime.vim 可以使用
 安裝，請參考它們的安裝教學。
 
 在某些環境下，你可能沒有辦法正常使用 plugin manager，
-此時仍然可以手動安裝，請參考 `手動安裝 ime.vim <README-install-manually.rst>`_
+此時仍然可以手動安裝，請參考 `手動安裝 ime.vim <README-manually-install.rst>`_
 
 ime.vim 在以下環境測試過：
 
