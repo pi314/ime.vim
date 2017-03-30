@@ -17,9 +17,9 @@ function! s:fallback_str (arg)
 endfunction
 
 
-function! boshiamy#boshiamy#handler (matchobj)
+function! ime#builtin_boshiamy#handler (matchobj, trigger)
     if s:table == {}
-        let s:table = boshiamy#boshiamy_table#table()
+        let s:table = ime#boshiamy_table#table()
     endif
 
     let l:boshiamy_str = a:matchobj[0]
@@ -37,13 +37,14 @@ function! boshiamy#boshiamy#handler (matchobj)
 endfunction
 
 
-function! boshiamy#boshiamy#info ()
+function! ime#builtin_boshiamy#info ()
     return {
     \ 'type': 'standalone',
     \ 'icon': '[嘸]',
-    \ 'description': 'Chinese mode',
+    \ 'description': 'Boshiamy input mode',
     \ 'pattern': '\v%(\w|[,.''\[\]])+$',
-    \ 'handler': function('boshiamy#boshiamy#handler'),
+    \ 'handler': function('ime#builtin_boshiamy#handler'),
+    \ 'trigger': [' '],
     \ }
 
     " Note: This plugin use ``\w`` in regex.

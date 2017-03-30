@@ -1,4 +1,4 @@
-call boshiamy#log('chewing', 'Loading chewing table...')
+call ime#log('chewing', 'Loading chewing table...')
 let s:table = {}
 let s:table[';,'] = ['ㄝ', '掖']
 let s:table[';,4'] = ['誒']
@@ -1393,9 +1393,9 @@ let s:table[';zp3'] = ['粉', '扮', '黺']
 let s:table[';zp4'] = ['分', '份', '奮', '噴', '憤', '糞', '墳', '忿', '焚', '僨', '瀵', '坋', '弅', '朆', '橨', '秎', '羵', '膹', '魵', '鱝']
 let s:table[';zp6'] = ['頒', '墳', '焚', '汾', '賁', '棼', '濆', '鼢', '坟', '妢', '幩', '弅', '枌', '梤', '橨', '炃', '燌', '燓', '秎', '羒', '羵', '肦', '蒶', '蕡', '蚠', '蚡', '豶', '轒', '鐼', '隫', '馚', '馩', '黂', '鼖']
 let s:table[';zul4'] = ['覅']
-call boshiamy#log('chewing', 'Loading chewing table... Done')
+call ime#log('chewing', 'Loading chewing table... Done')
 
 
-function! boshiamy#chewing_table#table ()
+function! ime#chewing_table#table ()
     return s:table
 endfunction

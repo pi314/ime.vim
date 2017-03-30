@@ -1,0 +1,239 @@
+*ime-plugin.txt*          For Vim version 8.0             Last update：2017/03
+
+                                           ime.vim plugin development document
+==============================================================================
+Index
+
+1.  Introduction............................|ime-plugin-introduction|
+    1.1 Plugin metadata.....................|ime-plugin-metadata|
+2.  Folder structure........................|ime-plugin-structure|
+    2.1 Plugin with huge data...............|ime-plugin-with-huge-data|
+3.  Handler - the core of the plugin........|ime-plugin-handler|
+    3.1 Handler - complicated operations....|ime-plugin-complex-handler|
+4.  Log message.............................|ime#log()|
+5.  Script-local function in Vim 7.3........|ime-plugin-for-vim-7.3-funcref|
+
+==============================================================================
+1.  Introduction                                     *ime-plugin-introduction*
+
+ime.vim is able to load third party plugins if they fit certain structure.
+
+There are two kinds ot ime.vim plugins:
+
+1)  Standalone plugins work as input modes, they show up in the menu when you
+    are choosing input mode. They have their own icons and descriptions.
+
+2)  Embedded plugins are embedded in every input mode,
+    prior to the input modes.
+    They can be considered as extensions to the input modes.
+
+------------------------------------------------------------------------------
+1.1 Plugin metadata                                      *ime-plugin-metadata*
+
+To make your plugin recognizable to ime.vim, the plugin has to provide
+necessary informations:
+
+- Type: |string|, "standalone" or "embedded"
+- Pattern: |regex|, the string pattern that can be processed by this plugin
+- Handler: |Funcref|, process the input string and returns the result
+- Trigger: |List|[|string|], what keys should trigger this plugin to work
+
+Standalone plugin should provide two additional informations:
+
+- Icon: |string|, shown in mode selection menu and 'statusline'
+- Description: |string|, shown in mode selection menu
+
+Further more, this plugin should decide a name: {plugin-name}
+for user to add in |g:ime_plugins|.
+
+These information are packed in one |dict| object
+and returned through *ime_{plugin-name}#info()*:
+>
+    function ime_{plugin-name}#info()
+        return {
+            \ 'type': 'standalone' / 'embedded',
+            \ 'pattern': {regex},
+            \ 'handler': {function},
+            \ 'icon': '[En]',
+            \ 'description': {description},
+            \ 'trigger': ['<space>', '3', '4', '6', ...],
+            \ }
+    endfunction
+<
+==============================================================================
+2.  Folder structure                                    *ime-plugin-structure*
+
+ime.vim plugins are suggested to place files in the following structure:
+>
+    {plugin-folder}/
+    |-- autoload/
+    |   `-- ime_{plugin-name}.vim
+    `-- README
+<
+*ime_{plugin-name}.vim* is the main file of the plugin.
+Suggested content is as following:
+>
+    function! ime_{plugin-name}#handler (matchobj, trigger)
+        " plugin logic here
+    endfunction
+
+    function! ime_{plugin-name}#info()
+        return {
+            \ 'type': 'standalone',
+            \ 'icon': '[eg]',
+            \ 'description': 'An example',
+            \ 'pattern': '.*$',
+            \ 'handler': function('ime_{plugin-name}#handler'),
+            \ 'trigger': ['<space>', '3', '4', '6', ...],
+            \ }
+    endfunction
+<
+Please adjust the content for your needs.
+Note that the value of handler is function('ime_{plugin-name}#handler'),
+     the quotes are necessary.
+
+Note that at least the file ime_{plugin-name}.vim and
+the function ime_{plugin-name}#info() should follow the naming rule,
+otherwise ime.vim will not load this plugin.
+
+------------------------------------------------------------------------------
+2.1 Plugin with huge data                          *ime-plugin-with-huge-data*
+
+If you plugin needs to load huge data, Vim's |autoload| can help.
+
+Add file *ime_{plugin-name}_table.vim* in {plugin-folder}/autoload:
+>
+    let s:table = {}
+    let s:table['key_1'] = [...]
+    let s:table['key_2'] = [...]
+    ...
+    let s:table['key_n'] = [...]
+
+    function! ime_{plugin-name}_table#table ()
+        return s:table
+    endfunction
+<
+
+And adjust |ime_{plugin-name}.vim| to:
+>
+    let s:table = {}
+
+    function! ime_{plugin-name}#handler (matchobj)
+        if s:table == {}
+            let s:table = ime_{plugin-name}_table#table()
+        endif
+
+        " plugin logic here
+    endfunction
+
+    function! ime_{plugin-name}#info()
+        return {
+            \ 'type': 'standalone',
+            \ 'icon': '[eg]',
+            \ 'description': 'An example',
+            \ 'pattern': '.*$',
+            \ 'handler': function('ime_{plugin-name}#handler'),
+            \ 'trigger': ['<space>', '3', '4', '6', ...],
+            \ }
+    endfunction
+<
+==============================================================================
+3.  Handler - the core of the plugin                      *ime-plugin-handler*
+
+The core function of the plugin is provided by the plugin handler.
+
+When switching to a input method, ime.vim executes |inoremap| according to
+the "trigger" information provided by the plugin.
+If user pressed one of the trigger key, ime.vim passes the cursor line text
+and "pattern" provided by the plugin to |matchlist()|.
+If the matching succeed, the matching result (a |List|) and the trigger key
+will be passed into handler.
+
+Handler processes the matching result and trigger,
+and return a |List| containing availble options.
+The ordering of the options could be decided by the handler.
+
+The options then passed into |complete()| to generate completion menu,
+every option could have description text,
+for further information see |complete-items|.
+
+The handler can leverage regex groups (see |\1|) in the pattern.
+
+------------------------------------------------------------------------------
+3.1 Handler - complicated operations              *ime-plugin-complex-handler*
+
+Some plugins need to do very complicated operations, for example 嘸蝦米 does
+multi-stage match and gave up part of strings every time.
+This is very hard to achieve only with pattern.
+
+So, ime.vim allows handler to return a |dict| including two keys:
+
+- "len": the text length that actually used
+- "options": available options
+
+For example if ime.vim matchs string ".[,stare" with the pattern and passed
+into the handler, but the handler decides only ",stare" can be used to
+generate "ಠ_ಠ".
+In this situation the handler should return:
+>
+    {
+    \ 'len': 6,
+    \ 'options': ['ಠ_ಠ']
+    \ }
+<
+for ime.vim to replace ".[,stare" to ".[ಠ_ಠ".
+
+If the handler returns ['ಠ_ಠ'], ime.vim replaces ".[,stare" to "ಠ_ಠ".
+
+==============================================================================
+4.  Log message                                                    *ime#log()*
+
+    If debugging is the process of removing software bugs,
+    then programming must be the process of putting them in.
+
+                                                    -- Edsger Dijkstra
+
+Instead of |echom| yourself, you can try ime#log({logtag}, {...}) instead.
+
+{logtag} The log tag that prepends to the log message.
+         This value has no constrains (must be |string| though),
+         the value is up to developr.
+{...}    The log message, could be any values (up to 20 values, see |...|)
+         Every argument will be cast to |string| and separate with a
+         space character.
+
+The following code:
+>
+    call ime#log('MyTag', 'It''s not a bug, it''s feature.')
+<
+prints the following message:
+>
+    [ime][MyTag] It's not a bug, it's feature.
+<
+For convenience, you can wrap |ime#log()|:
+>
+    function! s:log (...)
+        call call(function('ime#log'), ['my-tag'] + a:000)
+    endfunction
+<
+So that you don't have to write {logtag} every time you call |ime#log()|.
+
+==============================================================================
+5.  Script-local function in Vim 7.3          *ime-plugin-for-vim-7.3-funcref*
+
+According to this thread:
+
+http://vim.1045645.n5.nabble.com/Funcref-and-script-local-functions-td1151686.html
+
+Script-local functions (i.e. functions with prefix |s:|) cannot be used outside
+the script.
+In other words, the plugin handler should not be declared to script local.
+
+But according my test:
+>
+    function("s:Handler")
+<
+could successfully be used as plugin handler in Vim 7.4 and above.
+
+If you want to hide plugin handler in this way, remember to notify your user
+that this plugin is not compatiable to Vim 7.3.
