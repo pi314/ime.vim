@@ -200,6 +200,7 @@ ime.vim 能夠載入第三方套件，以擴充自己的輸入能力。
 * `ime-runes.vim <https://github.com/pi314/ime-runes.vim>`_ - 輸入盧恩字母
 * `ime-wide.vim <https://github.com/pi314/ime-wide.vim>`_ - 輸入全型字
 * `ime-braille.vim <https://github.com/pi314/ime-braille.vim>`_ - 輸入點字
+* `ime-phonetic.vim <https://github.com/pi314/ime-phonetic.vim>`_ - 注音輸入法
 
 這些套件原本都是 ime.vim 的一部份，現在拔出核心，更加彈性。
 

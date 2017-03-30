@@ -206,6 +206,7 @@ Currently these plugins are available:
 * `ime-runes.vim <https://github.com/pi314/ime-runes.vim>`_ - Runes
 * `ime-wide.vim <https://github.com/pi314/ime-wide.vim>`_ - Wide characters
 * `ime-braille.vim <https://github.com/pi314/ime-braille.vim>`_ - Braille
+* `ime-phonetic.vim <https://github.com/pi314/ime-phonetic.vim>`_ - Phonetic input method
 
 All these plugins are part of ime.vim, now they are pluggable.
 
