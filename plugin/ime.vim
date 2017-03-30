@@ -16,7 +16,7 @@ endif
 if !exists('g:ime_select_mode_style') || type(g:ime_select_mode_style) != type('')
     let g:ime_select_mode_style = 'menu'
 endif
-if !exists('##CompleteDone') && g:ime_select_mode_style == 'menu'
+if g:ime_select_mode_style == 'menu' && (!exists('##CompleteDone') || !exists('v:completed_item'))
     let g:ime_select_mode_style = 'fallback'
 endif
 
