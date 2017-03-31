@@ -99,7 +99,17 @@ Usage
 
     set statusline=%<%{ime#mode()}%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 
-  - This statusline looks like ``[嘸]README.rst [+]      75,67-59  53%``
+  - This ``statusline`` looks like ``[嘸]README.rst [+]      75,67-59  53%``
+  - Before Vim 7.4.1711, directly put it into ``statusline`` may cause ``statusline``
+    being reset. Wrap it with another function solves this problem ::
+
+      function! IMEStatusString ()
+          if exists('*ime#mode')
+              return ime#mode()
+          endif
+          return ''
+      endfunction
+      set statusline=%{IMEStatusString()}
 
 * Toggle English ::
 

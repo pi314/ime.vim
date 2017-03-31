@@ -101,11 +101,17 @@ ime.vim 的目標之一是安裝以後不用設定即可使用，
 >
     [嘸]README.rst [+]     75,67-59 53%
 <
-Note: 這個功能在 Vim 7.3 可能使 'statusline' 被設為空字串。
-      目前不確定是 ime.vim 或是 Vim 7.3 導致的，
-      重新設定 'statusline' 以後就不會再被重設，
-      你可以用 |autocmd| 達成（例如 |VimResized|）。
-
+Note: 在 Vim 7.4.1711 之前，直接把它放在 'statusline' 裡面可能會導致
+      'statusline' 被重設，包裝一層函式可以暫時解決這個問題：
+>
+      function! IMEStatusString ()
+          if exists('*ime#mode')
+              return ime#mode()
+          endif
+          return ''
+      endfunction
+      set statusline=%{IMEStatusString()}
+<
 ------------------------------------------------------------------------------
 2.2 在英文與其他輸入模式之間切換                        *g:ime_toggle_english*
 >
