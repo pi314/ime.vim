@@ -38,13 +38,10 @@ let s:cr_imap_save = maparg("<CR>", "i")
 if empty(s:cr_imap_save)
     let s:cr_imap_save = "<CR>"
 endif
-function s:SendCr ()
-    if pumvisible()
-        return "\<C-Y>"
-    endif
-    return s:cr_imap_save
-endfunction
-execute 'inoremap <expr> <CR> <SID>SendCr()'
+
+execute "inoremap <Plug>IME_OriginCR ". s:cr_imap_save
+imap <expr> <Plug>IME_DispatchCR (pumvisible() ? "\<C-Y>" : "\<Plug>IME_OriginCR")
+imap <CR> <Plug>IME_DispatchCR
 
 if !exists('g:ime_plugins') || type(g:ime_plugins) != type([])
     let g:ime_plugins = ['builtin-boshiamy', 'builtin-kana', 'builtin-chewing', 'builtin-unicode']
