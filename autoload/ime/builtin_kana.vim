@@ -1,45 +1,38 @@
-let s:table = {}
+let s:table = []
+let s:submode = 0
+let s:large_small_kana = 'あえいかけおつうわやよゆアエイカケオツウワヤヨユぁぃぅぇぉっゃゅょゎゕゖァィゥェォッャュョヮヵヶ'
+
+
+function! s:log (...)
+    call call(function('ime#log'), ['builtin-kana'] + a:000)
+endfunction
+
 
 function! ime#builtin_kana#handler (matchobj, trigger)
-    if s:table == {}
+    if s:table == []
         let s:table = ime#kana_table#table()
     endif
 
-    let l:kana_str = a:matchobj[0]
-    if strlen(l:kana_str) == 0
-        return []
-    endif
+    call s:log(a:matchobj, a:trigger)
 
-    if has_key(s:table, l:kana_str)
-        return s:table[(l:kana_str)]
-    endif
-
-    let ret_hiragana = ''
-    let ret_katakana = ''
-    let i = 0
-    let j = 4
-    while l:i <= l:j
-        let t = l:kana_str[ (l:i) : (l:j) ]
-
-        if has_key(s:table, l:t)
-            let ret_hiragana = l:ret_hiragana . s:table[(l:t)][0]
-            if has_key(s:table, l:t .'.')
-                let ret_katakana = l:ret_katakana . s:table[(l:t .'.')][0]
-            else
-                let ret_katakana = l:ret_katakana . s:table[(l:t)][0]
-            endif
-            let i = l:j + 1
-            let j = l:i + 4
-        else
-            let j = l:j - 1
+    if a:trigger == 'v'
+        if a:matchobj[2] != ''
+            return [s:table[2][(a:matchobj[2])]]
         endif
-    endwhile
-    let l:remain = l:kana_str[(l:j + 1) : ]
-
-    if strlen(l:ret_hiragana) == 0 && strlen(l:ret_katakana) == 0
-        return []
+        return ['']
     endif
-    return [l:ret_hiragana . l:remain, l:ret_katakana . l:remain]
+
+    if has_key(s:table[(s:submode)], a:matchobj[1] . a:trigger)
+        return {
+        \ 'len': strlen(a:matchobj[1]),
+        \ 'options': s:table[(s:submode)][a:matchobj[1] . a:trigger]
+        \ }
+    endif
+    return []
+endfunction
+
+
+function! ime#builtin_kana#submode (switch)
 endfunction
 
 
@@ -49,8 +42,9 @@ function! ime#builtin_kana#info ()
     \ 'type': 'standalone',
     \ 'icon': '[あ]',
     \ 'description': 'Kana input mode',
-    \ 'pattern': '\v[.a-z]+$',
+    \ 'pattern': '\v%(([.a-z]*)|(['. s:large_small_kana .']))$',
     \ 'handler': function('ime#builtin_kana#handler'),
-    \ 'trigger': [' '],
+    \ 'trigger': split('.''abcdefghijkmnoprstuvwyz', '\zs'),
+    \ 'submode': function('ime#builtin_kana#submode'),
     \ }
 endfunction
