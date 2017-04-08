@@ -78,6 +78,15 @@ function! s:LoadPlugins () " {{{
             continue
         endif
 
+        if !has_key(l:plugin_info, 'submode') && has_key(l:plugin_info, 'switch')
+            call ime#log('core', 'plugin "'. l:plugin . '" has abandoned "switch" information')
+            unlet l:plugin_info['switch']
+        endif
+
+        if has_key(l:plugin_info, 'submode') && !has_key(l:plugin_info, 'switch')
+            let l:plugin_info['switch'] = [g:ime_switch_submode]
+        endif
+
         let l:plugin_info['name'] = l:plugin
 
         if l:plugin_info['type'] == 'standalone'
@@ -87,11 +96,11 @@ function! s:LoadPlugins () " {{{
         endif
     endfor
 
-    for s:plugin in s:standalone_plugin_list
-        let s:plugin['menu'] = s:plugin['icon'] .' - '. s:plugin['description']
-        let s:plugin['word'] = ''
-        let s:plugin['dup'] = s:true
-        let s:plugin['empty'] = s:true
+    for l:plugin in s:standalone_plugin_list
+        let l:plugin['menu'] = l:plugin['icon'] .' - '. l:plugin['description']
+        let l:plugin['word'] = ''
+        let l:plugin['dup'] = s:true
+        let l:plugin['empty'] = s:true
     endfor
 endfunction " }}}
 call s:LoadPlugins()
@@ -120,12 +129,16 @@ endfunction " }}}
 
 
 function! s:SelectMode (new_mode) " {{{
-    for l:key in s:ime_mode['trigger']
+    for l:key in s:ime_mode['trigger'] + get(s:ime_mode, 'switch', [])
         try
             execute 'iunmap '. s:EscapeKey(l:key)
         catch
         endtry
     endfor
+
+    if has_key(s:ime_mode, 'submode')
+        call s:ime_mode['submode']('')
+    endif
 
     if type(a:new_mode) == type('ENGLISH') && a:new_mode == 'ENGLISH'
         let s:ime_english_enable = s:true
@@ -141,6 +154,16 @@ function! s:SelectMode (new_mode) " {{{
             try
                 let l:escaped_key = s:EscapeKey(l:key)
                 execute 'inoremap '. l:escaped_key . ' <C-R>=<SID>SendKey('''.
+                            \ (l:escaped_key == "'" ? "''" : l:escaped_key) .''')<CR>'
+            catch
+                call ime#log('core', '>> '. v:exception)
+            endtry
+        endfor
+
+        for l:key in get(s:ime_mode, 'switch', [])
+            try
+                let l:escaped_key = s:EscapeKey(l:key)
+                execute 'inoremap '. l:escaped_key . ' <C-R>=<SID>Submode('''.
                             \ (l:escaped_key == "'" ? "''" : l:escaped_key) .''')<CR>'
             catch
                 call ime#log('core', '>> '. v:exception)
@@ -233,6 +256,12 @@ function! s:SendKey (trigger) " {{{
 endfunction " }}}
 
 
+function! s:Submode (switch) " {{{
+    call s:ime_mode['submode'](a:switch)
+    return ''
+endfunction " }}}
+
+
 " ================
 " Public Functions
 " ================
@@ -311,4 +340,16 @@ function! ime#plugins () " {{{
     \ 'standalone': map(copy(s:standalone_plugin_list), 'v:val[''name'']'),
     \ 'embedded': map(copy(s:embedded_plugin_list), 'v:val[''name'']'),
     \ }
+endfunction " }}}
+
+
+function! ime#icon (pname, icon) " {{{
+    let l:pname = substitute(a:pname, '-', '_', 'g')
+    if l:pname != s:ime_mode['name']
+        call s:log('core',
+        \ 'ime#icon("'. l:pname .'"): current plugin name is "'. s:ime_mode['name'] .'"')
+    endif
+
+    let s:ime_mode['icon'] = a:icon
+    let s:ime_mode['menu'] = s:ime_mode['icon'] .' - '. s:ime_mode['description']
 endfunction " }}}
