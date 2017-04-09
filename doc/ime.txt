@@ -1,4 +1,4 @@
-*ime.txt* *ime.vim*       For Vim version 8.0             Last update：2017/03
+*ime.txt* *ime.vim*       For Vim version 8.0             Last update：2017/04
 
                                                      A Vim input method engine
 ==============================================================================
@@ -53,7 +53,7 @@ your keyboard input will be intercepted
 by the input method and will not go into Vim.
 
 If we can get rid of this situation, we can avoid keep hitting
-"shift" or "control + space" to close input method.
+|shift| or "|control| + |space|" to close input method.
 And the best way to do this is to embedded an input method in Vim.
 
 ------------------------------------------------------------------------------
@@ -297,12 +297,10 @@ which can input characters with unicode code point and also
 query the unicode code point of any characters. (the later feature is like |ga|)
 Its plugin name is "builtin-unicode"。
 
-Type "\u" and proceeding with unicode code point,
-after pressing <space>, the corresponding character will be generated.
-(E.g. "\u5b57" generates "字")
+Examples:
 
-Type "\u[]" with a character inside [ and ],
-after pressing <space>, the corresponding unicode code point will be generated.
+- "\u5B57" -> "字"
+- "\u[字]" -> "\u5b57"
 
 ==============================================================================
 4.  Tips that can be used with Vim                                  *ime-tips*
