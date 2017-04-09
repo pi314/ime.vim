@@ -252,6 +252,9 @@ submode.
 Remember to call |ime#icon()| when "submode" is called to let ime.vim update
 the plugin icon.
 
+Note that is your plugin has only two submodes, you can omit "switch", and
+ime.vim will use |g:ime_switch_submode| for it.
+
 ==============================================================================
 4.  Log message                                                    *ime#log()*
 
