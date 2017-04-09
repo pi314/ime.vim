@@ -152,9 +152,15 @@ function! s:SelectMode (new_mode) " {{{
     if s:ime_english_enable == s:false
         for l:key in s:ime_mode['trigger']
             try
+                " Compose this command (so complex):
+                " inoremap trigger (Submode('trigger'))
                 let l:escaped_key = s:EscapeKey(l:key)
-                execute 'inoremap '. l:escaped_key . ' <C-R>=<SID>SendKey('''.
-                            \ (l:escaped_key == "'" ? "''" : l:escaped_key) .''')<CR>'
+                let l:cmd = 'inoremap '
+                let l:cmd .= l:escaped_key .' '
+                let l:cmd .= '<C-R>=<SID>SendKey('''
+                let l:cmd .= (l:escaped_key == "'" ? "''" : l:escaped_key)
+                let l:cmd .= ''')<CR>'
+                execute l:cmd
             catch
                 call ime#log('core', '>> '. v:exception)
             endtry
@@ -162,9 +168,16 @@ function! s:SelectMode (new_mode) " {{{
 
         for l:key in get(s:ime_mode, 'switch', [])
             try
+                " Compose this command (so complex):
+                " inoremap <expr> switch (remove popup menu) . (Submode('switch'))
                 let l:escaped_key = s:EscapeKey(l:key)
-                execute 'inoremap '. l:escaped_key . ' <C-R>=<SID>Submode('''.
-                            \ (l:escaped_key == "'" ? "''" : l:escaped_key) .''')<CR>'
+                let l:cmd = 'inoremap <expr> '
+                let l:cmd .= l:escaped_key .' '
+                let l:cmd .= '(pumvisible() ? "<C-Y>" : "") . '
+                let l:cmd .= '"<C-R>=<SID>Submode('''
+                let l:cmd .= (l:escaped_key == "'" ? "''" : l:escaped_key)
+                let l:cmd .= ''')<CR>"'
+                execute l:cmd
             catch
                 call ime#log('core', '>> '. v:exception)
             endtry
