@@ -15,8 +15,6 @@ function! ime#builtin_kana#handler (matchobj, trigger)
         let s:keys = s:table[3]
     endif
 
-    call s:log(a:matchobj, a:trigger)
-
     if a:trigger == 'v'
         if a:matchobj[2] != ''
             return [s:table[2][(a:matchobj[2])]]

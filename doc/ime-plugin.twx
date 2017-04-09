@@ -10,6 +10,7 @@
     2.1 需要載入龐大資料的套件..............|ime-plugin-with-huge-data|
 3.  套件核心 - handler......................|ime-plugin-handler|
     3.1 Handler - 複雜的判斷................|ime-plugin-complex-handler|
+    3.2 多個子模式..........................|ime-plugin-submodes|
 4.  Log 訊息................................|ime#log()|
 5.  Vim 7.3 的 script-local function 問題...|ime-plugin-for-vim-7.3-funcref|
 
@@ -173,6 +174,62 @@ handler 需要針對 matchobj 以及 trigger 進行處理及判斷，
 使 ime.vim 把 ".[,stare" 取代為 ".[ಠ_ಠ"。
 
 若直接回傳 ['ಠ_ಠ']，ime.vim 會把 ".[,stare" 取代為 "ಠ_ಠ"。
+
+------------------------------------------------------------------------------
+3.2 多個子模式                                           *ime-plugin-submodes*
+
+基於某些不同的原因，有些輸入法會有多個子模式：
+
+- 例如注音輸入法使用了至少 36 個按鍵，此時標點符號變得不容易輸入
+- 例如假名輸入法，在同一個鍵盤上輸入平假名和片假名是不容易的事情
+- 即使是英文輸入法也有 Capslock，相當於大寫的子模式
+
+如果你想要為你的套件實作多個子模式，你需要提供以下資訊：
+
+- "switch": |List|[|string|]，列出切換子模式的按鍵
+- "submode": |Funcref|，根據按下的按鍵切換到對應的子模式
+
+相對的，ime.vim 也提供介面讓套件顯示每個子模式：
+
+ime#icon({plugin-name}, {icon-str})                               *ime#icon()*
+
+{plugin-name}   套件的名稱。ime.vim 只允許當下正在使用的套件更改自己的圖示。
+{icon-str}      新的圖示。這個參數沒有強制性，只要使用者方便識別即可。
+
+先看一個簡略的範例：
+>
+    let s:mode = 0
+
+    function! ime_{plugin-name}#submode (switch)
+        if a:switch == ''
+            let s:mode = 0
+            call ime#icon({plugin-name}, '[:)]')
+        elseif a:switch == <key1>
+            let s:mode = 1
+            call ime#icon({plugin-name}, '[:D]')
+        ...
+        endif
+    endfunction
+
+    function! ime_{plugin-name}#info()
+        return {
+            \ ...
+            \ 'switch': ['<key1>', '<key2>', ...]
+            \ 'submode': function('ime_{plugin-name}#submode')
+            \ ...
+            \ }
+    endfunction
+<
+首先，"submode" 資訊需要在 |ime_{plugin-name}#info()| 中提供。
+在切換到輸入法的時候，ime.vim 會根據套件提供的 "switch" 資訊執行 |inoremap|。
+若使用者按下了 "switch" 按鍵，ime.vim 會呼叫 "submode" 並將該按鍵當成參數傳入。
+套件可以根據這個按鍵決定要切換至哪一個子模式。
+
+若 ime.vim 傳入了空字串給 "submode"，代表使用者切換到別的模式了，
+你可以選擇在這時候回到預設的子模式，也可以留在當下的子模式。
+
+在切換到子模式以後，請記得呼叫 |ime#icon()|
+讓 ime.vim 更新套件的圖示。
 
 ==============================================================================
 4.  Log 訊息                                                       *ime#log()*

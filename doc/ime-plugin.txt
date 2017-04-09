@@ -10,8 +10,9 @@ Index
     2.1 Plugin with huge data...............|ime-plugin-with-huge-data|
 3.  Handler - the core of the plugin........|ime-plugin-handler|
     3.1 Handler - complicated operations....|ime-plugin-complex-handler|
+    3.2 Multiple submodes...................|ime-plugin-submodes|
 4.  Log message.............................|ime#log()|
-5.  Script-local function in Vim 7.3........|ime-plugin-for-vim-7.3-funcref|
+6.  Script-local function in Vim 7.3........|ime-plugin-for-vim-7.3-funcref|
 
 ==============================================================================
 1.  Introduction                                     *ime-plugin-introduction*
@@ -185,6 +186,72 @@ for ime.vim to replace ".[,stare" to ".[ಠ_ಠ".
 
 If the handler returns ['ಠ_ಠ'], ime.vim replaces ".[,stare" to "ಠ_ಠ".
 
+------------------------------------------------------------------------------
+3.2 Multiple submodes                                    *ime-plugin-submodes*
+
+Some input methods have multiple submodes for different reasons:
+
+- It's not easy to input punctuation marks in phonetic input method
+  as it uses at least 36 keys
+- It's not easy to input Hiragana and Katakana characters on the same keyboard
+  as they pronounce the same
+- Even English input method has Capslock that equals to capitalized mode
+
+If your plugin needs multiple submodes, the following information are necessary:
+
+- "switch": |List|[|string|], what keys should switch to submode
+- "submode": |Funcref|, switch to correcponding submode
+             according to the switch key
+
+On the other side, ime.vim provides a interface to allow your plugin to change
+the icon:
+
+ime#icon({plugin-name}, {icon-str})                               *ime#icon()*
+
+{plugin-name}   the plugin name.
+                ime.vim permitts the current plugin to change its icon
+{icon-str}      the new icon string.
+                This argument has no constrains.
+
+Let's see a simplified example:
+>
+    let s:mode = 0
+
+    function! ime_{plugin-name}#submode (switch)
+        if a:switch == ''
+            let s:mode = 0
+            call ime#icon({plugin-name}, '[:)]')
+        elseif a:switch == <key1>
+            let s:mode = 1
+            call ime#icon({plugin-name}, '[:D]')
+        ...
+        endif
+    endfunction
+
+    function! ime_{plugin-name}#info()
+        return {
+            \ ...
+            \ 'switch': ['<key1>', '<key2>', ...]
+            \ 'submode': function('ime_{plugin-name}#submode')
+            \ ...
+            \ }
+    endfunction
+<
+First, the "submode" information is provided by |ime_{plugin-name}#info()|.
+When the user select this mode, ime.vim executes |inoremap| according to the
+"switch" information.
+
+If the user pressed any one of "switch" key, ime.vim calls "submode" and pass
+the key as the argument.
+The plugin can switch to correcponding submode according to this key.
+
+If ime.vim passed an empty string to "submode", it means the user selects
+another mode. The plugin can set itself to default submode or stay in current
+submode.
+
+Remember to call |ime#icon()| when "submode" is called to let ime.vim update
+the plugin icon.
+
 ==============================================================================
 4.  Log message                                                    *ime#log()*
 
@@ -219,7 +286,7 @@ For convenience, you can wrap |ime#log()|:
 So that you don't have to write {logtag} every time you call |ime#log()|.
 
 ==============================================================================
-5.  Script-local function in Vim 7.3          *ime-plugin-for-vim-7.3-funcref*
+6.  Script-local function in Vim 7.3          *ime-plugin-for-vim-7.3-funcref*
 
 According to this thread:
 

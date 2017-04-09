@@ -12,8 +12,9 @@ Index
     2.3 Select input mode...................|g:ime_select_mode|
     2.4 Different mode select styles........|g:ime_select_mode_style|
     2.5 Cancel input text...................|g:ime_cancel_input|
-    2.6 Custom table........................|g:ime_boshiamy_custom_table|
-    2.7 Load plugins........................|g:ime_plugins|
+    2.6 Switch to submode...................|g:ime_switch_submode|
+    2.7 Custom table........................|g:ime_boshiamy_custom_table|
+    2.8 Load plugins........................|g:ime_plugins|
 3.  Built-in plugins........................|ime-built-in-plugins|
     3.1 Boshiamy mode.......................|ime-built-in-plugin-ime|
     3.2 Kana mode...........................|ime-built-in-plugin-kana|
@@ -169,7 +170,19 @@ to turn the character back to word again (before completion menu disappear).
 Same rules apply to other input modes.
 
 ------------------------------------------------------------------------------
-2.6 Custom table                                 *g:ime_boshiamy_custom_table*
+2.6 Switch to submode                                   *g:ime_switch_submode*
+>
+    let g:ime_switch_submode = ';;'
+<
+Some input mode has several submodes, like Microsoft phonetic input method,
+after pressing ``ctrl`` + ``alt`` + ``,``, a screen keyboard pops up,
+and the next key will output a punctuation mark instead of phonetic symbol.
+
+Not every input mode has submodes, and their switch keys would not be the same,
+please refer to their documents.
+
+------------------------------------------------------------------------------
+2.7 Custom table                                 *g:ime_boshiamy_custom_table*
 >
     let g:ime_boshiamy_custom_table = '~/.boshiamy.table'
 <
@@ -194,7 +207,7 @@ The order in this table will be kept.
 This option has NO default value.
 
 ------------------------------------------------------------------------------
-2.7 Load plugins                                               *g:ime_plugins*
+2.8 Load plugins                                               *g:ime_plugins*
 
 ime.vim is able to load third party plugins if they fit certain structure.
 If you had installed some, please list them in your |vimrc|:
@@ -253,19 +266,16 @@ Example:
 
 Kana mode is a standalone plugin, which can be used to input
 Japanese Hiragana and Katakana, but it is unable to output Kanji.
-Its icon is [あ], plugin name is "builtin-kana"。
+Its icon is [あ] and [ア], plugin name is "builtin-kana"。
 
-- Hiragana can be input in romanisation
-- Katakana can be input with postfix character "."
-- Subscribe characters can be input with postfix "v"
+- Input in romanisation
+- Type ";;" to switch between Hiragana and Katakana
+- Type "v" to change previous symbol to sokuon
 - Examples:
 
-  - "a" --------------> "あ"
-  - "a." -------------> "ア"
-  - "a.v" ------------> "ァ"
-  - "av." ------------> "ァ"
-  - "buiaiemu" -------> "ぶいあいえむ"
-  - "bu.i.a.i.e.mu." -> "ブイアイエム"
+  - "a" -> "あ"
+  - "あv" -> "ぁ"
+  - "buiaiemu" -> "ぶいあいえむ"
 
 ------------------------------------------------------------------------------
 3.3 Phonetic mode                               *ime-built-in-plugin-chewing*
