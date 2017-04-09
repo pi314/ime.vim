@@ -352,4 +352,6 @@ function! ime#icon (pname, icon) " {{{
 
     let s:ime_mode['icon'] = a:icon
     let s:ime_mode['menu'] = s:ime_mode['icon'] .' - '. s:ime_mode['description']
+
+    redrawstatus!
 endfunction " }}}
