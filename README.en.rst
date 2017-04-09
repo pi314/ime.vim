@@ -129,6 +129,14 @@ Usage
     If you type English in Chinese mode, these words become Chinese characters.
     You can press ``<C-h>`` to turn them back to English.
 
+* Switch to submode ::
+
+    let g:ime_switch_submode = ';;'
+
+  - Some input mode has several submodes
+  - Like Microsoft phonetic input method, after pressing ``ctrl`` + ``alt`` + ``,``, a screen keyboard pops up, and the next key will output a punctuation mark instead of phonetic symbol
+  - Not every input mode has submodes, and their switch keys would not be the same, please refer to their documents
+
 * Built-in input modes
 
   - Built-in input modes are triggered with ``<space>``
@@ -143,17 +151,15 @@ Usage
     + Type ``\u`` and proceeding with unicode code point
     + ``\u[字]`` decodes ``字`` to ``\u5b57``
 
-  - Kana mode ``[あ]``
+  - Kana mode ``[あ]`` / ``[ア]``
 
-    + Japanese Hiragana and Katakana
+    + Type ``;;`` to switch between Japanese Hiragana and Katakana
+    + Type ``v`` to change previous symbol to "sokuon"
     + Examples:
 
       * ``a`` -> ``あ``
-      * ``a.`` -> ``ア``
-      * ``a.v`` -> ``ァ``
-      * ``av.`` -> ``ァ``
+      * ``あv`` -> ``ぁ``
       * ``buiaiemu`` -> ``ぶいあいえむ``
-      * ``bu.i.a.i.e.mu.`` -> ``ブイアイエム``
 
 * Custom table
 

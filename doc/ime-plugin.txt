@@ -1,4 +1,4 @@
-*ime-plugin.txt*          For Vim version 8.0             Last update：2017/03
+*ime-plugin.txt*          For Vim version 8.0             Last update：2017/04
 
                                            ime.vim plugin development document
 ==============================================================================
@@ -8,10 +8,11 @@ Index
     1.1 Plugin metadata.....................|ime-plugin-metadata|
 2.  Folder structure........................|ime-plugin-structure|
     2.1 Plugin with huge data...............|ime-plugin-with-huge-data|
-3.  Handler - the core of the plugin........|ime-plugin-handler|
+3.  Handler - the core of the plugin........|ime-plugin-handler()|
     3.1 Handler - complicated operations....|ime-plugin-complex-handler|
+    3.2 Multiple submodes...................|ime-plugin-submodes|
 4.  Log message.............................|ime#log()|
-5.  Script-local function in Vim 7.3........|ime-plugin-for-vim-7.3-funcref|
+6.  Script-local function in Vim 7.3........|ime-plugin-for-vim-7.3-funcref|
 
 ==============================================================================
 1.  Introduction                                     *ime-plugin-introduction*
@@ -34,15 +35,19 @@ To make your plugin recognizable to ime.vim, the plugin has to provide
 necessary informations:
 
 - Type: |string|, "standalone" or "embedded"
+                                                          *ime-plugin-pattern*
 - Pattern: |regex|, the string pattern that can be processed by this plugin
-- Handler: |Funcref|, process the input string and returns the result
+
+- Handler: |Funcref|, process the input string and returns the result.
+           see |ime-plugin-handler()|.
+                                                        *ime-plugin-trigger[]*
 - Trigger: |List|[|string|], what keys should trigger this plugin to work
 
 Standalone plugin should provide two additional informations:
 
 - Icon: |string|, shown in mode selection menu and 'statusline'
 - Description: |string|, shown in mode selection menu
-
+                                                             *ime-plugin-name*
 Further more, this plugin should decide a name: {plugin-name}
 for user to add in |g:ime_plugins|.
 
@@ -71,6 +76,7 @@ ime.vim plugins are suggested to place files in the following structure:
     `-- README
 <
 *ime_{plugin-name}.vim* is the main file of the plugin.
+
 Suggested content is as following:
 >
     function! ime_{plugin-name}#handler (matchobj, trigger)
@@ -90,11 +96,11 @@ Suggested content is as following:
 <
 Please adjust the content for your needs.
 Note that the value of handler is function('ime_{plugin-name}#handler'),
-     the quotes are necessary.
+     the quote marks are necessary.
 
-Note that at least the file ime_{plugin-name}.vim and
-the function ime_{plugin-name}#info() should follow the naming rule,
-otherwise ime.vim will not load this plugin.
+Note that at least the file ime_{plugin-name}.vim and the function
+ime_{plugin-name}#info() should follow the naming rule, otherwise ime.vim
+will not load this plugin.
 
 ------------------------------------------------------------------------------
 2.1 Plugin with huge data                          *ime-plugin-with-huge-data*
@@ -118,7 +124,7 @@ And adjust |ime_{plugin-name}.vim| to:
 >
     let s:table = {}
 
-    function! ime_{plugin-name}#handler (matchobj)
+    function! ime_{plugin-name}#handler (matchobj, trigger)
         if s:table == {}
             let s:table = ime_{plugin-name}_table#table()
         endif
@@ -138,24 +144,24 @@ And adjust |ime_{plugin-name}.vim| to:
     endfunction
 <
 ==============================================================================
-3.  Handler - the core of the plugin                      *ime-plugin-handler*
+3.  Handler - the core of the plugin                    *ime-plugin-handler()*
 
 The core function of the plugin is provided by the plugin handler.
 
 When switching to a input method, ime.vim executes |inoremap| according to
-the "trigger" information provided by the plugin.
+|ime-plugin-trigger|.
 If user pressed one of the trigger key, ime.vim passes the cursor line text
-and "pattern" provided by the plugin to |matchlist()|.
+and |ime-plugin-pattern| to |matchlist()|.
 If the matching succeed, the matching result (a |List|) and the trigger key
 will be passed into handler.
 
-Handler processes the matching result and trigger,
+|ime-plugin-handler()| processes the matching result and the trigger key,
 and return a |List| containing availble options.
 The ordering of the options could be decided by the handler.
 
 The options then passed into |complete()| to generate completion menu,
-every option could have description text,
-for further information see |complete-items|.
+every option could have description text.
+For further information see |complete-items|.
 
 The handler can leverage regex groups (see |\1|) in the pattern.
 
@@ -164,7 +170,7 @@ The handler can leverage regex groups (see |\1|) in the pattern.
 
 Some plugins need to do very complicated operations, for example 嘸蝦米 does
 multi-stage match and gave up part of strings every time.
-This is very hard to achieve only with pattern.
+This is very hard to achieve only with |ime-plugin-pattern|.
 
 So, ime.vim allows handler to return a |dict| including two keys:
 
@@ -184,6 +190,76 @@ In this situation the handler should return:
 for ime.vim to replace ".[,stare" to ".[ಠ_ಠ".
 
 If the handler returns ['ಠ_ಠ'], ime.vim replaces ".[,stare" to "ಠ_ಠ".
+
+------------------------------------------------------------------------------
+3.2 Multiple submodes                                    *ime-plugin-submodes*
+
+Some input methods have multiple submodes for different reasons:
+
+- It's not easy to input punctuation marks in phonetic input method
+  as it uses at least 36 keys
+- It's not easy to input Hiragana and Katakana characters on the same keyboard
+  as they pronounce the same
+- Even English input method has Capslock that equals to capitalized mode
+
+If your plugin has multiple submodes, the following information are necessary:
+                                                         *ime-plugin-switch[]*
+- "switch": |List|[|string|], what keys should switch to submode
+                                                        *ime-plugin-submode()*
+- "submode": |Funcref|, switch to correcponding submode
+             according to the switch key
+
+On the other side, ime.vim provides a interface to allow your plugin to change
+the icon:
+
+ime#icon({plugin-name}, {icon-str})                               *ime#icon()*
+
+{plugin-name}   the plugin name. ime.vim only permitts the current plugin to
+                change its icon. Please refer to |ime-plugin-name|
+{icon-str}      the new icon string. This argument has no constrains, just make
+                sure the user understand it.
+
+Let's see a simplified example:
+>
+    let s:mode = 0
+
+    function! ime_{plugin-name}#submode (switch)
+        if a:switch == ''
+            let s:mode = 0
+            call ime#icon({plugin-name}, '[:)]')
+        elseif a:switch == <key1>
+            let s:mode = 1
+            call ime#icon({plugin-name}, '[:D]')
+        ...
+        endif
+    endfunction
+
+    function! ime_{plugin-name}#info()
+        return {
+            \ ...
+            \ 'switch': ['<key1>', '<key2>', ...]
+            \ 'submode': function('ime_{plugin-name}#submode')
+            \ ...
+            \ }
+    endfunction
+<
+First, |ime-plugin-submode()| is provided by |ime_{plugin-name}#info()|.
+When the user select this mode, ime.vim executes |inoremap| according to
+|ime-plugin-switch[]|.
+
+If the user pressed any one of switch key, ime.vim calls |ime-plugin-submode()|
+and pass the key as the argument.
+The plugin can switch to correcponding submode according to this key.
+
+If ime.vim passed an empty string to |ime-plugin-submode()|, it means that the
+user selects another mode. The plugin can set itself to the default submode or
+stay in the current submode.
+
+Remember to call |ime#icon()| in |ime-plugin-submode()| to let ime.vim update
+the plugin icon.
+
+Note that is your plugin has only two submodes, you can omit
+|ime-plugin-switch[]|, and ime.vim will use |g:ime_switch_submode| for it.
 
 ==============================================================================
 4.  Log message                                                    *ime#log()*
@@ -219,7 +295,7 @@ For convenience, you can wrap |ime#log()|:
 So that you don't have to write {logtag} every time you call |ime#log()|.
 
 ==============================================================================
-5.  Script-local function in Vim 7.3          *ime-plugin-for-vim-7.3-funcref*
+6.  Script-local function in Vim 7.3          *ime-plugin-for-vim-7.3-funcref*
 
 According to this thread:
 

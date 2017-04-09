@@ -1,4 +1,4 @@
-*ime-plugin.twx*          For Vim version 8.0                最近更新：2017/03
+*ime-plugin.twx*          For Vim version 8.0                最近更新：2017/04
 
                                                           ime.vim 套件開發文件
 ==============================================================================
@@ -8,8 +8,9 @@
     1.1 套件資訊............................|ime-plugin-metadata|
 2.  目錄結構................................|ime-plugin-structure|
     2.1 需要載入龐大資料的套件..............|ime-plugin-with-huge-data|
-3.  套件核心 - handler......................|ime-plugin-handler|
+3.  套件核心 - handler......................|ime-plugin-handler()|
     3.1 Handler - 複雜的判斷................|ime-plugin-complex-handler|
+    3.2 多個子模式..........................|ime-plugin-submodes|
 4.  Log 訊息................................|ime#log()|
 5.  Vim 7.3 的 script-local function 問題...|ime-plugin-for-vim-7.3-funcref|
 
@@ -30,16 +31,19 @@ ime.vim 能夠載入第三方的套件，擴充自己的輸入能力。
 要讓 ime.vim 正確載入，套件需要提供必要的資訊：
 
 - Type: |string|，"standalone" 或是 "embedded"。
+                                                          *ime-plugin-pattern*
 - Pattern: |regex|，表示該套件所能處理的字串。
-- Handler: |Funcref|，根據比對到的字串回傳可用的選項。
+
+- Handler: |Funcref|，根據比對到的字串回傳可用的選項。  |ime-plugin-handler()|
+                                                        *ime-plugin-trigger[]*
 - Trigger: |List|[|string|]，列出能夠觸發該輸入模式的按鍵。
 
 Standalone 套件需要額外提供兩項資訊：
-
+                                                             *ime-plugin-icon*
 - Icon: |string|，在選擇輸入模式時顯示，以及在 'statusline' 中顯示。
 - Description: |string|，在選擇輸入模式時顯示。
 
-除此之外，套件需要訂定一個名稱： {plugin-name}
+除此之外，套件需要訂定一個名稱： {plugin-name}               *ime-plugin-name*
 讓使用者加在 |g:ime_plugins| 之中。
 
 這些資訊需要包裝成一個 |dict| 並透過 *ime_{plugin-name}#info()* 回傳：
@@ -82,12 +86,11 @@ ime.vim 的套件建議依照以下的目錄結構放置檔案：
             \ }
     endfunction
 <
-請依照自己的需求對以上的內容做調整。
-注意 handler 的值為 function('ime_{plugin-name}#handler')，引號不可省略。
+請依照自己的需求對以上的內容做調整。注意 "handler" 的值為
+function('ime_{plugin-name}#handler')，引號不可省略。
 
-請注意至少 ime_{plugin-name}.vim 的檔名以及
-ime_{plugin-name}#info() 函式需要按照規則命名，
-否則 ime.vim 無法載入套件。
+請注意至少 ime_{plugin-name}.vim 的檔名以及 ime_{plugin-name}#info() 函式
+需要按照規則命名，否則 ime.vim 無法載入套件。
 
 ------------------------------------------------------------------------------
 2.1 需要載入龐大資料的套件                         *ime-plugin-with-huge-data*
@@ -111,7 +114,7 @@ ime_{plugin-name}#info() 函式需要按照規則命名，
 >
     let s:table = {}
 
-    function! ime_{plugin-name}#handler (matchobj)
+    function! ime_{plugin-name}#handler (matchobj, trigger)
         if s:table == {}
             let s:table = ime_{plugin-name}_table#table()
         endif
@@ -131,39 +134,39 @@ ime_{plugin-name}#info() 函式需要按照規則命名，
     endfunction
 <
 ==============================================================================
-3.  套件核心 - handler                                    *ime-plugin-handler*
+3.  套件核心 - handler                                  *ime-plugin-handler()*
 
-套件的核心功能由 handler 提供。
+套件的核心功能由 |ime-plugin-handler()| 提供。
 
-在切換到輸入法的時候，ime.vim 會根據套件提供的 trigger 資訊執行 |inoremap|。
-使用者若按下了其中一個 trigger 按鍵，
-ime.vim 會將編輯區該行的文字與套件提供的 pattern 傳入 |matchlist()| 進行比對。
-若比對成功，該結果（一個 |List|）和 trigger 按鍵會一起被傳入 handler。
+在切換到輸入法的時候，ime.vim 會根據套件提供的 |ime-plugin-trigger[]| 執行
+|inoremap|。使用者若按下了其中一個 trigger 按鍵， ime.vim 會將編輯區該行的文字
+與 |ime-plugin-pattern| 傳入 |matchlist()| 進行比對。
+若比對成功，該結果（一個 |List|）和 trigger 按鍵會一起被傳入
+|ime-plugin-handler()|。
 
-handler 需要針對 matchobj 以及 trigger 進行處理及判斷，
-並回傳一個 |List|，包含可用的選項。
-回傳選項的順序可以由套件自行決定。
+|ime-plugin-handler()| 需要針對 matchobj 以及 trigger 按鍵進行處理及判斷，
+並回傳一個 |List|，包含可用的選項。回傳選項的順序可以由套件自行決定。
 
-輸入時產生的選單透過 |complete()| 產生，每個選項可以帶有說明文字，
-詳細資訊請見 |complete-items|。
+輸入時產生的選單透過 |complete()| 產生，每個選項可以帶有說明文字，詳細資訊請見
+|complete-items|。
 
-套件提供的 pattern 可以包含 regex groups（請參考 |\1|），
-提供 handler 判斷使用。
+|ime-plugin-pattern| 可以包含 regex groups（請參考 |\1|），提供
+|ime-plugin-handler()| 判斷使用。
 
 ------------------------------------------------------------------------------
 3.1 Handler - 複雜的判斷                          *ime-plugin-complex-handler*
 
-有些套件需要做很複雜的判斷，例如嘸蝦米模式會做多階段的比對，
-每次放棄一部份的字串，這樣複雜程度只靠 pattern 處理是非常困難的。
+有些套件需要做很複雜的判斷，例如嘸蝦米模式會做多階段的比對，每次放棄一部份的
+字串，這樣複雜程度只靠 |ime-plugin-pattern| 處理是非常困難的。
 
-因此，ime.vim 允許 handler 回傳 |dict|，包含兩個 key：
+因此，ime.vim 允許 |ime-plugin-handler()| 回傳 |dict|，包含兩項資訊：
 
 - "len": 實際上比對到的長度
 - "options": 比對到可用的選項
 
-例如 ime.vim 根據 pattern 比對到 ".[,stare"，傳入 handler。
-但 handler 決定只有 ",stare" 能被比對為 "ಠ_ಠ"，
-此時應回傳
+例如 ime.vim 根據 |ime-plugin-pattern| 比對到 ".[,stare" 並傳入
+|ime-plugin-handler()|，但 |ime-plugin-handler()| 決定只有 ",stare"
+能被比對為 "ಠ_ಠ"，此時應回傳
 >
     {
     \ 'len': 6,
@@ -174,11 +177,73 @@ handler 需要針對 matchobj 以及 trigger 進行處理及判斷，
 
 若直接回傳 ['ಠ_ಠ']，ime.vim 會把 ".[,stare" 取代為 "ಠ_ಠ"。
 
+------------------------------------------------------------------------------
+3.2 多個子模式                                           *ime-plugin-submodes*
+
+基於某些不同的原因，有些輸入法會有多個子模式：
+
+- 例如注音輸入法使用了至少 36 個按鍵，此時標點符號變得不容易輸入。
+- 例如假名輸入法，在同一個鍵盤上輸入平假名和片假名是不容易的事情。
+- 即使是英文輸入法也有 Capslock，相當於大寫的子模式。
+
+如果你想要為你的套件實作多個子模式，你需要提供以下資訊：
+                                                         *ime-plugin-switch[]*
+- "switch": |List|[|string|]，列出切換子模式的按鍵。
+                                                        *ime-plugin-submode()*
+- "submode": |Funcref|，根據按下的按鍵切換到對應的子模式。
+
+另一方面，ime.vim 也提供介面讓套件顯示每個子模式：
+
+ime#icon({plugin-name}, {icon-str})                               *ime#icon()*
+
+{plugin-name}   套件的名稱。ime.vim 只允許當下正在使用的套件更改自己的圖示。
+                請參考 |ime-plugin-name|。
+{icon-str}      新的圖示。這個參數沒有強制性，只要使用者方便識別即可。
+
+先看一個簡略的範例：
+>
+    let s:mode = 0
+
+    function! ime_{plugin-name}#submode (switch)
+        if a:switch == ''
+            let s:mode = 0
+            call ime#icon({plugin-name}, '[:)]')
+        elseif a:switch == <key1>
+            let s:mode = 1
+            call ime#icon({plugin-name}, '[:D]')
+        ...
+        endif
+    endfunction
+
+    function! ime_{plugin-name}#info()
+        return {
+            \ ...
+            \ 'switch': ['<key1>', '<key2>', ...]
+            \ 'submode': function('ime_{plugin-name}#submode')
+            \ ...
+            \ }
+    endfunction
+<
+首先，|ime-plugin-submode()| 資訊需要在 |ime_{plugin-name}#info()| 中提供。
+在切換到輸入法的時候，ime.vim 會根據 |ime-plugin-switch[]| 執行 |inoremap|。
+
+若使用者按下了 switch 按鍵，ime.vim 會呼叫 |ime-plugin-submode()| 並將該按鍵
+當成參數傳入。
+套件可以根據這個按鍵決定要切換至哪一個子模式。
+
+若 ime.vim 傳入了空字串給 |ime-plugin-submode()|，代表使用者切換到別的模式了，
+你可以選擇在這時候回到預設的子模式，也可以留在當下的子模式。
+
+在切換到子模式以後，請記得呼叫 |ime#icon()|，讓 ime.vim 更新套件的圖示。
+
+有一點值得注意，如果你的套件只有兩個子模式，你可以忽略 |ime-plugin-switch[]|，
+ime.vim 會採用 |g:ime_switch_submode|。
+
 ==============================================================================
 4.  Log 訊息                                                       *ime#log()*
 
-人有失神，馬有亂蹄，吃飯哪有不掉飯米粒的，吃燒餅哪有不掉芝麻的，
-寫程式總會需要 debug，需要 log 訊息。
+人有失神，馬有亂蹄，吃飯哪有不掉飯米粒的，吃燒餅哪有不掉芝麻的，寫程式總會
+需要 debug，需要 log 訊息。
 
 ime#log({logtag}, {...})
 

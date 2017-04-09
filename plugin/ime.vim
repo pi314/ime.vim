@@ -46,3 +46,8 @@ imap <CR> <Plug>IME_DispatchCR
 if !exists('g:ime_plugins') || type(g:ime_plugins) != type([])
     let g:ime_plugins = ['builtin-boshiamy', 'builtin-kana', 'builtin-chewing', 'builtin-unicode']
 endif
+
+
+if !exists('g:ime_switch_submode') || type(g:ime_switch_submode) != ''
+    let g:ime_switch_submode = ';;'
+endif
