@@ -36,13 +36,13 @@ endfunction
 let s:standalone_plugin_list = []
 let s:embedded_plugin_list = []
 function! s:LoadPlugins () " {{{
-    for l:plugin in g:ime_plugins
-        let l:plugin = substitute(l:plugin, '-', '_', 'g')
+    for l:pname in g:ime_plugins
+        let l:pname = substitute(l:pname, '-', '_', 'g')
         try
-            let l:plugin_info = function('ime#'. l:plugin .'#info')()
+            let l:plugin_info = function('ime#'. l:pname .'#info')()
         catch
             try
-                let l:plugin_info = function('ime_'. l:plugin .'#info')()
+                let l:plugin_info = function('ime_'. l:pname .'#info')()
             catch
                 call ime#log('core', '// '. v:throwpoint)
                 call ime#log('core', '\\ '. v:exception)
@@ -52,34 +52,34 @@ function! s:LoadPlugins () " {{{
 
         " sanity check
         if !has_key(l:plugin_info, 'type')
-            call ime#log('core', 'plugin "'. l:plugin . '" lacks "type" information')
+            call ime#log('core', 'plugin "'. l:pname . '" lacks "type" information')
             continue
         endif
 
         if l:plugin_info['type'] == 'standalone' &&
                 \ (!has_key(l:plugin_info, 'icon') ||
                 \ !has_key(l:plugin_info, 'description'))
-            call ime#log('core', 'plugin "'. l:plugin . '" lacks "icon" or "description" information')
+            call ime#log('core', 'plugin "'. l:pname . '" lacks "icon" or "description" information')
             continue
         endif
 
         if !has_key(l:plugin_info, 'pattern')
-            call ime#log('core', 'plugin "'. l:plugin . '" lacks "pattern" information')
+            call ime#log('core', 'plugin "'. l:pname . '" lacks "pattern" information')
             continue
         endif
 
         if !has_key(l:plugin_info, 'handler')
-            call ime#log('core', 'plugin "'. l:plugin . '" lacks "handler" information')
+            call ime#log('core', 'plugin "'. l:pname . '" lacks "handler" information')
             continue
         endif
 
         if !has_key(l:plugin_info, 'trigger')
-            call ime#log('core', 'plugin "'. l:plugin . '" lacks "trigger" information')
+            call ime#log('core', 'plugin "'. l:pname . '" lacks "trigger" information')
             continue
         endif
 
         if !has_key(l:plugin_info, 'submode') && has_key(l:plugin_info, 'switch')
-            call ime#log('core', 'plugin "'. l:plugin . '" has abandoned "switch" information')
+            call ime#log('core', 'plugin "'. l:pname . '" has abandoned "switch" information')
             unlet l:plugin_info['switch']
         endif
 
@@ -87,7 +87,7 @@ function! s:LoadPlugins () " {{{
             let l:plugin_info['switch'] = [g:ime_switch_submode]
         endif
 
-        let l:plugin_info['name'] = l:plugin
+        let l:plugin_info['name'] = l:pname
 
         if l:plugin_info['type'] == 'standalone'
             call add(s:standalone_plugin_list, l:plugin_info)
