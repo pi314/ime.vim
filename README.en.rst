@@ -121,6 +121,11 @@ Usage
 
     let g:ime_select_mode = ',m'
 
+  - Set ``g:ime_select_mode_style`` for different selection style:
+
+    + ``let g:ime_select_mode_style = 'popup'`` - (default) use completion menu for selection
+    + ``let g:ime_select_mode_style = 'interactive'`` - use interactive menu for selection
+
 * Cancel input text ::
 
     let g:ime_cancel_input = '<C-h>'

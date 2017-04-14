@@ -296,7 +296,7 @@ function! ime#toggle () " {{{
 endfunction " }}}
 
 
-function! ime#_comp_mode_menu () " {{{
+function! ime#_popup_mode_menu () " {{{
     if s:ime_mode == {}
         call ime#log('core', 'No input mode installed.')
         return ''
@@ -311,7 +311,7 @@ function! ime#_comp_mode_menu () " {{{
 endfunction " }}}
 
 
-function! ime#_fallback_mode_menu () " {{{
+function! ime#_interactive_mode_menu () " {{{
     let l:cursor = index(s:standalone_plugin_list, s:ime_mode)
     try
         let l:more = &more

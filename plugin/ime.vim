@@ -14,17 +14,17 @@ endif
 
 
 if !exists('g:ime_select_mode_style') || type(g:ime_select_mode_style) != type('')
-    let g:ime_select_mode_style = 'menu'
+    let g:ime_select_mode_style = 'popup'
 endif
-if g:ime_select_mode_style == 'menu' && (!exists('##CompleteDone') || !exists('v:completed_item'))
-    let g:ime_select_mode_style = 'fallback'
+if g:ime_select_mode_style == 'popup' && (!exists('##CompleteDone') || !exists('v:completed_item'))
+    let g:ime_select_mode_style = 'interactive'
 endif
 
 
-if g:ime_select_mode_style == 'menu'
-    execute 'inoremap <expr> '. g:ime_select_mode .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=ime#_comp_mode_menu()<CR>"'
+if g:ime_select_mode_style == 'popup'
+    execute 'inoremap <expr> '. g:ime_select_mode .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=ime#_popup_mode_menu()<CR>"'
 else
-    execute 'inoremap '. g:ime_select_mode .' <C-\><C-o>:call ime#_fallback_mode_menu()<CR>'
+    execute 'inoremap '. g:ime_select_mode .' <C-\><C-o>:call ime#_interactive_mode_menu()<CR>'
 endif
 
 
