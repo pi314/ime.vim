@@ -1,0 +1,9 @@
+Before (Set to Kana mode):
+  AssertEqual ime#mode('builtin-kana'), '[あ]'
+
+Do (Typing):
+  iaiueo\<CR>\<CR>;;aiueo\<Esc>
+
+Expect ():
+  あいうえお
+  アイウエオ
