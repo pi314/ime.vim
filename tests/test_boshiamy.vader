@@ -1,0 +1,8 @@
+Before (Set to 嘸蝦米 mode):
+  AssertEqual ime#mode('builtin-boshiamy'), '[嘸]'
+
+Do (Typing):
+  iix jn pns bxc yua yfmb fn zft \<Esc>
+
+Expect ():
+  我是你爸去賣火柴

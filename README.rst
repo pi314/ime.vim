@@ -117,6 +117,11 @@ vim-boshiamy 是暫時的 work around，2012 年中釋出後就沒有再更新�
 
     let g:ime_select_mode = ',m'
 
+  - 設定 ``g:ime_select_mode_style`` 以使用不同的風格：
+
+    + ``let g:ime_select_mode_style = 'popup'`` - (預設) 透過補完選單切換模式
+    + ``let g:ime_select_mode_style = 'interactive'`` - 透過互動式選單切換模式
+
 * 取消輸入，回復為輸入前的字串： ::
 
     let g:ime_cancel_input = '<C-h>'

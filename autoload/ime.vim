@@ -278,7 +278,21 @@ endfunction " }}}
 " ================
 " Public Functions
 " ================
-function! ime#mode () " {{{
+function! ime#mode (...) " {{{
+    if a:0
+        try
+            let l:pname = substitute(a:1, '-', '_', 'g')
+            let l:pnames = map(copy(s:standalone_plugin_list), 'v:val[''name'']')
+            if l:pname ==? 'english' || index(l:pnames, l:pname) == -1
+                call s:SelectMode({})
+            else
+                call s:SelectMode(s:standalone_plugin_list[index(l:pnames, l:pname)])
+            endif
+        catch
+            call s:SelectMode({})
+        endtry
+    endif
+
     if s:ime_english_enable == s:true
         return '[En]'
     endif
@@ -296,7 +310,7 @@ function! ime#toggle () " {{{
 endfunction " }}}
 
 
-function! ime#_comp_mode_menu () " {{{
+function! ime#_popup_mode_menu () " {{{
     if s:ime_mode == {}
         call ime#log('core', 'No input mode installed.')
         return ''
@@ -311,7 +325,7 @@ function! ime#_comp_mode_menu () " {{{
 endfunction " }}}
 
 
-function! ime#_fallback_mode_menu () " {{{
+function! ime#_interactive_mode_menu () " {{{
     let l:cursor = index(s:standalone_plugin_list, s:ime_mode)
     try
         let l:more = &more
@@ -367,4 +381,39 @@ function! ime#icon (pname, icon) " {{{
     let s:ime_mode['menu'] = s:ime_mode['icon'] .' - '. s:ime_mode['description']
 
     redrawstatus!
+endfunction " }}}
+
+
+function! ime#export_cin_file () " {{{
+    let l:boshiamy_table = ime#boshiamy_table#table()
+    let l:chewing_table = ime#chewing_table#table()
+
+    tabedit
+    call setline('$', '%gen_inp')
+    call append('$', '%ename liu57')
+    call append('$', '%cname 嘸蝦米')
+    call append('$', '%encoding UTF-8')
+    call append('$', '%selkey 0123456789')
+    call append('$', '%keyname begin')
+    let l:keyname = split("abcdefghijklmnopqrstuvwxyz,.'[];1234567890-=", '\zs')
+    let l:keylook = split("ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ，．'〔〔；１２３４５６７８９０–＝", '\zs')
+    for l:idx in range(len(l:keyname))
+        call append('$', l:keyname[(l:idx)] .' '. l:keylook[(l:idx)])
+    endfor
+    call append('$', '%keyname end')
+    call append('$', '%chardef begin')
+
+    for l:key in sort(keys(l:boshiamy_table))
+        for l:char in l:boshiamy_table[l:key]
+            call append('$', l:key .' '. l:char)
+        endfor
+    endfor
+
+    for l:key in sort(keys(l:chewing_table))
+        for l:char in l:chewing_table[l:key]
+            call append('$', l:key .' '. l:char)
+        endfor
+    endfor
+
+    call append('$', '%chardef end')
 endfunction " }}}
