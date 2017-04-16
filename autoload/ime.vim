@@ -393,10 +393,10 @@ function! ime#export_cin_file () " {{{
     call append('$', '%ename liu57')
     call append('$', '%cname 嘸蝦米')
     call append('$', '%encoding UTF-8')
-    call append('$', '%selkey 0123456789')
+    call append('$', '%selkey !@#$%^&*(')
     call append('$', '%keyname begin')
-    let l:keyname = split("abcdefghijklmnopqrstuvwxyz,.'[];1234567890-=", '\zs')
-    let l:keylook = split("ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ，．'〔〔；１２３４５６７８９０–＝", '\zs')
+    let l:keyname = split("abcdefghijklmnopqrstuvwxyz,.'[];1234567890-=/", '\zs')
+    let l:keylook = split("ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ，．'〔〔；１２３４５６７８９０-＝／", '\zs')
     for l:idx in range(len(l:keyname))
         call append('$', l:keyname[(l:idx)] .' '. l:keylook[(l:idx)])
     endfor
