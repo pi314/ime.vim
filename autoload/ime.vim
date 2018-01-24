@@ -373,7 +373,7 @@ endfunction " }}}
 function! ime#icon (pname, icon) " {{{
     let l:pname = substitute(a:pname, '-', '_', 'g')
     if l:pname != s:ime_mode['name']
-        call s:log('core',
+        call ime#log('core',
         \ 'ime#icon("'. l:pname .'"): current plugin name is "'. s:ime_mode['name'] .'"')
     endif
 
