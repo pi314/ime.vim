@@ -11,8 +11,9 @@
 3.  套件核心 - handler......................|ime-plugin-handler()|
     3.1 Handler - 複雜的判斷................|ime-plugin-complex-handler|
     3.2 多個子模式..........................|ime-plugin-submodes|
-4.  Log 訊息................................|ime#log()|
-5.  Vim 7.3 的 script-local function 問題...|ime-plugin-for-vim-7.3-funcref|
+4.  選字....................................|ime-plugin-choose-word|
+5.  Log 訊息................................|ime#log()|
+6.  Vim 7.3 的 script-local function 問題...|ime-plugin-for-vim-7.3-funcref|
 
 ==============================================================================
 1.  介紹                                             *ime-plugin-introduction*
@@ -240,7 +241,34 @@ ime#icon({plugin-name}, {icon-str})                               *ime#icon()*
 ime.vim 會採用 |g:ime_switch_submode|。
 
 ==============================================================================
-4.  Log 訊息                                                       *ime#log()*
+4.  選字                                              *ime-plugin-choose-word*
+
+許多輸入法都有「快速鍵選字」的功能，使用者不需要一直按方向鍵來選擇想要的字。
+
+這個功能現在由 ime.vim 提供，plugin 只需要提供 "choice" 資訊：
+>
+    function! ime_{plugin-name}#info()
+        return {
+            \ ...
+            \ 'choice': ['<key1>', '<key2>', ...]
+            \ ...
+            \ }
+    endfunction
+<
+在選字的選單出現時，ime.vim 會自動將 "choice" 填入選單，並使用 |inoremap|
+設定好每個按鍵。
+
+使用者按下對應的按鍵以後，該選項會被當成唯一一個選項，然後所有的 "choice" 按鍵
+會被 ime.vim 用 |iunmap| 清除。
+
+空字串的快捷鍵會被跳過。
+
+此功能在不支援 ##CompleteDone 的 Vim 上無法啟用。
+
+建議 "choice" 資訊和 "trigger" 不要重疊。
+
+==============================================================================
+5.  Log 訊息                                                       *ime#log()*
 
 人有失神，馬有亂蹄，吃飯哪有不掉飯米粒的，吃燒餅哪有不掉芝麻的，寫程式總會
 需要 debug，需要 log 訊息。
@@ -269,7 +297,7 @@ ime#log({logtag}, {...})
 這樣就不需要在每次呼叫 |ime#log()| 時都要寫一次 {logtag}。
 
 ==============================================================================
-5.  Vim 7.3 的 script-local function 問題     *ime-plugin-for-vim-7.3-funcref*
+6.  Vim 7.3 的 script-local function 問題     *ime-plugin-for-vim-7.3-funcref*
 
 根據這個討論串：
 

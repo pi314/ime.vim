@@ -11,7 +11,8 @@ Index
 3.  Handler - the core of the plugin........|ime-plugin-handler()|
     3.1 Handler - complicated operations....|ime-plugin-complex-handler|
     3.2 Multiple submodes...................|ime-plugin-submodes|
-4.  Log message.............................|ime#log()|
+4.  Choose a word...........................|ime-plugin-choose-word|
+5.  Log message.............................|ime#log()|
 6.  Script-local function in Vim 7.3........|ime-plugin-for-vim-7.3-funcref|
 
 ==============================================================================
@@ -262,7 +263,36 @@ Note that is your plugin has only two submodes, you can omit
 |ime-plugin-switch[]|, and ime.vim will use |g:ime_switch_submode| for it.
 
 ==============================================================================
-4.  Log message                                                    *ime#log()*
+4.  Choose a word                                     *ime-plugin-choose-word*
+
+Many input methods has the "use hotkey to choose word" feature, so that uses
+don't have to press arrow key many times to select the desired word.
+
+This function is provided by ime.vim, and your plugin only need to provide
+"choice" information:
+>
+    function! ime_{plugin-name}#info()
+        return {
+            \ ...
+            \ 'choice': ['<key1>', '<key2>', ...]
+            \ ...
+            \ }
+    endfunction
+<
+When the word-selection menu appears, ime.vim will add "choice" key into menu
+one-by-one, and use |inoremap| to setup those keys.
+
+After user press the corresponding key, the word will be treat as the only
+option in the menu, and then all "choice" keys are |iunmap| ed.
+
+Zero-length hotkeys will be skipped.
+
+This feature would be disabled if ##CompleteDone is not supported.
+
+It's recommanded that "trigger" and "choice" are not overlapped.
+
+==============================================================================
+5.  Log message                                                    *ime#log()*
 
     If debugging is the process of removing software bugs,
     then programming must be the process of putting them in.

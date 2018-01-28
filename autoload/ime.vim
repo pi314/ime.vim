@@ -29,6 +29,8 @@ endfunction
 "   'description': <description>
 "   'pattern': <pattern>
 "   'handler': <handler-function-reference>
+"   'trigger': [<trigger>]
+"   'choice': [<choice>]
 " }
 
 
@@ -130,6 +132,9 @@ endfunction " }}}
 
 function! s:SelectMode (new_mode) " {{{
     for l:key in s:ime_mode['trigger'] + get(s:ime_mode, 'switch', [])
+        if l:key == ''
+            continue
+        endif
         try
             execute 'iunmap '. s:EscapeKey(l:key)
         catch
@@ -236,6 +241,55 @@ function! s:ExecutePlugin (line, plugin, trigger) " {{{
             return s:false
         endif
 
+        let s:option_cache = {} " {{{
+        let s:option_cache['options'] = []
+        if has_key(a:plugin, 'choice') && exists('##CompleteDone') && exists('v:completed_item')
+            for l:i in range(len(a:plugin['choice']))
+                if l:i >= len(l:options)
+                    break
+                endif
+
+                let l:opt = l:options[(l:i)]
+                let l:cho = a:plugin['choice'][(l:i)]
+
+                if l:cho == ''
+                    continue
+                endif
+
+                if type(l:opt) == type('')
+                    let l:options[(l:i)] = {
+                                \ 'word': l:opt,
+                                \ 'menu': l:cho,
+                                \ }
+                elseif type(l:opt) == type({}) && !has_key(l:opt, 'menu')
+                    let l:opt['menu'] = l:cho
+                endif
+
+                call add(s:option_cache['options'], l:options[(l:i)])
+
+                try
+                    " Compose this command (so complex):
+                    " inoremap choice (choose_option(choice))
+                    let l:escaped_key = s:EscapeKey(l:cho)
+                    let l:cmd = 'inoremap '
+                    let l:cmd .= l:escaped_key .' '
+                    let l:cmd .= '<C-R>=<SID>choose_option('''
+                    let l:cmd .= (l:escaped_key == "'" ? "''" : l:escaped_key)
+                    let l:cmd .= ''')<CR>'
+                    execute l:cmd
+                catch
+                    call ime#log('core', '>> '. v:exception)
+                endtry
+            endfor
+
+            augroup ime
+                autocmd! ime CompleteDone
+                autocmd ime CompleteDone * call s:clear_option_cache()
+            augroup end
+
+            let s:option_cache['col'] = col('.') - l:len
+        endif " }}}
+
         call complete(col('.') - l:len, l:options)
         return s:true
     catch
@@ -243,6 +297,46 @@ function! s:ExecutePlugin (line, plugin, trigger) " {{{
         call ime#log('core', '['. a:plugin['name'] .']', '\\ '. v:exception)
     endtry
     return s:false
+endfunction " }}}
+
+
+function! s:choose_option (key) " {{{
+    call ime#log('core', a:key, s:option_cache)
+    for l:i in get(s:option_cache, 'options', [])
+        if has_key(l:i, 'menu') && l:i['menu'] == a:key
+            call ime#log('core', l:i)
+            unlet l:i['menu']
+            call complete(s:option_cache['col'], [l:i])
+        endif
+    endfor
+
+    let s:option_cache = {}
+    call s:clear_option_cache()
+    return ''
+endfunction " }}}
+
+
+function! s:clear_option_cache () " {{{
+    " User use 'choose' key: s:choose_option() -> s:clear_option_cache()
+    " User cancel completion: CompleteDone -> s:clear_option_cache()
+
+    if len(s:option_cache)
+        return
+    endif
+
+    for l:key in get(s:ime_mode, 'choice', [])
+        if l:key == ''
+            continue
+        endif
+        try
+            execute 'iunmap '. s:EscapeKey(l:key)
+        catch
+        endtry
+    endfor
+
+    augroup ime
+        autocmd! ime CompleteDone
+    augroup end
 endfunction " }}}
 
 
