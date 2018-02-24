@@ -241,46 +241,39 @@ function! s:ExecutePlugin (line, plugin, trigger) " {{{
             return s:false
         endif
 
-        let s:option_cache = {} " {{{
-        let s:option_cache['options'] = []
+        " choice {{{
         if has_key(a:plugin, 'choice') && exists('##CompleteDone') && exists('v:completed_item')
-            for l:i in range(len(a:plugin['choice']))
-                if l:i >= len(l:options)
-                    break
+            let s:option_cache = {'options': {}}
+            let l:i = 0
+            let l:choices = copy(a:plugin['choice'])
+            while l:i < len(l:options) && len(l:choices)
+                if type(l:options[(l:i)]) == type('')
+                    let l:options[(l:i)] = {'word': l:options[(l:i)]}
                 endif
 
                 let l:opt = l:options[(l:i)]
-                let l:cho = a:plugin['choice'][(l:i)]
 
-                if l:cho == ''
-                    continue
+                if !has_key(s:option_cache['options'], l:opt['word'])
+                    let l:opt['menu'] = l:choices[0]
+                    let s:option_cache['options'][(l:opt['word'])] = l:options[(l:i)]
+                    try
+                        " Compose this command (so complex):
+                        " inoremap choice (choose_option(choice))
+                        let l:escaped_key = s:EscapeKey(l:choices[0])
+                        let l:cmd = 'inoremap '
+                        let l:cmd .= l:escaped_key .' '
+                        let l:cmd .= '<C-R>=<SID>choose_option('''
+                        let l:cmd .= (l:escaped_key == "'" ? "''" : l:escaped_key)
+                        let l:cmd .= ''')<CR>'
+                        execute l:cmd
+                    catch
+                        call ime#log('core', '>> '. v:exception)
+                    endtry
+                    call remove(l:choices, 0)
                 endif
 
-                if type(l:opt) == type('')
-                    let l:options[(l:i)] = {
-                                \ 'word': l:opt,
-                                \ 'menu': l:cho,
-                                \ }
-                elseif type(l:opt) == type({}) && !has_key(l:opt, 'menu')
-                    let l:opt['menu'] = l:cho
-                endif
-
-                call add(s:option_cache['options'], l:options[(l:i)])
-
-                try
-                    " Compose this command (so complex):
-                    " inoremap choice (choose_option(choice))
-                    let l:escaped_key = s:EscapeKey(l:cho)
-                    let l:cmd = 'inoremap '
-                    let l:cmd .= l:escaped_key .' '
-                    let l:cmd .= '<C-R>=<SID>choose_option('''
-                    let l:cmd .= (l:escaped_key == "'" ? "''" : l:escaped_key)
-                    let l:cmd .= ''')<CR>'
-                    execute l:cmd
-                catch
-                    call ime#log('core', '>> '. v:exception)
-                endtry
-            endfor
+                let l:i = l:i + 1
+            endwhile
 
             augroup ime
                 autocmd! ime CompleteDone
@@ -301,12 +294,12 @@ endfunction " }}}
 
 
 function! s:choose_option (key) " {{{
-    call ime#log('core', a:key, s:option_cache)
-    for l:i in get(s:option_cache, 'options', [])
-        if has_key(l:i, 'menu') && l:i['menu'] == a:key
-            call ime#log('core', l:i)
-            unlet l:i['menu']
-            call complete(s:option_cache['col'], [l:i])
+    for l:key in keys(get(s:option_cache, 'options', {}))
+        let l:option = s:option_cache['options'][(l:key)]
+        if has_key(l:option, 'menu') && l:option['menu'] == a:key
+            call ime#log('core', l:option)
+            unlet l:option['menu']
+            call complete(s:option_cache['col'], [(l:option)])
         endif
     endfor
 
