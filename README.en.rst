@@ -239,7 +239,7 @@ Further information about developing third party plugins for ime.vim:
 ``:help ime-plugins.en``
 
 
-可以配合 vim 使用的技巧
+Tips
 -------------------------------------------------------------------------------
 In replace mode, one character override one character,
 no matter the width.
@@ -249,6 +249,12 @@ space characters, the line under cursor will be longer and longer,
 because a two-width Chinese character only replaces one space character.
 
 The vim built-in ``gR`` is very useful in this case.
+
+
+Thanks
+-------------------------------------------------------------------------------
+honglong0420 - for mentioning ``𡦀`` on twitter
+
 
 
 License
