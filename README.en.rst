@@ -194,6 +194,20 @@ Usage
 
     let g:ime_plugins = ['emoji', 'runes']
 
+* Enable ime buffer ::
+
+    let g:ime_enable_ime_buffer = 1
+
+  - In ime buffer
+
+    + Copy-and-cut a line by pressing Enter in Insert mode
+    + Copy-and-cut multiple lines by pressing Enter in visual mode
+    + If the line is empty, pressing Enter pastes it back
+
+  - To activate ime buffer, set filetype to ``ime`` ::
+
+      :set ft=ime
+
 For further information please refer to ``:help ime.vim.en``
 
 

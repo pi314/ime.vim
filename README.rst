@@ -185,6 +185,20 @@ vim-boshiamy 是暫時的 work around，2012 年中釋出後就沒有再更新�
 
     let g:ime_plugins = ['emoji', 'runes']
 
+* 啟用 ime buffer ::
+
+    let g:ime_enable_ime_buffer = 1
+
+  - ime buffer 的效果為
+
+    + 在 Insert mode 按下 Enter 會直接剪下並複製一行
+    + 在 Visual mode 按下 Enter 會剪下並複製多行
+    + 若該行是空的，Enter 會貼上先前複製的文字
+
+  - 透過指定 filetype 來啟動 ime buffer ::
+
+      :set ft=ime
+
 詳細的文件請參考 ``:help ime.vim``
 
 
