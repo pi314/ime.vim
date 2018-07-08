@@ -490,6 +490,18 @@ function! ime#export_cin_file () " {{{
     call append('$', '%keyname end')
     call append('$', '%chardef begin')
 
+    let l:kana_tables = ime#kana_table#table()
+    for l:kana_table in [(l:kana_tables[0]), (l:kana_tables[1])]
+        for l:key in sort(keys(l:kana_table))
+            if l:key == '''' || l:key == '.'
+                continue
+            endif
+            for l:char in l:kana_table[(l:key)]
+                call append('$', ','. l:key .' '. l:char)
+            endfor
+        endfor
+    endfor
+
     for l:key in sort(keys(l:boshiamy_table))
         for l:char in l:boshiamy_table[l:key]
             call append('$', l:key .' '. l:char)
