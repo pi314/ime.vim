@@ -106,6 +106,12 @@ let s:hiragana_table['za'] = ['ざ']
 let s:hiragana_table['zu'] = ['ず', 'づ']
 let s:hiragana_table['ze'] = ['ぜ']
 let s:hiragana_table['zo'] = ['ぞ']
+let s:hiragana_table['cya'] = s:hiragana_table['cha']
+let s:hiragana_table['cyu'] = s:hiragana_table['chu']
+let s:hiragana_table['cyo'] = s:hiragana_table['cho']
+let s:hiragana_table['jya'] = s:hiragana_table['ja']
+let s:hiragana_table['jyu'] = s:hiragana_table['ju']
+let s:hiragana_table['jyo'] = s:hiragana_table['jo']
 call ime#log('builtin-kana', 'Loading hiragana table...Done')
 
 call ime#log('builtin-kana', 'Loading katakana table...')
@@ -216,6 +222,12 @@ let s:katakana_table['za'] = ['ザ']
 let s:katakana_table['zu'] = ['ズ', 'ヅ']
 let s:katakana_table['ze'] = ['ゼ']
 let s:katakana_table['zo'] = ['ゾ']
+let s:katakana_table['cya'] = s:katakana_table['cha']
+let s:katakana_table['cyu'] = s:katakana_table['chu']
+let s:katakana_table['cyo'] = s:katakana_table['cho']
+let s:katakana_table['jya'] = s:katakana_table['ja']
+let s:katakana_table['jyu'] = s:katakana_table['ju']
+let s:katakana_table['jyo'] = s:katakana_table['jo']
 call ime#log('builtin-kana', 'Loading katakana table...Done')
 
 function! ime#kana_table#table ()
@@ -230,7 +242,7 @@ function! ime#kana_table#table ()
         let l:large_small_table[(l:sk)] = l:lk
     endfor
 
-    let l:keys = ['''', '.', 'n', 'a', 'i', 'u', 'e', 'o', 'ka', 'ki', 'ku', 'ke', 'ko', 'sa', 'shi', 'su', 'se', 'so', 'ta', 'chi', 'tsu', 'te', 'to', 'na', 'ni', 'nu', 'ne', 'no', 'ha', 'hi', 'fu', 'he', 'ho', 'ma', 'mi', 'mu', 'me', 'mo', 'ya', 'yu', 'yo', 'ra', 'ri', 'ru', 're', 'ro', 'wa', 'wi', 'we', 'wo', 'ba', 'bi', 'bu', 'be', 'bo', 'bya', 'byu', 'byo', 'cha', 'chu', 'cho', 'da', 'de', 'do', 'ga', 'gi', 'gu', 'ge', 'go', 'gya', 'gyu', 'gyo', 'hya', 'hyu', 'hyo', 'ja', 'ji', 'ju', 'jo', 'kya', 'kyu', 'kyo', 'mya', 'myu', 'myo', 'nya', 'nyu', 'nyo', 'pa', 'pi', 'pu', 'pe', 'po', 'pya', 'pyu', 'pyo', 'rya', 'ryu', 'ryo', 'sha', 'shu', 'sho', 'za', 'zu', 'ze', 'zo']
+    let l:keys = sort(keys(s:hiragana_table))
 
     return [s:hiragana_table, s:katakana_table, l:large_small_table, l:keys]
 endfunction

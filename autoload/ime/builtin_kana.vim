@@ -1,3 +1,5 @@
+let s:true = exists('v:true') ? v:true : 1
+
 let s:table = []
 let s:keys = []
 let s:submode = 0
@@ -36,6 +38,7 @@ function! ime#builtin_kana#handler (matchobj, trigger)
                 call add(l:ret, {
                 \ 'word': l:char,
                 \ 'menu': l:key,
+                \ 'dup': s:true,
                 \ })
             endfor
         endfor
