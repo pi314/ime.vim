@@ -414,12 +414,15 @@ endfunction " }}}
 
 function! ime#_interactive_mode_menu () " {{{
     let l:cursor = index(s:standalone_plugin_list, s:ime_mode)
+    execute 'resize -'. (len(s:standalone_plugin_list) + 1)
     try
         let l:more = &more
+        let l:showmode = &showmode
         set nomore
+        set noshowmode
         while s:true
             redraw!
-            echo 'Select input mode: (j/Down/<C-n>) (k/Up/<C-p>) (enter) (c/Esc)'
+            echo 'Select input mode: (j/Down/<C-n>) (k/Up/<C-p>) (enter) (c/q/Esc)'
             for l:index in range(len(s:standalone_plugin_list))
                 if l:index == l:cursor
                     echo '> '. s:standalone_plugin_list[(l:index)]['menu']
@@ -435,13 +438,19 @@ function! ime#_interactive_mode_menu () " {{{
                 let l:cursor = (l:cursor + len(s:standalone_plugin_list) - 1) % len(s:standalone_plugin_list)
             elseif l:key == char2nr("\<CR>")
                 break
-            elseif l:key == char2nr('c') || l:key == char2nr("\<Esc>")
+            elseif l:key == char2nr('c') || l:key == char2nr('q')
                 redraw!
+                return
+            elseif l:key == char2nr("\<Esc>")
+                redraw!
+                call feedkeys("\<Esc>")
                 return
             endif
         endwhile
     finally
         let &more = l:more
+        let &showmode = l:showmode
+        execute 'resize +'. (len(s:standalone_plugin_list) + 1)
         redraw!
     endtry
 
