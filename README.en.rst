@@ -160,10 +160,13 @@ Usage
 
     + Type ``;;`` to switch between Japanese Hiragana and Katakana
     + Type ``v`` to change previous symbol to "sokuon"
+    + Type ``v`` to transform between ``n`` / ``ん``
     + Examples:
 
       * ``a`` -> ``あ``
       * ``あv`` -> ``ぁ``
+      * ``nv`` -> ``ん``
+      * ``んv`` -> ``n``
       * ``buiaiemu`` -> ``ぶいあいえむ``
 
 * Custom table
