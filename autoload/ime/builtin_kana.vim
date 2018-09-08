@@ -1,4 +1,5 @@
 let s:true = exists('v:true') ? v:true : 1
+let s:false = exists('v:false') ? v:false : 1
 
 let s:table = []
 let s:keys = []
@@ -17,34 +18,48 @@ function! ime#builtin_kana#handler (matchobj, trigger)
         let s:keys = s:table[3]
     endif
 
+    let l:buffer = a:matchobj[1]
+    let l:key = a:matchobj[1] . a:trigger
+
     if a:trigger == 'v'
+        if a:matchobj[1] ==# 'n'
+            return s:table[(s:submode)]['n']
+        endif
+
         if a:matchobj[2] != ''
             return [s:table[2][(a:matchobj[2])]]
         endif
-        return ['']
+
+        if a:matchobj[3] != '' && a:trigger == 'v'
+            " special case, press v on kana('n')
+            " should trigger completion of 'n'
+            let l:buffer = a:matchobj[3]
+            let l:key = 'n'
+        else
+            return ['']
+        endif
     endif
 
-    let l:key = a:matchobj[1] . a:trigger
     let l:matched_keys = filter(copy(s:keys), 'strpart(v:val, 0, strlen(l:key)) == l:key')
     if len(l:matched_keys) == 1
         return {
-        \ 'len': strlen(a:matchobj[1]),
+        \ 'len': strlen(l:buffer),
         \ 'options': s:table[(s:submode)][a:matchobj[1] . a:trigger]
         \ }
     elseif len(l:matched_keys) > 1
         let l:ret = []
-        for l:key in l:matched_keys
-            for l:char in s:table[(s:submode)][(l:key)]
+        for l:k in l:matched_keys
+            for l:char in s:table[(s:submode)][(l:k)]
                 call add(l:ret, {
                 \ 'word': l:char,
-                \ 'menu': l:key,
+                \ 'menu': l:k,
                 \ 'dup': s:true,
                 \ })
             endfor
         endfor
         return {
-        \ 'len': strlen(a:matchobj[1]),
-        \ 'options': [a:matchobj[1] . a:trigger] + l:ret,
+        \ 'len': strlen(l:buffer),
+        \ 'options': [(l:key)] + l:ret,
         \ }
     endif
     return []
@@ -72,7 +87,7 @@ function! ime#builtin_kana#info ()
     \ 'type': 'standalone',
     \ 'icon': '[あ]',
     \ 'description': 'Kana input mode',
-    \ 'pattern': '\v%(([.a-z]*)|(['. s:large_small_kana .']))$',
+    \ 'pattern': '\v%(([.a-z]*)|(['. s:large_small_kana .'])|([んン]))$',
     \ 'handler': function('ime#builtin_kana#handler'),
     \ 'trigger': split('.''abcdefghijkmnoprstuvwyz', '\zs'),
     \ 'submode': function('ime#builtin_kana#submode'),
