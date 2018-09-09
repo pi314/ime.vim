@@ -7,36 +7,3 @@ Do (aiueo / aiueo):
 Expect (あいうえお / アイウエオ):
   あいうえお
   アイウエオ
-
-===============================================================================
-
-Before (Set to Kana mode):
-  AssertEqual ime#mode('builtin-kana'), '[あ]'
-
-Do (n):
-  in
-
-Expect (n):
-  n
-
-===============================================================================
-
-Before (Set to Kana mode):
-  AssertEqual ime#mode('builtin-kana'), '[あ]'
-
-Do (nv):
-  inv
-
-Expect (ん):
-  ん
-
-===============================================================================
-
-Before (Set to Kana mode):
-  AssertEqual ime#mode('builtin-kana'), '[あ]'
-
-Do (nvv):
-  invv
-
-Expect (n):
-  n

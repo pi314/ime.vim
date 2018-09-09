@@ -1,0 +1,30 @@
+Before (Set to Kana mode):
+  AssertEqual ime#mode('builtin-kana'), '[あ]'
+
+Do (n):
+  in
+
+Expect (n):
+  n
+
+===============================================================================
+
+Before (Set to Kana mode):
+  AssertEqual ime#mode('builtin-kana'), '[あ]'
+
+Do (nv):
+  inv
+
+Expect (n):
+  n
+
+===============================================================================
+
+Before (Set to Kana mode):
+  AssertEqual ime#mode('builtin-kana'), '[あ]'
+
+Do (nn):
+  inn
+
+Expect (ん):
+  ん

@@ -506,7 +506,7 @@ function! ime#export_cin_file () " {{{
                 continue
             endif
             for l:char in l:kana_table[(l:key)]
-                call append('$', ','. l:key .' '. l:char)
+                call append('$', ','. substitute(l:key, 'nn', 'n', '') .' '. l:char)
             endfor
         endfor
     endfor

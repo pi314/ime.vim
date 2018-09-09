@@ -22,22 +22,10 @@ function! ime#builtin_kana#handler (matchobj, trigger)
     let l:key = a:matchobj[1] . a:trigger
 
     if a:trigger == 'v'
-        if a:matchobj[1] ==# 'n'
-            return s:table[(s:submode)]['n']
-        endif
-
         if a:matchobj[2] != ''
             return [s:table[2][(a:matchobj[2])]]
         endif
-
-        if a:matchobj[3] != '' && a:trigger == 'v'
-            " special case, press v on kana('n')
-            " should trigger completion of 'n'
-            let l:buffer = a:matchobj[3]
-            let l:key = 'n'
-        else
-            return ['']
-        endif
+        return ['']
     endif
 
     let l:matched_keys = filter(copy(s:keys), 'strpart(v:val, 0, strlen(l:key)) == l:key')
