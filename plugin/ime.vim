@@ -1,3 +1,7 @@
+let s:true = exists('v:true') ? v:true : 1
+let s:false = exists('v:false') ? v:false : 0
+
+
 " I want this option be set because it's related to my 'cancel' feature
 setlocal completeopt+=menuone
 
@@ -5,7 +9,14 @@ setlocal completeopt+=menuone
 if !exists('g:ime_toggle_english') || type(g:ime_toggle_english) != type('')
     let g:ime_toggle_english = ',,'
 endif
-execute 'inoremap <expr> '. g:ime_toggle_english .' (pumvisible() ? "<C-Y>" : "") . ime#toggle()'
+execute 'inoremap <expr> '. g:ime_toggle_english .' (pumvisible() ? "<C-Y>" : "") . ime#toggle_english()'
+
+
+let g:ime_show_2nd_mode = s:true
+if !exists('g:ime_toggle_2nd') || type(g:ime_toggle_2nd) != type('')
+    let g:ime_toggle_last = ',.'
+endif
+execute 'inoremap <expr> '. g:ime_toggle_last .' (pumvisible() ? "<C-Y>" : "") . ime#toggle_2nd()'
 
 
 if !exists('g:ime_select_mode') || type(g:ime_select_mode) != type('')

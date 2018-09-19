@@ -1,4 +1,5 @@
 Before (Set to Kana mode):
+  let g:ime_show_2nd_mode = 0
   AssertEqual ime#mode('builtin-kana'), '[あ]'
 
 Do (n):

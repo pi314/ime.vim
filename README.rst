@@ -113,7 +113,7 @@ vim-boshiamy 是暫時的 work around，2012 年中釋出後就沒有再更新�
   - 在英文與目前選定的輸入模式之間切換
   - 如果目前的模式是日文，用 ``,,`` 切換回英文再切換回來仍會是日文
 
-* 在不同輸入模式之間切換： ::
+* 選擇主要輸入模式： ::
 
     let g:ime_select_mode = ',m'
 
@@ -121,6 +121,14 @@ vim-boshiamy 是暫時的 work around，2012 年中釋出後就沒有再更新�
 
     + ``let g:ime_select_mode_style = 'popup'`` - (預設) 透過補完選單切換模式
     + ``let g:ime_select_mode_style = 'interactive'`` - 透過互動式選單切換模式
+
+* 交換主要/次要輸入模式： ::
+
+    let g:ime_toggle_2nd = ',.'
+
+  - 若不想在 statusline 顯示兩個輸入模式： ::
+
+      let g:ime_show_2nd_mode = 0
 
 * 取消輸入，回復為輸入前的字串： ::
 

@@ -117,7 +117,7 @@ Usage
 
   - The previous mode will be kept after switch to English mode.
 
-* Switch between input modes ::
+* Select mandatory input mode ::
 
     let g:ime_select_mode = ',m'
 
@@ -125,6 +125,14 @@ Usage
 
     + ``let g:ime_select_mode_style = 'popup'`` - (default) use completion menu for selection
     + ``let g:ime_select_mode_style = 'interactive'`` - use interactive menu for selection
+
+* Switch mandatory/secondary input modes ::
+
+    let g:ime_toggle_2nd = ',.'
+
+  - If you don't want to show both modes on statusline ::
+
+      let g:ime_show_2nd_mode = 0
 
 * Cancel input text ::
 

@@ -115,6 +115,8 @@ else
     let s:ime_mode = s:standalone_plugin_list[0]
 endif
 
+let s:ime_mode_2nd = {}
+
 
 function s:EscapeKey (key) " {{{
     if a:key == '|'
@@ -150,6 +152,12 @@ function! s:SelectMode (new_mode) " {{{
     elseif type(a:new_mode) == type({}) && a:new_mode == {}
         let s:ime_english_enable = s:true
     elseif type(a:new_mode) == type({})
+        if s:ime_mode_2nd == {} && s:ime_mode != a:new_mode
+            let s:ime_mode_2nd = s:ime_mode
+        elseif s:ime_mode_2nd == a:new_mode
+            let s:ime_mode_2nd = s:ime_mode
+        endif
+
         let s:ime_mode = a:new_mode
         let s:ime_english_enable = s:false
     endif
@@ -383,16 +391,31 @@ function! ime#mode (...) " {{{
     if s:ime_english_enable == s:true
         return '[En]'
     endif
-    return get(s:ime_mode, 'icon', '[？]')
+
+    let l:ret = get(s:ime_mode, 'icon', '[？]')
+    if g:ime_show_2nd_mode
+        let l:ret .= get(s:ime_mode_2nd, 'icon', '')
+    endif
+    return l:ret
 endfunction " }}}
 
 
-function! ime#toggle () " {{{
+function! ime#toggle_english () " {{{
     if s:ime_english_enable == s:true
         call s:SelectMode(s:ime_mode)
     else
         call s:SelectMode('ENGLISH')
     endif
+    return ''
+endfunction " }}}
+
+
+function! ime#toggle_2nd () " {{{
+    if s:ime_mode_2nd == {}
+        return ''
+    endif
+
+    call s:SelectMode(s:ime_mode_2nd)
     return ''
 endfunction " }}}
 
