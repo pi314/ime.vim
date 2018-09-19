@@ -13,10 +13,10 @@ execute 'inoremap <expr> '. g:ime_toggle_english .' (pumvisible() ? "<C-Y>" : ""
 
 
 let g:ime_show_2nd_mode = s:true
-if !exists('g:ime_toggle_2nd') || type(g:ime_toggle_2nd) != type('')
-    let g:ime_toggle_last = ',.'
+if !exists('g:ime_switch_2nd') || type(g:ime_switch_2nd) != type('')
+    let g:ime_switch_2nd = ',.'
 endif
-execute 'inoremap <expr> '. g:ime_toggle_last .' (pumvisible() ? "<C-Y>" : "") . ime#toggle_2nd()'
+execute 'inoremap <expr> '. g:ime_switch_2nd .' (pumvisible() ? "<C-Y>" : "") . ime#switch_2nd()'
 
 
 if !exists('g:ime_select_mode') || type(g:ime_select_mode) != type('')

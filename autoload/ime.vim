@@ -410,7 +410,7 @@ function! ime#toggle_english () " {{{
 endfunction " }}}
 
 
-function! ime#toggle_2nd () " {{{
+function! ime#switch_2nd () " {{{
     if s:ime_mode_2nd == {}
         return ''
     endif
