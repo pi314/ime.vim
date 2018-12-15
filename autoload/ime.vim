@@ -467,12 +467,25 @@ endfunction " }}}
 " Public Functions
 " =============================================================================
 function! ime#icon (...) " {{{
+    if a:0 == 0
+        if s:ime_english_enable == s:true
+            return '[En]'
+        endif
+
+        let l:ret = get(s:ime_mode, 'icon', '[？]')
+        if g:ime_show_2nd_mode
+            let l:ret .= get(s:ime_mode_2nd, 'icon', '')
+        endif
+        return l:ret
+    endif
+
     if a:0 == 2
         " ime#icon(pname, icon)
         let l:pname = substitute(a:1, '-', '_', 'g')
-        if l:pname != s:ime_mode['name']
-            call ime#log('core',
-            \ 'ime#icon("'. l:pname .'"): current plugin name is "'. s:ime_mode['name'] .'"')
+        if l:pname != ime#mode()
+            call ime#log('core', '// ime#icon('. l:pname .'): forbidden')
+            call ime#log('core', '\\ current activated plugin: "'. ime#mode() .'"')
+            return
         endif
 
         let s:ime_mode['icon'] = a:2
@@ -482,15 +495,7 @@ function! ime#icon (...) " {{{
         return
     endif
 
-    if s:ime_english_enable == s:true
-        return '[En]'
-    endif
-
-    let l:ret = get(s:ime_mode, 'icon', '[？]')
-    if g:ime_show_2nd_mode
-        let l:ret .= get(s:ime_mode_2nd, 'icon', '')
-    endif
-    return l:ret
+    call ime#log('core', 'ime#icon(): wrong argument')
 endfunction " }}}
 
 
@@ -523,19 +528,40 @@ function! ime#switch_2nd () " {{{
 endfunction " }}}
 
 
-function! ime#menu () " {{{
-    if s:ime_english_enable || !has_key(s:ime_mode, 'menu_cb')
-        call feedkeys(g:ime_menu, 'n')
+function! ime#menu (...) " {{{
+    if a:0 == 0
+        if s:ime_english_enable || !has_key(s:ime_mode, 'menu_cb')
+            call feedkeys(g:ime_menu, 'n')
+            return
+        endif
+
+        call s:interactive_menu(
+                \ 'Select menu: (j/Down/<C-n>) (k/Up/<C-p>) (enter/space) (q/esc)',
+                \ function('s:per_mode_menu_render'),
+                \ 0,
+                \ function('s:per_mode_menu_handler'),
+                \ )
         return
     endif
 
-    call s:interactive_menu(
-            \ 'Select menu: (j/Down/<C-n>) (k/Up/<C-p>) (enter/space) (q/esc)',
-            \ function('s:per_mode_menu_render'),
-            \ 0,
-            \ function('s:per_mode_menu_handler'),
-            \ )
-    return
+    if a:0 == 2
+        let l:pname = substitute(a:1, '-', '_', 'g')
+        if l:pname != ime#mode()
+            call ime#log('core', '// ime#menu('. l:pname .'): forbidden')
+            call ime#log('core', '\\ current activated plugin: "'. ime#mode() .'"')
+            return
+        endif
+
+        if !has_key(s:ime_mode, 'menu_cb')
+            call ime#log('core', '// ime#menu(): plugin "'. s:ime_mode['name'] .'" have no menu')
+            return
+        endif
+
+        call s:ime_mode['menu_cb'](a:2)
+        return
+    endif
+
+    call ime#log('core', 'ime#menu(): wrong argument')
 endfunction " }}}
 
 
