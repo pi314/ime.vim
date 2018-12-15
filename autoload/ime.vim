@@ -466,6 +466,19 @@ endfunction " }}}
 " =============================================================================
 " Public Functions
 " =============================================================================
+function! ime#icon (...) " {{{
+    if s:ime_english_enable == s:true
+        return '[En]'
+    endif
+
+    let l:ret = get(s:ime_mode, 'icon', '[？]')
+    if g:ime_show_2nd_mode
+        let l:ret .= get(s:ime_mode_2nd, 'icon', '')
+    endif
+    return l:ret
+endfunction " }}}
+
+
 function! ime#mode (...) " {{{
     if a:0
         try
@@ -482,14 +495,10 @@ function! ime#mode (...) " {{{
     endif
 
     if s:ime_english_enable == s:true
-        return '[En]'
+        return 'english'
     endif
 
-    let l:ret = get(s:ime_mode, 'icon', '[？]')
-    if g:ime_show_2nd_mode
-        let l:ret .= get(s:ime_mode_2nd, 'icon', '')
-    endif
-    return l:ret
+    return get(s:ime_mode, 'name', '')
 endfunction " }}}
 
 
