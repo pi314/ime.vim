@@ -62,9 +62,9 @@ function! ime#builtin_kana#menu (...)
     endif
 
     if s:submode == 0
-        call ime#icon('builtin-kana', '[あ]')
+        call ime#set_icon('builtin-kana', '[あ]')
     else
-        call ime#icon('builtin-kana', '[ア]')
+        call ime#set_icon('builtin-kana', '[ア]')
     endif
 endfunction
 

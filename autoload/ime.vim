@@ -564,7 +564,7 @@ function! ime#plugins () " {{{
 endfunction " }}}
 
 
-function! ime#icon (pname, icon) " {{{
+function! ime#set_icon (pname, icon) " {{{
     let l:pname = substitute(a:pname, '-', '_', 'g')
     if l:pname != s:ime_mode['name']
         call ime#log('core',
