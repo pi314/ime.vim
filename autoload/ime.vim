@@ -52,41 +52,48 @@ function! s:LoadPlugins () " {{{
             endtry
         endtry
 
+        let l:invalid = s:false
+
         " sanity check
         if !has_key(l:plugin_info, 'type')
             call ime#log('core', 'plugin "'. l:pname . '" lacks "type" information')
-            continue
+            let l:invalid = s:true
         endif
 
         if l:plugin_info['type'] == 'standalone' &&
                 \ (!has_key(l:plugin_info, 'icon') ||
                 \ !has_key(l:plugin_info, 'description'))
             call ime#log('core', 'plugin "'. l:pname . '" lacks "icon" or "description" information')
-            continue
+            let l:invalid = s:true
         endif
 
         if !has_key(l:plugin_info, 'pattern')
             call ime#log('core', 'plugin "'. l:pname . '" lacks "pattern" information')
-            continue
+            let l:invalid = s:true
         endif
 
         if !has_key(l:plugin_info, 'handler')
             call ime#log('core', 'plugin "'. l:pname . '" lacks "handler" information')
-            continue
+            let l:invalid = s:true
         endif
 
         if !has_key(l:plugin_info, 'trigger')
             call ime#log('core', 'plugin "'. l:pname . '" lacks "trigger" information')
+            let l:invalid = s:true
+        endif
+
+        if has_key(l:plugin_info, 'switch')
+            call ime#log('core', 'plugin "'. l:pname . '" has deprecated information "switch"')
+            let l:invalid = s:true
+        endif
+
+        if has_key(l:plugin_info, 'submode')
+            call ime#log('core', 'plugin "'. l:pname . '" has deprecated information "submode"')
+            let l:invalid = s:true
+        endif
+
+        if l:invalid != s:false
             continue
-        endif
-
-        if !has_key(l:plugin_info, 'submode') && has_key(l:plugin_info, 'switch')
-            call ime#log('core', 'plugin "'. l:pname . '" has abandoned "switch" information')
-            unlet l:plugin_info['switch']
-        endif
-
-        if has_key(l:plugin_info, 'submode') && !has_key(l:plugin_info, 'switch')
-            let l:plugin_info['switch'] = [g:ime_switch_submode]
         endif
 
         let l:plugin_info['name'] = l:pname
@@ -133,7 +140,7 @@ endfunction " }}}
 
 
 function! s:SelectMode (new_mode) " {{{
-    for l:key in s:ime_mode['trigger'] + get(s:ime_mode, 'switch', [])
+    for l:key in s:ime_mode['trigger'] + has_key(s:ime_mode, 'menu') ? [] : []
         if l:key == ''
             continue
         endif
@@ -179,22 +186,22 @@ function! s:SelectMode (new_mode) " {{{
             endtry
         endfor
 
-        for l:key in get(s:ime_mode, 'switch', [])
-            try
-                " Compose this command (so complex):
-                " inoremap <expr> switch (remove popup menu) . (Submode('switch'))
-                let l:escaped_key = s:EscapeKey(l:key)
-                let l:cmd = 'inoremap <expr> '
-                let l:cmd .= l:escaped_key .' '
-                let l:cmd .= '(pumvisible() ? "<C-Y>" : "") . '
-                let l:cmd .= '"<C-R>=<SID>Submode('''
-                let l:cmd .= (l:escaped_key == "'" ? "''" : l:escaped_key)
-                let l:cmd .= ''')<CR>"'
-                execute l:cmd
-            catch
-                call ime#log('core', '>> '. v:exception)
-            endtry
-        endfor
+        " if has_key(s:ime_mode, 'menu')
+        "     try
+        "         " Compose this command (so complex):
+        "         " inoremap <expr> switch (remove popup menu) . (Submode('switch'))
+        "         let l:escaped_key = s:EscapeKey(g:ime_menu)
+        "         let l:cmd = 'inoremap <expr> '
+        "         let l:cmd .= l:escaped_key .' '
+        "         let l:cmd .= '(pumvisible() ? "<C-Y>" : "") . '
+        "         let l:cmd .= '"<C-R>=<SID>Submode('''
+        "         let l:cmd .= (l:escaped_key == "'" ? "''" : l:escaped_key)
+        "         let l:cmd .= ''')<CR>"'
+        "         execute l:cmd
+        "     catch
+        "         call ime#log('core', '>> '. v:exception)
+        "     endtry
+        " endfor
     endif
 
     redrawstatus!

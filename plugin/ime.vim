@@ -59,6 +59,6 @@ if !exists('g:ime_plugins') || type(g:ime_plugins) != type([])
 endif
 
 
-if !exists('g:ime_switch_submode') || type(g:ime_switch_submode) != ''
-    let g:ime_switch_submode = ';;'
+if !exists('g:ime_menu') || type(g:ime_menu) != ''
+    let g:ime_menu = ';;'
 endif
