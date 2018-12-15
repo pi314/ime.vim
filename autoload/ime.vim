@@ -131,7 +131,7 @@ endif
 let s:ime_mode_2nd = {}
 
 
-function s:EscapeKey (key) " {{{
+function! s:EscapeKey (key) " {{{
     if a:key == '|'
         return '<bar>'
     elseif a:key == ' '
