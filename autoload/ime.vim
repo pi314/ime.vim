@@ -514,7 +514,7 @@ endfunction " }}}
 
 
 function! ime#menu () " {{{
-    if !has_key(s:ime_mode, 'menu_cb')
+    if s:ime_english_enable || !has_key(s:ime_mode, 'menu_cb')
         call feedkeys(g:ime_menu, 'n')
         return
     endif
