@@ -103,6 +103,12 @@ function! s:LoadPlugins () " {{{
         elseif l:plugin_info['type'] == 'embedded'
             call add(s:embedded_plugin_list, l:plugin_info)
         endif
+
+        if has_key(l:plugin_info, 'menu')
+            " have to rename 'menu' or it will be overridden
+            " cb stands for callback
+            let l:plugin_info['menu_cb'] = l:plugin_info['menu']
+        endif
     endfor
 
     for l:plugin in s:standalone_plugin_list
@@ -140,7 +146,7 @@ endfunction " }}}
 
 
 function! s:SelectMode (new_mode) " {{{
-    for l:key in s:ime_mode['trigger'] + has_key(s:ime_mode, 'menu') ? [] : []
+    for l:key in s:ime_mode['trigger']
         if l:key == ''
             continue
         endif
@@ -150,8 +156,8 @@ function! s:SelectMode (new_mode) " {{{
         endtry
     endfor
 
-    if has_key(s:ime_mode, 'submode')
-        call s:ime_mode['submode']('')
+    if has_key(s:ime_mode, 'menu_cb')
+        call s:ime_mode['menu_cb']('')
     endif
 
     if type(a:new_mode) == type('ENGLISH') && a:new_mode == 'ENGLISH'
@@ -173,7 +179,7 @@ function! s:SelectMode (new_mode) " {{{
         for l:key in s:ime_mode['trigger']
             try
                 " Compose this command (so complex):
-                " inoremap trigger (Submode('trigger'))
+                " inoremap trigger (SendKey('trigger'))
                 let l:escaped_key = s:EscapeKey(l:key)
                 let l:cmd = 'inoremap '
                 let l:cmd .= l:escaped_key .' '
@@ -185,23 +191,6 @@ function! s:SelectMode (new_mode) " {{{
                 call ime#log('core', '>> '. v:exception)
             endtry
         endfor
-
-        " if has_key(s:ime_mode, 'menu')
-        "     try
-        "         " Compose this command (so complex):
-        "         " inoremap <expr> switch (remove popup menu) . (Submode('switch'))
-        "         let l:escaped_key = s:EscapeKey(g:ime_menu)
-        "         let l:cmd = 'inoremap <expr> '
-        "         let l:cmd .= l:escaped_key .' '
-        "         let l:cmd .= '(pumvisible() ? "<C-Y>" : "") . '
-        "         let l:cmd .= '"<C-R>=<SID>Submode('''
-        "         let l:cmd .= (l:escaped_key == "'" ? "''" : l:escaped_key)
-        "         let l:cmd .= ''')<CR>"'
-        "         execute l:cmd
-        "     catch
-        "         call ime#log('core', '>> '. v:exception)
-        "     endtry
-        " endfor
     endif
 
     redrawstatus!
@@ -371,12 +360,6 @@ function! s:SendKey (trigger) " {{{
 endfunction " }}}
 
 
-function! s:Submode (switch) " {{{
-    call s:ime_mode['submode'](a:switch)
-    return ''
-endfunction " }}}
-
-
 " ================
 " Public Functions
 " ================
@@ -424,6 +407,15 @@ function! ime#switch_2nd () " {{{
 
     call s:SelectMode(s:ime_mode_2nd)
     return ''
+endfunction " }}}
+
+
+function! ime#menu () " {{{
+    if has_key(s:ime_mode, 'menu_cb')
+        call s:ime_mode['menu_cb']()
+        return ''
+    endif
+    return g:ime_menu
 endfunction " }}}
 
 
