@@ -494,21 +494,7 @@ function! ime#icon (...) " {{{
 endfunction " }}}
 
 
-function! ime#mode (...) " {{{
-    if a:0
-        try
-            let l:pname = substitute(a:1, '-', '_', 'g')
-            let l:pnames = map(copy(s:standalone_plugin_list), 'v:val[''name'']')
-            if l:pname ==? 'english' || index(l:pnames, l:pname) == -1
-                call s:SelectMode({})
-            else
-                call s:SelectMode(s:standalone_plugin_list[index(l:pnames, l:pname)])
-            endif
-        catch
-            call s:SelectMode({})
-        endtry
-    endif
-
+function! ime#mode () " {{{
     if s:ime_english_enable == s:true
         return 'english'
     endif
