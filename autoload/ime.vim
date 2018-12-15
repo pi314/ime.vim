@@ -467,6 +467,21 @@ endfunction " }}}
 " Public Functions
 " =============================================================================
 function! ime#icon (...) " {{{
+    if a:0 == 2
+        " ime#icon(pname, icon)
+        let l:pname = substitute(a:1, '-', '_', 'g')
+        if l:pname != s:ime_mode['name']
+            call ime#log('core',
+            \ 'ime#icon("'. l:pname .'"): current plugin name is "'. s:ime_mode['name'] .'"')
+        endif
+
+        let s:ime_mode['icon'] = a:2
+        let s:ime_mode['menu'] = s:ime_mode['icon'] .' - '. s:ime_mode['description']
+
+        redrawstatus!
+        return
+    endif
+
     if s:ime_english_enable == s:true
         return '[En]'
     endif
@@ -570,20 +585,6 @@ function! ime#plugins () " {{{
     \ 'standalone': map(copy(s:standalone_plugin_list), 'v:val[''name'']'),
     \ 'embedded': map(copy(s:embedded_plugin_list), 'v:val[''name'']'),
     \ }
-endfunction " }}}
-
-
-function! ime#set_icon (pname, icon) " {{{
-    let l:pname = substitute(a:pname, '-', '_', 'g')
-    if l:pname != s:ime_mode['name']
-        call ime#log('core',
-        \ 'ime#icon("'. l:pname .'"): current plugin name is "'. s:ime_mode['name'] .'"')
-    endif
-
-    let s:ime_mode['icon'] = a:icon
-    let s:ime_mode['menu'] = s:ime_mode['icon'] .' - '. s:ime_mode['description']
-
-    redrawstatus!
 endfunction " }}}
 
 
