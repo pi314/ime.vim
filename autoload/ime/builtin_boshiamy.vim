@@ -43,10 +43,12 @@ endfunction
 
 function! ime#builtin_boshiamy#menu (...)
     if a:0 == 0
-        if s:conn
-            return [['c', '將 Aa 視為連續 (on)']]
-        endif
-        return [['c', '將 Aa 視為連續 (off)']]
+        return [
+                \ {
+                    \ 'key': 'c',
+                    \ 'menu': '將 Aa 視為連續 ('. (s:conn ? 'on' : 'off') .')'
+                \ },
+            \ ]
     endif
 
     if a:1 == 'c'
