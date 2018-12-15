@@ -411,11 +411,60 @@ endfunction " }}}
 
 
 function! ime#menu () " {{{
-    if has_key(s:ime_mode, 'menu_cb')
-        call s:ime_mode['menu_cb']()
-        return ''
+    if !has_key(s:ime_mode, 'menu_cb')
+        call feedkeys(g:ime_menu)
     endif
-    return g:ime_menu
+
+    try
+        let l:cursor = 0
+        let l:menu = s:ime_mode['menu_cb']()
+
+        let l:more = &more
+        let l:showmode = &showmode
+
+        if type(l:menu) != type([])
+            return
+        endif
+
+        set nomore
+        set noshowmode
+        while s:true
+            redraw!
+            echo 'Select menu: (j/Down/<C-n>) (k/Up/<C-p>) (enter/space) (q/esc)'
+            for l:index in range(len(l:menu))
+                echo ((l:index == l:cursor) ? '> ' : '  ') .'('. l:menu[(l:index)][0] .') '. l:menu[(l:index)][1]
+            endfor
+
+            let l:key = getchar()
+            if l:key == char2nr('j') || l:key == "\<Down>" || l:key == char2nr("\<C-n>")
+                let l:cursor = (l:cursor + 1) % len(l:menu)
+            elseif l:key == char2nr('k') || l:key == "\<Up>" || l:key == char2nr("\<C-p>")
+                let l:cursor = (l:cursor + len(l:menu) - 1) % len(l:menu)
+            elseif l:key == char2nr("\<CR>") || l:key == char2nr(' ')
+                call s:ime_mode['menu_cb'](l:menu[(l:cursor)][0])
+                let l:menu = s:ime_mode['menu_cb']()
+                if l:key == char2nr("\<CR>")
+                    break
+                endif
+            elseif l:key == char2nr('q')
+                break
+            elseif l:key == char2nr("\<Esc>")
+                call feedkeys("\<Esc>")
+                break
+            else
+                for l:index in range(len(l:menu))
+                    if l:key == char2nr(l:menu[(l:index)][0])
+                        call s:ime_mode['menu_cb'](nr2char(l:key))
+                        let l:menu = s:ime_mode['menu_cb']()
+                    endif
+                endfor
+            endif
+        endwhile
+    finally
+        let &more = l:more
+        let &showmode = l:showmode
+        redraw!
+    endtry
 endfunction " }}}
 
 
@@ -444,7 +493,7 @@ function! ime#_interactive_mode_menu () " {{{
         set noshowmode
         while s:true
             redraw!
-            echo 'Select input mode: (j/Down/<C-n>) (k/Up/<C-p>) (enter) (c/q/Esc)'
+            echo 'Select input mode: (j/Down/<C-n>) (k/Up/<C-p>) (enter) (q/esc)'
             for l:index in range(len(s:standalone_plugin_list))
                 if l:index == l:cursor
                     echo '> '. s:standalone_plugin_list[(l:index)]['menu']
@@ -460,7 +509,7 @@ function! ime#_interactive_mode_menu () " {{{
                 let l:cursor = (l:cursor + len(s:standalone_plugin_list) - 1) % len(s:standalone_plugin_list)
             elseif l:key == char2nr("\<CR>")
                 break
-            elseif l:key == char2nr('c') || l:key == char2nr('q')
+            elseif l:key == char2nr('q')
                 redraw!
                 return
             elseif l:key == char2nr("\<Esc>")

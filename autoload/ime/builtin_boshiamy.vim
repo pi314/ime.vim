@@ -1,4 +1,8 @@
+let s:true = exists('v:true') ? v:true : 1
+let s:false = exists('v:false') ? v:false : 0
+
 let s:table = {}
+let s:conn = s:true
 
 
 function! s:fallback_str (arg)
@@ -37,6 +41,20 @@ function! ime#builtin_boshiamy#handler (matchobj, trigger)
 endfunction
 
 
+function! ime#builtin_boshiamy#menu (...)
+    if a:0 == 0
+        if s:conn
+            return [['c', '將 Aa 視為連續 (on)']]
+        endif
+        return [['c', '將 Aa 視為連續 (off)']]
+    endif
+
+    if a:1 == 'c'
+        let s:conn = 1 - s:conn
+    endif
+endfunction
+
+
 function! ime#builtin_boshiamy#info ()
     return {
     \ 'type': 'standalone',
@@ -45,6 +63,7 @@ function! ime#builtin_boshiamy#info ()
     \ 'pattern': '\v%(\w|[,.''\[\]])+$',
     \ 'handler': function('ime#builtin_boshiamy#handler'),
     \ 'trigger': [' '],
+    \ 'menu': function('ime#builtin_boshiamy#menu'),
     \ }
 
     " Note: This plugin use ``\w`` in regex.

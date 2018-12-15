@@ -62,4 +62,4 @@ endif
 if !exists('g:ime_menu') || type(g:ime_menu) != ''
     let g:ime_menu = ';;'
 endif
-execute 'inoremap <expr> '. g:ime_menu .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=ime#menu()<CR>"'
+execute 'inoremap '. g:ime_menu .' <C-\><C-o>:call ime#menu()<CR>'
