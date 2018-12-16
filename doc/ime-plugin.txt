@@ -1,16 +1,16 @@
-*ime-plugin.txt*          For Vim version 8.0             Last update：2017/04
+*ime-plugin.txt*          For Vim version 8.0             Last update：2018/12
 
                                            ime.vim plugin development document
 ==============================================================================
 Index
 
 1.  Introduction............................|ime-plugin-introduction|
-    1.1 Plugin metadata.....................|ime-plugin-metadata|
+    1.1 Plugin information..................|ime-plugin-info()|
 2.  Folder structure........................|ime-plugin-structure|
     2.1 Plugin with huge data...............|ime-plugin-with-huge-data|
 3.  Handler - the core of the plugin........|ime-plugin-handler()|
     3.1 Handler - complicated operations....|ime-plugin-complex-handler|
-    3.2 Multiple submodes...................|ime-plugin-submodes|
+    3.2 Setting menu........................|ime-plugin-menu()|
 4.  Choose a word...........................|ime-plugin-choose-word|
 5.  Log message.............................|ime#log()|
 6.  Script-local function in Vim 7.3........|ime-plugin-for-vim-7.3-funcref|
@@ -30,7 +30,7 @@ There are two kinds ot ime.vim plugins:
     They can be considered as extensions to the input modes.
 
 ------------------------------------------------------------------------------
-1.1 Plugin metadata                                      *ime-plugin-metadata*
+1.1 Plugin information                                     *ime-plugin-info()*
 
 To make your plugin recognizable to ime.vim, the plugin has to provide
 necessary informations:
@@ -193,9 +193,10 @@ for ime.vim to replace ".[,stare" to ".[ಠ_ಠ".
 If the handler returns ['ಠ_ಠ'], ime.vim replaces ".[,stare" to "ಠ_ಠ".
 
 ------------------------------------------------------------------------------
-3.2 Multiple submodes                                    *ime-plugin-submodes*
+3.2 Setting menu                                           *ime-plugin-menu()*
 
-Some input methods have multiple submodes for different reasons:
+For different reasons, some input modes provide setting menu for users to
+adjust the behavior dynamically:
 
 - It's not easy to input punctuation marks in phonetic input method
   as it uses at least 36 keys
@@ -203,15 +204,26 @@ Some input methods have multiple submodes for different reasons:
   as they pronounce the same
 - Even English input method has Capslock that equals to capitalized mode
 
-If your plugin has multiple submodes, the following information are necessary:
-                                                         *ime-plugin-switch[]*
-- "switch": |List|[|string|], what keys should switch to submode
-                                                        *ime-plugin-submode()*
-- "submode": |Funcref|, switch to correcponding submode
-             according to the switch key
+If your plugin needs a setting menu, you need to provide "menu": |Funcref|,
+to provide menu or adjust behavior, according to input arguments.
 
-On the other side, ime.vim provides a interface to allow your plugin to change
-the icon:
+- If there are only one argument (a:0 == 1), |a:1| will be the key that user
+  pressed. Your plugin can adjust behavior according to this value.
+
+  - If |a:1| is an empty string (''), it means the user selects another mode.
+    The plugin can reset its setting to default state, or state in the current
+    state.
+
+- If there are no any arguments (a:0 == 0), it means ime.vim is requesting a
+  menu.
+
+  - The accepted value is a |List|, each item is a |Dictionary|.
+  - Each item needs to provide "key" and "menu", represents the hotkey and
+    description text, respectively.
+  - If you don't want to display the menu, it can return nothing and adjust
+    behavior directly.
+
+ime.vim provides a interface to allow your plugin to change the icon:
 
 ime#icon({plugin-name}, {icon-str})                               *ime#icon()*
 
@@ -252,10 +264,6 @@ If the user pressed any one of switch key, ime.vim calls |ime-plugin-submode()|
 and pass the key as the argument.
 The plugin can switch to correcponding submode according to this key.
 
-If ime.vim passed an empty string to |ime-plugin-submode()|, it means that the
-user selects another mode. The plugin can set itself to the default submode or
-stay in the current submode.
-
 Remember to call |ime#icon()| in |ime-plugin-submode()| to let ime.vim update
 the plugin icon.
 
@@ -265,7 +273,7 @@ Note that is your plugin has only two submodes, you can omit
 ==============================================================================
 4.  Choose a word                                     *ime-plugin-choose-word*
 
-Many input methods has the "use hotkey to choose word" feature, so that uses
+Many input methods has the "use hotkey to choose word" feature, so that users
 don't have to press arrow key many times to select the desired word.
 
 This function is provided by ime.vim, and your plugin only need to provide

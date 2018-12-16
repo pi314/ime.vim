@@ -1,16 +1,16 @@
-*ime-plugin.twx*          For Vim version 8.0                最近更新：2017/04
+*ime-plugin.twx*          For Vim version 8.0                最近更新：2018/12
 
                                                           ime.vim 套件開發文件
 ==============================================================================
 目錄
 
 1.  介紹....................................|ime-plugin-introduction|
-    1.1 套件資訊............................|ime-plugin-metadata|
+    1.1 套件資訊............................|ime-plugin-info()|
 2.  目錄結構................................|ime-plugin-structure|
     2.1 需要載入龐大資料的套件..............|ime-plugin-with-huge-data|
 3.  套件核心 - handler......................|ime-plugin-handler()|
     3.1 Handler - 複雜的判斷................|ime-plugin-complex-handler|
-    3.2 多個子模式..........................|ime-plugin-submodes|
+    3.2 設定選單............................|ime-plugin-menu()|
 4.  選字....................................|ime-plugin-choose-word|
 5.  Log 訊息................................|ime#log()|
 6.  Vim 7.3 的 script-local function 問題...|ime-plugin-for-vim-7.3-funcref|
@@ -27,7 +27,7 @@ ime.vim 能夠載入第三方的套件，擴充自己的輸入能力。
     相當於對輸入法字根表的擴充。
 
 ------------------------------------------------------------------------------
-1.1 套件資訊                                             *ime-plugin-metadata*
+1.1 套件資訊                                               *ime-plugin-info()*
 
 要讓 ime.vim 正確載入，套件需要提供必要的資訊：
 
@@ -179,21 +179,30 @@ function('ime_{plugin-name}#handler')，引號不可省略。
 若直接回傳 ['ಠ_ಠ']，ime.vim 會把 ".[,stare" 取代為 "ಠ_ಠ"。
 
 ------------------------------------------------------------------------------
-3.2 多個子模式                                           *ime-plugin-submodes*
+3.2 設定選單                                               *ime-plugin-menu()*
 
-基於某些不同的原因，有些輸入法會有多個子模式：
+基於某些不同的原因，有些輸入模式會提供設定選單，讓使用者隨時調整輸入法的行為：
 
 - 例如注音輸入法使用了至少 36 個按鍵，此時標點符號變得不容易輸入。
 - 例如假名輸入法，在同一個鍵盤上輸入平假名和片假名是不容易的事情。
-- 即使是英文輸入法也有 Capslock，相當於大寫的子模式。
+- 即使是英文輸入法也有 Capslock，相當於大寫模式。
 
-如果你想要為你的套件實作多個子模式，你需要提供以下資訊：
-                                                         *ime-plugin-switch[]*
-- "switch": |List|[|string|]，列出切換子模式的按鍵。
-                                                        *ime-plugin-submode()*
-- "submode": |Funcref|，根據按下的按鍵切換到對應的子模式。
+如果你想要為你的套件實作選單，你需要提供 "menu": |Funcref|，
+根據傳入的參數提供選單，或是更改設定。
 
-另一方面，ime.vim 也提供介面讓套件顯示每個子模式：
+- 若傳入值為一個（a:0 == 1），則 |a:1| 為使用者按下的按鍵。
+  輸入模式根據按鍵決定行為要如何調整。
+
+  - 若 |a:1| 為空字串（''），代表代表使用者切換到別的模式了，
+    你可以選擇在這時候將行為調回預設狀態，也可以保留當下的狀態。
+
+- 若沒有傳入值（a:0 == 0），代表要顯示選單。
+
+  - 回傳值為一個 |List|，每一項為一個 |Dictionary|。
+  - Dictionary 需有 "key" 以及 "menu"，分別代表快捷鍵以及說明文字。
+  - 若輸入模式不想要有選單，也可以不回傳任何值，直接調整自身行為。
+
+ime.vim 也提供介面讓套件顯示每個子模式：
 
 ime#icon({plugin-name}, {icon-str})                               *ime#icon()*
 
@@ -205,7 +214,10 @@ ime#icon({plugin-name}, {icon-str})                               *ime#icon()*
 >
     let s:mode = 0
 
-    function! ime_{plugin-name}#submode (switch)
+    function! ime_{plugin-name}#menu (...)
+        if a:0 == 0
+        endif
+
         if a:switch == ''
             let s:mode = 0
             call ime#icon({plugin-name}, '[:)]')
@@ -231,9 +243,6 @@ ime#icon({plugin-name}, {icon-str})                               *ime#icon()*
 若使用者按下了 switch 按鍵，ime.vim 會呼叫 |ime-plugin-submode()| 並將該按鍵
 當成參數傳入。
 套件可以根據這個按鍵決定要切換至哪一個子模式。
-
-若 ime.vim 傳入了空字串給 |ime-plugin-submode()|，代表使用者切換到別的模式了，
-你可以選擇在這時候回到預設的子模式，也可以留在當下的子模式。
 
 在切換到子模式以後，請記得呼叫 |ime#icon()|，讓 ime.vim 更新套件的圖示。
 
