@@ -39,7 +39,11 @@ let s:standalone_plugin_list = []
 let s:embedded_plugin_list = []
 function! s:LoadPlugins () " {{{
     for l:pname in g:ime_plugins
-        let l:pname = substitute(l:pname, '-', '_', 'g')
+        if match(l:pname, '\v^\w+$') == -1
+            call ime#log('core', 'invalid plugin name "'. l:pname . '"')
+            continue
+        endif
+
         try
             let l:plugin_info = function('ime#'. l:pname .'#info')()
         catch

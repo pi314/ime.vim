@@ -239,10 +239,10 @@ Note that if you set this value, the built-in plugins will all being disabled.
 If you want to enable built-in plugins, please list them manually:
 >
     let g:ime_plugins = [
-        \ 'builtin-boshiamy',
-        \ 'builtin-kana',
-        \ 'builtin-chewing',
-        \ 'builtin-unicode',
+        \ 'builtin_boshiamy',
+        \ 'builtin_kana',
+        \ 'builtin_chewing',
+        \ 'builtin_unicode',
         \ 'wide', 'runes', 'braille', 'emoji']
 <
 You can decide the order of these plugins.
@@ -284,7 +284,7 @@ This section introduces the built-in plugins in ime.vim.
 3.1 Boshiamy mode                               *ime-built-in-plugin-boshiamy*
 
 Boshiamy mode is a standalone plugin, which is the original idea of this project.
-Its icon is [嘸], plugin name is "builtin-boshiamy".
+Its icon is [嘸], plugin name is "builtin_boshiamy".
 
 Different from most system input methods, Boshiamy mode first takes the whole
 string and try to generate characters, if no result, part of the string will
@@ -306,7 +306,7 @@ Example:
 
 Kana mode is a standalone plugin, which can be used to input
 Japanese Hiragana and Katakana, but it is unable to output Kanji.
-Its icon is [あ] and [ア], plugin name is "builtin-kana"。
+Its icon is [あ] and [ア], plugin name is "builtin_kana"。
 
 - Input in romanisation
 - Type ";;" to switch between Hiragana and Katakana
@@ -321,7 +321,7 @@ Its icon is [あ] and [ア], plugin name is "builtin-kana"。
 3.3 Phonetic mode                               *ime-built-in-plugin-chewing*
 
 Phonetic mode is an embedded plugin, can be used to input Chinese characters.
-Its plugin name is "builtin-chewing"。
+Its plugin name is "builtin_chewing"。
 
 ";" has to preceed any phonetic strings;
 ";hk4" generates a menu containing all characters with same sound to "測".
@@ -335,7 +335,7 @@ All phonetic symbol will be in the first place;
 Unicode mode is an embedded plugin,
 which can input characters with unicode code point and also
 query the unicode code point of any characters. (the later feature is like |ga|)
-Its plugin name is "builtin-unicode"。
+Its plugin name is "builtin_unicode"。
 
 Examples:
 

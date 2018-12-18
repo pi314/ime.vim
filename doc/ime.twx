@@ -224,10 +224,10 @@ ime.vim 能夠載入符合格式的第三方套件，若你有安裝套件，
 如果你希望內建的套件也開啟，請手動將它們列出：
 >
     let g:ime_plugins = [
-        \ 'builtin-boshiamy',
-        \ 'builtin-kana',
-        \ 'builtin-chewing',
-        \ 'builtin-unicode',
+        \ 'builtin_boshiamy',
+        \ 'builtin_kana',
+        \ 'builtin_chewing',
+        \ 'builtin_unicode',
         \ 'wide', 'runes', 'braille', 'emoji']
 <
 你可以依照喜好決定套件的順序。
@@ -267,7 +267,7 @@ ime.vim 的套件分成兩種
 3.1 嘸蝦米模式                                   *ime-built-in-plugin-boshiamy*
 
 嘸蝦米模式為 standalone 套件，是 ime.vim 的開發動機。
-圖示為 [嘸]，套件名稱為 "builtin-boshiamy"。
+圖示為 [嘸]，套件名稱為 "builtin_boshiamy"。
 
 和大部份的系統輸入法不同，嘸蝦米模式會先取整段字串嘗試送字，
 若沒有結果，最開頭的一部份字串會被放棄，然後再次嘗試，
@@ -286,7 +286,7 @@ ime.vim 的套件分成兩種
 3.2 日文模式                                         *ime-built-in-plugin-kana*
 
 日文模式為 standalone 套件，能夠輸入日文平假名及片假名，但無法輸入漢字。
-圖示為 [あ] 以及 [ア]，套件名稱為 "builtin-kana"。
+圖示為 [あ] 以及 [ア]，套件名稱為 "builtin_kana"。
 
 - 使用羅馬拼音輸入
 - 按下 ";;" 可在平假名與片假名之間切換
@@ -301,7 +301,7 @@ ime.vim 的套件分成兩種
 3.3 注音模式                                     *ime-built-in-plugin-chewing*
 
 注音模式為 embedded 套件，能夠以注音輸入中文字，
-套件名稱為 "builtin-chewing"。
+套件名稱為 "builtin_chewing"。
 
 注音的字根開頭一律為 ";"，並接上注音字根；
 輸入 ";hk4" 以後可以產生 "測" 的同音字選單。
@@ -313,7 +313,7 @@ ime.vim 的套件分成兩種
 
 Unicode 模式為 embedded 套件，能夠以 unicode 碼位（code point）輸入字元，
 也能查詢字元的碼位。
-套件名稱為 "builtin-unicode"。
+套件名稱為 "builtin_unicode"。
 
 範例：
 
