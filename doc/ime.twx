@@ -19,7 +19,7 @@
     2.9 載入套件................................|g:ime_plugins|
     2.10 ime buffer.............................|g:ime_enable_ime_buffer|
 3.  內建套件....................................|ime-builtin-plugins|
-    3.1 嘸蝦米模式..............................|ime-builtin-plugin-ime|
+    3.1 嘸蝦米模式..............................|ime-builtin-plugin-boshiamy|
     3.2 日文模式................................|ime-builtin-plugin-kana|
     3.3 注音模式................................|ime-builtin-plugin-chewing|
     3.4 Unicode 模式............................|ime-builtin-plugin-unicode|
