@@ -1,7 +1,7 @@
-*ime.txt* *ime.vim*       For Vim version 8.0             Last update：2017/04
+*ime.txt* *ime.vim*        For Vim version 8.0             Last update：2018/12
 
-                                                     A Vim input method engine
-==============================================================================
+                                                      A Vim input method engine
+===============================================================================
 Index
 
 1.  Introduction................................|ime-introduction|
@@ -14,20 +14,20 @@ Index
     2.5 Switch mandatory/secondary input mode...|g:ime_switch_2nd|
     2.5.1 Only show mandatory input mode........|g:ime_show_2nd_mode|
     2.6 Cancel input text.......................|g:ime_cancel_input|
-    2.7 Switch to submode.......................|g:ime_switch_submode|
+    2.7 Open input method setting menu..........|g:ime_menu|
     2.8 Custom table............................|g:ime_boshiamy_custom_table|
     2.9 Load plugins............................|g:ime_plugins|
     2.10 ime buffer.............................|g:ime_enable_ime_buffer|
-3.  Built-in plugins............................|ime-built-in-plugins|
-    3.1 Boshiamy mode...........................|ime-built-in-plugin-ime|
-    3.2 Kana mode...............................|ime-built-in-plugin-kana|
-    3.3 Phonetic mode...........................|ime-built-in-plugin-chewing|
-    3.4 Unicode mode............................|ime-built-in-plugin-unicode|
+3.  Built-in plugins............................|ime-builtin-plugins|
+    3.1 Boshiamy mode...........................|ime-builtin-plugin-ime|
+    3.2 Kana mode...............................|ime-builtin-plugin-kana|
+    3.3 Phonetic mode...........................|ime-builtin-plugin-chewing|
+    3.4 Unicode mode............................|ime-builtin-plugin-unicode|
 4.  Tips that can be used with Vim..............|ime-tips|
 5.  Implementation details......................|ime-implementation-details|
 
-==============================================================================
-1.  Introduction                                            *ime-introduction*
+===============================================================================
+1.  Introduction                                             *ime-introduction*
 
 It's always a trouble to input Chinese characters in Vim.
 
@@ -59,8 +59,8 @@ If we can get rid of this situation, we can avoid keep hitting
 |shift| or "|control| + |space|" to close input method.
 And the best way to do this is to embedded an input method in Vim.
 
-------------------------------------------------------------------------------
-1.2 Input modes                                                    *ime-modes*
+-------------------------------------------------------------------------------
+1.2 Input modes                                                     *ime-modes*
 
 ime.vim has built-in boshiamy, kana, and chewing (phonetic) input methods,
 it can even load third-party plugins.
@@ -93,14 +93,14 @@ Every input method has their own key-sending settings,
 please refer to their documents.
 The built-in Boshiamy and kana mode are triggered by <space>.
 
-==============================================================================
-2.  Settings                                                    *ime-settings*
+===============================================================================
+2.  Settings                                                     *ime-settings*
 
 One of the goals of ime.vim is plug-and-play,
 so most settings is provided in variable form instead of functions.
 
-------------------------------------------------------------------------------
-2.1 Show input mode in 'statusline'                               *ime#mode()*
+-------------------------------------------------------------------------------
+2.1 Show input mode in 'statusline'                                *ime#mode()*
 
 |ime#mode()| returns the current status,
 you can show this information in 'statusline':
@@ -123,8 +123,8 @@ Note: Before Vim 7.4.1711, directly put it into 'statusline' may cause
     endfunction
     set statusline=%{IMEStatusString()}
 <
-------------------------------------------------------------------------------
-2.2 Toggle English                                      *g:ime_toggle_english*
+-------------------------------------------------------------------------------
+2.2 Toggle English                                       *g:ime_toggle_english*
 >
     let g:ime_toggle_english = ',,'
 <
@@ -133,16 +133,16 @@ or set it to key sequences that generates a character.
 
 The previous mode will be kept after switch to English mode.
 
-------------------------------------------------------------------------------
-2.3 Select input mode                                      *g:ime_select_mode*
+-------------------------------------------------------------------------------
+2.3 Select input mode                                       *g:ime_select_mode*
 >
     let g:ime_select_mode = ',m'
 <
 This setting is used with |inoremap|, be careful not to override your mappings
 or set it to key sequences that generates a character.
 
-------------------------------------------------------------------------------
-2.4 Different mode select styles                     *g:ime_select_mode_style*
+-------------------------------------------------------------------------------
+2.4 Different mode select styles                      *g:ime_select_mode_style*
 >
     let g:ime_select_mode_style = 'popup'
 <
@@ -154,15 +154,15 @@ shown in an interactive way.
 This option is disabled and treat as "interactive" when
 |CompleteDone| event or |v:completed_item| variable is not available.
 
-------------------------------------------------------------------------------
-2.5 Switch mandatory/secondary input mode                   *g:ime_switch_2nd*
+-------------------------------------------------------------------------------
+2.5 Switch mandatory/secondary input mode                    *g:ime_switch_2nd*
 >
     let g:ime_switch_2nd = ',.'
 <
 Switch mandatory and secondary input modes.
 
-------------------------------------------------------------------------------
-2.5.1 Only show mandatory input mode                     *g:ime_show_2nd_mode*
+-------------------------------------------------------------------------------
+2.5.1 Only show mandatory input mode                      *g:ime_show_2nd_mode*
 >
     let g:ime_show_2nd_mode = 0
 <
@@ -170,8 +170,8 @@ By default, ime.vim show the icons of both mandatory and secondary input modes.
 
 By setting this option to false, |ime#mode()| shows mandatory input mode only.
 
-------------------------------------------------------------------------------
-2.6 Cancel input text                                     *g:ime_cancel_input*
+-------------------------------------------------------------------------------
+2.6 Cancel input text                                      *g:ime_cancel_input*
 >
     let g:ime_cancel_input = '<C-h>'
 <
@@ -189,20 +189,21 @@ to turn the character back to word again (before completion menu disappear).
 
 Same rules apply to other input modes.
 
-------------------------------------------------------------------------------
-2.7 Switch to submode                                   *g:ime_switch_submode*
+-------------------------------------------------------------------------------
+2.7 Open input method setting menu                                 *g:ime_menu*
 >
-    let g:ime_switch_submode = ';;'
+    let g:ime_menu = ';;'
 <
-Some input mode has several submodes, like Microsoft phonetic input method,
-after pressing ``ctrl`` + ``alt`` + ``,``, a screen keyboard pops up,
-and the next key will output a punctuation mark instead of phonetic symbol.
+Some input modes provide setting menu for users to adjust the behavior
+dynamically.
 
-Not every input mode has submodes, and their switch keys would not be the same,
-please refer to their documents.
+If there are only one setting provided, after pressing |g:ime_menu|,
+the menu may not appear and the setting may take effect directly.
 
-------------------------------------------------------------------------------
-2.8 Custom table                                 *g:ime_boshiamy_custom_table*
+Not every input mode has setting menu, please refer to their documents.
+
+-------------------------------------------------------------------------------
+2.8 Custom table                                  *g:ime_boshiamy_custom_table*
 >
     let g:ime_boshiamy_custom_table = '~/.boshiamy.table'
 <
@@ -226,8 +227,8 @@ The order in this table will be kept.
 
 This option has NO default value.
 
-------------------------------------------------------------------------------
-2.9 Load plugins                                               *g:ime_plugins*
+-------------------------------------------------------------------------------
+2.9 Load plugins                                                *g:ime_plugins*
 
 ime.vim is able to load third party plugins if they fit certain structure.
 If you had installed some, please list them in your |vimrc|:
@@ -238,16 +239,16 @@ Note that if you set this value, the built-in plugins will all being disabled.
 If you want to enable built-in plugins, please list them manually:
 >
     let g:ime_plugins = [
-        \ 'builtin-boshiamy',
-        \ 'builtin-kana',
-        \ 'builtin-chewing',
-        \ 'builtin-unicode',
+        \ 'builtin_boshiamy',
+        \ 'builtin_kana',
+        \ 'builtin_chewing',
+        \ 'builtin_unicode',
         \ 'wide', 'runes', 'braille', 'emoji']
 <
 You can decide the order of these plugins.
 
-------------------------------------------------------------------------------
-2.10 ime buffer                                      *g:ime_enable_ime_buffer*
+-------------------------------------------------------------------------------
+2.10 ime buffer                                       *g:ime_enable_ime_buffer*
 
 If you add some special symbol in ime.vim, but you are not able to input it
 with system input methods, you can leverage the ime buffer.
@@ -265,8 +266,8 @@ And you have to explicitly activate it:
     :set ft=ime
 <
 
-==============================================================================
-3.  Built-in plugins                                    *ime-built-in-plugins*
+===============================================================================
+3.  Built-in plugins                                      *ime-builtin-plugins*
 
 There are two kinds ot ime.vim plugins:
 
@@ -279,11 +280,11 @@ There are two kinds ot ime.vim plugins:
 
 This section introduces the built-in plugins in ime.vim.
 
-------------------------------------------------------------------------------
-3.1 Boshiamy mode                               *ime-built-in-plugin-boshiamy*
+-------------------------------------------------------------------------------
+3.1 Boshiamy mode                                 *ime-builtin-plugin-boshiamy*
 
 Boshiamy mode is a standalone plugin, which is the original idea of this project.
-Its icon is [嘸], plugin name is "builtin-boshiamy".
+Its icon is [嘸], plugin name is "builtin_boshiamy".
 
 Different from most system input methods, Boshiamy mode first takes the whole
 string and try to generate characters, if no result, part of the string will
@@ -300,12 +301,12 @@ Example:
     2.  Check ",id", no result, "," is cut out
     3.  Check "id", generates "誤"
 
-------------------------------------------------------------------------------
-3.2 Kana mode                                       *ime-built-in-plugin-kana*
+-------------------------------------------------------------------------------
+3.2 Kana mode                                         *ime-builtin-plugin-kana*
 
 Kana mode is a standalone plugin, which can be used to input
 Japanese Hiragana and Katakana, but it is unable to output Kanji.
-Its icon is [あ] and [ア], plugin name is "builtin-kana"。
+Its icon is [あ] and [ア], plugin name is "builtin_kana"。
 
 - Input in romanisation
 - Type ";;" to switch between Hiragana and Katakana
@@ -316,11 +317,11 @@ Its icon is [あ] and [ア], plugin name is "builtin-kana"。
   - "あv" -> "ぁ"
   - "buiaiemu" -> "ぶいあいえむ"
 
-------------------------------------------------------------------------------
-3.3 Phonetic mode                               *ime-built-in-plugin-chewing*
+-------------------------------------------------------------------------------
+3.3 Phonetic mode                                 *ime-builtin-plugin-chewing*
 
 Phonetic mode is an embedded plugin, can be used to input Chinese characters.
-Its plugin name is "builtin-chewing"。
+Its plugin name is "builtin_chewing"。
 
 ";" has to preceed any phonetic strings;
 ";hk4" generates a menu containing all characters with same sound to "測".
@@ -328,21 +329,21 @@ Its plugin name is "builtin-chewing"。
 All phonetic symbol will be in the first place;
 ";;" generates "ㄤ" in highest priority.
 
-------------------------------------------------------------------------------
-3.4 Unicode mode                                 *ime-built-in-plugin-unicode*
+-------------------------------------------------------------------------------
+3.4 Unicode mode                                   *ime-builtin-plugin-unicode*
 
 Unicode mode is an embedded plugin,
 which can input characters with unicode code point and also
 query the unicode code point of any characters. (the later feature is like |ga|)
-Its plugin name is "builtin-unicode"。
+Its plugin name is "builtin_unicode"。
 
 Examples:
 
 - "\u5B57" -> "字"
 - "\u[字]" -> "\u5b57"
 
-==============================================================================
-4.  Tips that can be used with Vim                                  *ime-tips*
+===============================================================================
+4.  Tips that can be used with Vim                                   *ime-tips*
 
 In replace mode, one character override one character,
 no matter the width.
@@ -353,8 +354,8 @@ because a two-width Chinese character only replaces one space character.
 
 The vim built-in |gR| is very useful in this case.
 
-==============================================================================
-5.  Implementation details                        *ime-implementation-details*
+===============================================================================
+5.  Implementation details                         *ime-implementation-details*
 
 ime.vim triggers the input modes by |inoremap|,
 and |iunmap| them after switching to English mode.
@@ -362,3 +363,5 @@ So type in English mode is more effective.
 
 Further information about developing third party plugins for ime.vim:
 |ime-plugin|
+
+vim:tw=79:ts=8:noet:ft=help:norl:

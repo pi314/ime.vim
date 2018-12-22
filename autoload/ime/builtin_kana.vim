@@ -54,11 +54,11 @@ function! ime#builtin_kana#handler (matchobj, trigger)
 endfunction
 
 
-function! ime#builtin_kana#submode (switch)
-    if a:switch == ''
-        let s:submode = 0
-    else
+function! ime#builtin_kana#menu (...)
+    if a:0 == 0
         let s:submode = 1 - s:submode
+    elseif a:1 == ''
+        let s:submode = 0
     endif
 
     if s:submode == 0
@@ -78,6 +78,6 @@ function! ime#builtin_kana#info ()
     \ 'pattern': '\v%(([.a-z]*)|(['. s:large_small_kana .'])|([んン]))$',
     \ 'handler': function('ime#builtin_kana#handler'),
     \ 'trigger': split('.''abcdefghijkmnoprstuvwyz', '\zs'),
-    \ 'submode': function('ime#builtin_kana#submode'),
+    \ 'menu': function('ime#builtin_kana#menu'),
     \ }
 endfunction

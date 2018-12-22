@@ -39,7 +39,11 @@ let s:standalone_plugin_list = []
 let s:embedded_plugin_list = []
 function! s:LoadPlugins () " {{{
     for l:pname in g:ime_plugins
-        let l:pname = substitute(l:pname, '-', '_', 'g')
+        if match(l:pname, '\v^\w+$') == -1
+            call ime#log('core', 'invalid plugin name "'. l:pname . '"')
+            continue
+        endif
+
         try
             let l:plugin_info = function('ime#'. l:pname .'#info')()
         catch
@@ -52,41 +56,48 @@ function! s:LoadPlugins () " {{{
             endtry
         endtry
 
+        let l:invalid = s:false
+
         " sanity check
         if !has_key(l:plugin_info, 'type')
             call ime#log('core', 'plugin "'. l:pname . '" lacks "type" information')
-            continue
+            let l:invalid = s:true
         endif
 
         if l:plugin_info['type'] == 'standalone' &&
                 \ (!has_key(l:plugin_info, 'icon') ||
                 \ !has_key(l:plugin_info, 'description'))
             call ime#log('core', 'plugin "'. l:pname . '" lacks "icon" or "description" information')
-            continue
+            let l:invalid = s:true
         endif
 
         if !has_key(l:plugin_info, 'pattern')
             call ime#log('core', 'plugin "'. l:pname . '" lacks "pattern" information')
-            continue
+            let l:invalid = s:true
         endif
 
         if !has_key(l:plugin_info, 'handler')
             call ime#log('core', 'plugin "'. l:pname . '" lacks "handler" information')
-            continue
+            let l:invalid = s:true
         endif
 
         if !has_key(l:plugin_info, 'trigger')
             call ime#log('core', 'plugin "'. l:pname . '" lacks "trigger" information')
+            let l:invalid = s:true
+        endif
+
+        if has_key(l:plugin_info, 'switch')
+            call ime#log('core', 'plugin "'. l:pname . '" has deprecated information "switch"')
+            let l:invalid = s:true
+        endif
+
+        if has_key(l:plugin_info, 'submode')
+            call ime#log('core', 'plugin "'. l:pname . '" has deprecated information "submode"')
+            let l:invalid = s:true
+        endif
+
+        if l:invalid != s:false
             continue
-        endif
-
-        if !has_key(l:plugin_info, 'submode') && has_key(l:plugin_info, 'switch')
-            call ime#log('core', 'plugin "'. l:pname . '" has abandoned "switch" information')
-            unlet l:plugin_info['switch']
-        endif
-
-        if has_key(l:plugin_info, 'submode') && !has_key(l:plugin_info, 'switch')
-            let l:plugin_info['switch'] = [g:ime_switch_submode]
         endif
 
         let l:plugin_info['name'] = l:pname
@@ -95,6 +106,12 @@ function! s:LoadPlugins () " {{{
             call add(s:standalone_plugin_list, l:plugin_info)
         elseif l:plugin_info['type'] == 'embedded'
             call add(s:embedded_plugin_list, l:plugin_info)
+        endif
+
+        if has_key(l:plugin_info, 'menu')
+            " have to rename 'menu' or it will be overridden
+            " cb stands for callback
+            let l:plugin_info['menu_cb'] = l:plugin_info['menu']
         endif
     endfor
 
@@ -118,7 +135,7 @@ endif
 let s:ime_mode_2nd = {}
 
 
-function s:EscapeKey (key) " {{{
+function! s:EscapeKey (key) " {{{
     if a:key == '|'
         return '<bar>'
     elseif a:key == ' '
@@ -133,7 +150,7 @@ endfunction " }}}
 
 
 function! s:SelectMode (new_mode) " {{{
-    for l:key in s:ime_mode['trigger'] + get(s:ime_mode, 'switch', [])
+    for l:key in s:ime_mode['trigger']
         if l:key == ''
             continue
         endif
@@ -143,8 +160,8 @@ function! s:SelectMode (new_mode) " {{{
         endtry
     endfor
 
-    if has_key(s:ime_mode, 'submode')
-        call s:ime_mode['submode']('')
+    if has_key(s:ime_mode, 'menu_cb')
+        call s:ime_mode['menu_cb']('')
     endif
 
     if type(a:new_mode) == type('ENGLISH') && a:new_mode == 'ENGLISH'
@@ -166,30 +183,13 @@ function! s:SelectMode (new_mode) " {{{
         for l:key in s:ime_mode['trigger']
             try
                 " Compose this command (so complex):
-                " inoremap trigger (Submode('trigger'))
+                " inoremap trigger (SendKey('trigger'))
                 let l:escaped_key = s:EscapeKey(l:key)
                 let l:cmd = 'inoremap '
                 let l:cmd .= l:escaped_key .' '
                 let l:cmd .= '<C-R>=<SID>SendKey('''
                 let l:cmd .= (l:escaped_key == "'" ? "''" : l:escaped_key)
                 let l:cmd .= ''')<CR>'
-                execute l:cmd
-            catch
-                call ime#log('core', '>> '. v:exception)
-            endtry
-        endfor
-
-        for l:key in get(s:ime_mode, 'switch', [])
-            try
-                " Compose this command (so complex):
-                " inoremap <expr> switch (remove popup menu) . (Submode('switch'))
-                let l:escaped_key = s:EscapeKey(l:key)
-                let l:cmd = 'inoremap <expr> '
-                let l:cmd .= l:escaped_key .' '
-                let l:cmd .= '(pumvisible() ? "<C-Y>" : "") . '
-                let l:cmd .= '"<C-R>=<SID>Submode('''
-                let l:cmd .= (l:escaped_key == "'" ? "''" : l:escaped_key)
-                let l:cmd .= ''')<CR>"'
                 execute l:cmd
             catch
                 call ime#log('core', '>> '. v:exception)
@@ -364,39 +364,151 @@ function! s:SendKey (trigger) " {{{
 endfunction " }}}
 
 
-function! s:Submode (switch) " {{{
-    call s:ime_mode['submode'](a:switch)
-    return ''
+function! s:interactive_menu (prompt, menu_render, cursor, menu_handler) " {{{
+    try
+        let l:more = &more
+        let l:showmode = &showmode
+        set nomore
+        set noshowmode
+
+        let l:menu = a:menu_render()
+        let l:cursor = a:cursor
+        while s:true
+            if type(l:menu) != type([])
+                break
+            endif
+
+            redraw!
+            echo a:prompt
+            for l:index in range(len(l:menu))
+                echo ((l:index == l:cursor) ? '> ' : '  '). l:menu[(l:index)]['menu']
+            endfor
+
+            let l:key = getchar()
+            if type(l:key) == type(0)
+                let l:key = nr2char(l:key)
+            endif
+            if l:key == 'j' || l:key == "\<Down>" || l:key == "\<C-n>"
+                let l:cursor = (l:cursor + 1) % len(l:menu)
+            elseif l:key == 'k' || l:key == "\<Up>" || l:key == "\<C-p>"
+                let l:cursor = (l:cursor + len(l:menu) - 1) % len(l:menu)
+            elseif l:key == 'q'
+                break
+            elseif l:key == "\<Esc>"
+                call feedkeys("\<Esc>")
+                break
+            else
+                let l:action = a:menu_handler(l:menu, l:cursor, l:key)
+                if l:action == 'return'
+                    break
+                elseif l:action == 'menu'
+                    let l:menu = a:menu_render()
+                    let l:cursor = l:cursor % len(l:menu)
+                endif
+            endif
+        endwhile
+    catch /^Vim:Interrupt$/
+    catch
+        call ime#log('core', '// '. v:throwpoint)
+        call ime#log('core', '\\ '. v:exception)
+    finally
+        let &more = l:more
+        let &showmode = l:showmode
+        redraw!
+    endtry
 endfunction " }}}
 
 
-" ================
+function! s:per_mode_menu_render () " {{{
+    let l:menu = s:ime_mode['menu_cb']()
+
+    if type(l:menu) != type([])
+        return l:menu
+    endif
+
+    let l:ret = []
+    for l:index in range(len(l:menu))
+        let l:menu[(l:index)]['menu'] = '('. l:menu[(l:index)]['key'] .') '. l:menu[(l:index)]['menu']
+    endfor
+    return l:menu
+endfunction " }}}
+
+
+function! s:per_mode_menu_handler (menu, cursor, key) " {{{
+    if a:key == "\<CR>" || a:key == ' '
+        call s:ime_mode['menu_cb'](a:menu[(a:cursor)]['key'])
+        if a:key == "\<CR>"
+            return 'return'
+        endif
+
+        if a:key == ' '
+            return 'menu'
+        endif
+    endif
+
+    for l:index in range(len(a:menu))
+        if a:key == a:menu[(l:index)]['key']
+            call s:ime_mode['menu_cb'](a:key)
+            return 'menu'
+        endif
+    endfor
+
+    return 'return'
+endfunction " }}}
+
+
+function! s:interactive_mode_select_menu_render () " {{{
+    return s:standalone_plugin_list
+endfunction " }}}
+
+
+function! s:interactive_mode_select_menu_handler (menu, cursor, key) " {{{
+    call s:SelectMode(s:standalone_plugin_list[(a:cursor)])
+endfunction " }}}
+
+
+" =============================================================================
 " Public Functions
-" ================
-function! ime#mode (...) " {{{
-    if a:0
-        try
-            let l:pname = substitute(a:1, '-', '_', 'g')
-            let l:pnames = map(copy(s:standalone_plugin_list), 'v:val[''name'']')
-            if l:pname ==? 'english' || index(l:pnames, l:pname) == -1
-                call s:SelectMode({})
-            else
-                call s:SelectMode(s:standalone_plugin_list[index(l:pnames, l:pname)])
-            endif
-        catch
-            call s:SelectMode({})
-        endtry
+" =============================================================================
+function! ime#icon (...) " {{{
+    if a:0 == 0
+        if s:ime_english_enable == s:true
+            return '[En]'
+        endif
+
+        let l:ret = get(s:ime_mode, 'icon', '[？]')
+        if g:ime_show_2nd_mode
+            let l:ret .= get(s:ime_mode_2nd, 'icon', '')
+        endif
+        return l:ret
     endif
 
+    if a:0 == 2
+        " ime#icon(pname, icon)
+        let l:pname = substitute(a:1, '-', '_', 'g')
+        if l:pname != ime#mode()
+            call ime#log('core', '// ime#icon('. l:pname .'): forbidden')
+            call ime#log('core', '\\ current activated plugin: "'. ime#mode() .'"')
+            return
+        endif
+
+        let s:ime_mode['icon'] = a:2
+        let s:ime_mode['menu'] = s:ime_mode['icon'] .' - '. s:ime_mode['description']
+
+        redrawstatus!
+        return
+    endif
+
+    call ime#log('core', 'ime#icon(): wrong argument')
+endfunction " }}}
+
+
+function! ime#mode () " {{{
     if s:ime_english_enable == s:true
-        return '[En]'
+        return 'english'
     endif
 
-    let l:ret = get(s:ime_mode, 'icon', '[？]')
-    if g:ime_show_2nd_mode
-        let l:ret .= get(s:ime_mode_2nd, 'icon', '')
-    endif
-    return l:ret
+    return get(s:ime_mode, 'name', '')
 endfunction " }}}
 
 
@@ -420,6 +532,43 @@ function! ime#switch_2nd () " {{{
 endfunction " }}}
 
 
+function! ime#menu (...) " {{{
+    if a:0 == 0
+        if s:ime_english_enable || !has_key(s:ime_mode, 'menu_cb')
+            call feedkeys(g:ime_menu, 'n')
+            return
+        endif
+
+        call s:interactive_menu(
+                \ 'Select menu: (j/Down/<C-n>) (k/Up/<C-p>) (enter/space) (q/esc)',
+                \ function('s:per_mode_menu_render'),
+                \ 0,
+                \ function('s:per_mode_menu_handler'),
+                \ )
+        return
+    endif
+
+    if a:0 == 2
+        let l:pname = substitute(a:1, '-', '_', 'g')
+        if l:pname != ime#mode()
+            call ime#log('core', '// ime#menu('. l:pname .'): forbidden')
+            call ime#log('core', '\\ current activated plugin: "'. ime#mode() .'"')
+            return
+        endif
+
+        if !has_key(s:ime_mode, 'menu_cb')
+            call ime#log('core', '// ime#menu(): plugin "'. s:ime_mode['name'] .'" have no menu')
+            return
+        endif
+
+        call s:ime_mode['menu_cb'](a:2)
+        return
+    endif
+
+    call ime#log('core', 'ime#menu(): wrong argument')
+endfunction " }}}
+
+
 function! ime#_popup_mode_menu () " {{{
     if s:ime_mode == {}
         call ime#log('core', 'No input mode installed.')
@@ -437,47 +586,13 @@ endfunction " }}}
 
 function! ime#_interactive_mode_menu () " {{{
     let l:cursor = index(s:standalone_plugin_list, s:ime_mode)
-    execute 'resize -'. (len(s:standalone_plugin_list) + 1)
-    try
-        let l:more = &more
-        let l:showmode = &showmode
-        set nomore
-        set noshowmode
-        while s:true
-            redraw!
-            echo 'Select input mode: (j/Down/<C-n>) (k/Up/<C-p>) (enter) (c/q/Esc)'
-            for l:index in range(len(s:standalone_plugin_list))
-                if l:index == l:cursor
-                    echo '> '. s:standalone_plugin_list[(l:index)]['menu']
-                else
-                    echo '  '. s:standalone_plugin_list[(l:index)]['menu']
-                endif
-            endfor
-
-            let l:key = getchar()
-            if l:key == char2nr('j') || l:key == "\<Down>" || l:key == char2nr("\<C-n>")
-                let l:cursor = (l:cursor + 1) % len(s:standalone_plugin_list)
-            elseif l:key == char2nr('k') || l:key == "\<Up>" || l:key == char2nr("\<C-p>")
-                let l:cursor = (l:cursor + len(s:standalone_plugin_list) - 1) % len(s:standalone_plugin_list)
-            elseif l:key == char2nr("\<CR>")
-                break
-            elseif l:key == char2nr('c') || l:key == char2nr('q')
-                redraw!
-                return
-            elseif l:key == char2nr("\<Esc>")
-                redraw!
-                call feedkeys("\<Esc>")
-                return
-            endif
-        endwhile
-    finally
-        let &more = l:more
-        let &showmode = l:showmode
-        execute 'resize +'. (len(s:standalone_plugin_list) + 1)
-        redraw!
-    endtry
-
-    call s:SelectMode(s:standalone_plugin_list[(l:cursor)])
+    call s:interactive_menu(
+            \ 'Select input mode: (j/Down/<C-n>) (k/Up/<C-p>) (enter) (q/esc)',
+            \ function('s:interactive_mode_select_menu_render'),
+            \ l:cursor,
+            \ function('s:interactive_mode_select_menu_handler'),
+            \ )
+    return
 endfunction " }}}
 
 
@@ -486,20 +601,6 @@ function! ime#plugins () " {{{
     \ 'standalone': map(copy(s:standalone_plugin_list), 'v:val[''name'']'),
     \ 'embedded': map(copy(s:embedded_plugin_list), 'v:val[''name'']'),
     \ }
-endfunction " }}}
-
-
-function! ime#icon (pname, icon) " {{{
-    let l:pname = substitute(a:pname, '-', '_', 'g')
-    if l:pname != s:ime_mode['name']
-        call ime#log('core',
-        \ 'ime#icon("'. l:pname .'"): current plugin name is "'. s:ime_mode['name'] .'"')
-    endif
-
-    let s:ime_mode['icon'] = a:icon
-    let s:ime_mode['menu'] = s:ime_mode['icon'] .' - '. s:ime_mode['description']
-
-    redrawstatus!
 endfunction " }}}
 
 
