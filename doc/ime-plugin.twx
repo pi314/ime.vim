@@ -47,7 +47,7 @@ ime.vim 能夠載入第三方的套件，擴充自己的輸入能力。
 - "choice"，選字用的按鍵。
 - "menu"，用來提供設定選單，或是調整套件的行為。
 
-請參考 |ime-plugin-info()|。
+在繼續往下讀之前，請參考 |ime-plugin-info()|。
 
 ===============================================================================
 2.  目錄結構                                             *ime-plugin-structure*
@@ -85,7 +85,7 @@ function('ime_{plugin-name}#handler')，引號不可省略。
 -------------------------------------------------------------------------------
 2.1 需要載入龐大資料的套件                          *ime-plugin-with-huge-data*
 
-若套件需要載入龐大的資料，可以利用 vim 的 |autoload| 功能。
+若套件需要載入龐大的資料，可以利用 Vim 的 |autoload| 功能。
 
 在 {plugin-folder}/autoload/ 目錄裡增加一個 ime_{plugin-name}_table.vim 檔案：
 >
@@ -133,13 +133,13 @@ ime_{plugin-name}.vim 檔案調整為：
 與 "pattern" 傳入 |matchlist()| 進行比對。
 若比對成功，該結果（一個 |list|）和 trigger 按鍵會一起被傳入 handler。
 
-handler 需要針對傳入的 matchobj 以及 trigger 按鍵進行處理及判斷，
+Handler 需要針對傳入的 matchobj 以及 trigger 按鍵進行處理及判斷，
 並回傳一個 |list|，包含可用的選項。回傳選項的順序可以由套件自行決定。
 
-輸入時產生的選單透過 |complete()| 產生，每個選項可以帶有說明文字，詳細資訊請見
+回傳的結果會透過 |complete()| 產生選單，每個選項可以帶有說明文字，詳細資訊請見
 |complete-items|。
 
-pattern 可以包含 regex groups（請參考 |\1|），提供 handler 判斷使用。
+Pattern 可以包含 regex groups（請參考 |\1|），提供 handler 判斷使用。
 
 詳見 |ime-plugin-trigger[]|、|ime-plugin-pattern|、|ime-plugin-handler()|。
 
@@ -281,15 +281,13 @@ ime#log({logtag}, {...})
 
 首先，套件需要訂定一個名稱：plugin-name                       *ime-plugin-name*
 讓使用者加在 |g:ime_plugins| 之中。
-套件名稱只能包含大小寫英文字母以及底線。
-
-以下套件名稱以 {plugin-name} 表示。
+套件名稱只能包含大小寫英文字母以及底線。(|\w|)
 
 以下為 ime.vim 能處理的資訊：
 
 - "type" |string|
   套件的種類，只能是 "standalone" 或是 "embedded"。
-  詳見 |ime-plugin-introduction|。
+  詳見 |ime-plugin-intro|。
 
 - "pattern": |search-pattern|                              *ime-plugin-pattern*
   表示該套件所能處理的字串。
