@@ -301,6 +301,14 @@ Example:
     2.  Check ",id", no result, "," is cut out
     3.  Check "id", generates "誤"
 
+Boshiamy mode has "eager mode", can be toggled in plugin menu. (see |g:ime_menu|)
+Eager mode removes capitalized alphabets, numbers, and underscores.
+
+Example:
+
+- Apl -> A卷
+- 10ol -> 10號
+
 -------------------------------------------------------------------------------
 3.2 Kana mode                                         *ime-builtin-plugin-kana*
 
