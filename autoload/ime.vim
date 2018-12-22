@@ -630,7 +630,10 @@ function! ime#boshiamy_export_cin_file () " {{{
                 continue
             endif
             for l:char in l:kana_table[(l:key)]
-                call append('$', ','. substitute(l:key, 'nn', 'n', '') .' '. l:char)
+                if l:key == 'nn'
+                    call append('$', 'n, '. l:char)
+                endif
+                call append('$', l:key .', '. l:char)
             endfor
         endfor
     endfor
