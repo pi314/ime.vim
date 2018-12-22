@@ -63,3 +63,6 @@ if !exists('g:ime_menu') || type(g:ime_menu) != ''
     let g:ime_menu = ';;'
 endif
 execute 'inoremap '. g:ime_menu .' <C-\><C-o>:call ime#menu()<CR>'
+
+
+command! IMEExportBoshiamyCIN :call ime#boshiamy_export_cin_file()

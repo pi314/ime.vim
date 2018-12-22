@@ -604,7 +604,7 @@ function! ime#plugins () " {{{
 endfunction " }}}
 
 
-function! ime#export_cin_file () " {{{
+function! ime#boshiamy_export_cin_file () " {{{
     let l:boshiamy_table = ime#boshiamy_table#table()
     let l:chewing_table = ime#chewing_table#table()
 
@@ -630,7 +630,10 @@ function! ime#export_cin_file () " {{{
                 continue
             endif
             for l:char in l:kana_table[(l:key)]
-                call append('$', ','. substitute(l:key, 'nn', 'n', '') .' '. l:char)
+                if l:key == 'nn'
+                    call append('$', 'n, '. l:char)
+                endif
+                call append('$', l:key .', '. l:char)
             endfor
         endfor
     endfor
