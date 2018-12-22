@@ -604,7 +604,7 @@ function! ime#plugins () " {{{
 endfunction " }}}
 
 
-function! ime#export_cin_file () " {{{
+function! ime#boshiamy_export_cin_file () " {{{
     let l:boshiamy_table = ime#boshiamy_table#table()
     let l:chewing_table = ime#chewing_table#table()
 

@@ -18,6 +18,7 @@ Index
     2.8 Custom table............................|g:ime_boshiamy_custom_table|
     2.9 Load plugins............................|g:ime_plugins|
     2.10 ime buffer.............................|g:ime_enable_ime_buffer|
+    2.11 Export boshiamy cin file...............|ime-export-boshiamy-cin|
 3.  Built-in plugins............................|ime-builtin-plugins|
     3.1 Boshiamy mode...........................|ime-builtin-plugin-boshiamy|
     3.2 Kana mode...............................|ime-builtin-plugin-kana|
@@ -265,6 +266,14 @@ And you have to explicitly activate it:
 >
     :set ft=ime
 <
+-------------------------------------------------------------------------------
+2.11 Export boshiamy cin file                         |ime-export-boshiamy-cin|
+
+ime.vim provides a command to export boshiamy cin file:
+>
+    :IMEExportBoshiamyCIN
+<
+The output contains kana table and custom table (|g:ime_boshiamy_custom_table|).
 
 ===============================================================================
 3.  Built-in plugins                                      *ime-builtin-plugins*
