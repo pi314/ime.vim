@@ -12,14 +12,6 @@
 let s:true = exists('v:true') ? v:true : 1
 let s:false = exists('v:false') ? v:false : 0
 
-function! ime#log (tag, ...)
-    redraw
-    let l:arguments = copy(a:000)
-    call map(l:arguments, 'type(v:val) == type("") ? (v:val) : string(v:val)')
-    let l:log_msg = join(l:arguments, ' ')
-    echom substitute('[ime]['. a:tag .'] '. l:log_msg, '] [', '][', '')
-endfunction
-
 
 " Plugin struct
 " {
@@ -37,101 +29,8 @@ endfunction
 " Load plugins
 let s:standalone_plugin_list = []
 let s:embedded_plugin_list = []
-function! s:LoadPlugins () " {{{
-    for l:pname in g:ime_plugins
-        if match(l:pname, '\v^\w+$') == -1
-            call ime#log('core', 'invalid plugin name "'. l:pname . '"')
-            continue
-        endif
-
-        try
-            let l:plugin_info = function('ime#'. l:pname .'#info')()
-        catch
-            try
-                let l:plugin_info = function('ime_'. l:pname .'#info')()
-            catch
-                call ime#log('core', '// '. v:throwpoint)
-                call ime#log('core', '\\ '. v:exception)
-                continue
-            endtry
-        endtry
-
-        let l:invalid = s:false
-
-        " sanity check
-        if !has_key(l:plugin_info, 'type')
-            call ime#log('core', 'plugin "'. l:pname . '" lacks "type" information')
-            let l:invalid = s:true
-        endif
-
-        if l:plugin_info['type'] == 'standalone' &&
-                \ (!has_key(l:plugin_info, 'icon') ||
-                \ !has_key(l:plugin_info, 'description'))
-            call ime#log('core', 'plugin "'. l:pname . '" lacks "icon" or "description" information')
-            let l:invalid = s:true
-        endif
-
-        if !has_key(l:plugin_info, 'pattern')
-            call ime#log('core', 'plugin "'. l:pname . '" lacks "pattern" information')
-            let l:invalid = s:true
-        endif
-
-        if !has_key(l:plugin_info, 'handler')
-            call ime#log('core', 'plugin "'. l:pname . '" lacks "handler" information')
-            let l:invalid = s:true
-        endif
-
-        if !has_key(l:plugin_info, 'trigger')
-            call ime#log('core', 'plugin "'. l:pname . '" lacks "trigger" information')
-            let l:invalid = s:true
-        endif
-
-        if has_key(l:plugin_info, 'switch')
-            call ime#log('core', 'plugin "'. l:pname . '" has deprecated information "switch"')
-            let l:invalid = s:true
-        endif
-
-        if has_key(l:plugin_info, 'submode')
-            call ime#log('core', 'plugin "'. l:pname . '" has deprecated information "submode"')
-            let l:invalid = s:true
-        endif
-
-        if l:invalid != s:false
-            continue
-        endif
-
-        let l:plugin_info['name'] = l:pname
-
-        if l:plugin_info['type'] == 'standalone'
-            call add(s:standalone_plugin_list, l:plugin_info)
-        elseif l:plugin_info['type'] == 'embedded'
-            call add(s:embedded_plugin_list, l:plugin_info)
-        endif
-
-        if has_key(l:plugin_info, 'menu')
-            " have to rename 'menu' or it will be overridden
-            " cb stands for callback
-            let l:plugin_info['menu_cb'] = l:plugin_info['menu']
-        endif
-    endfor
-
-    for l:plugin in s:standalone_plugin_list
-        let l:plugin['menu'] = l:plugin['icon'] .' - '. l:plugin['description']
-        let l:plugin['word'] = ''
-        let l:plugin['dup'] = s:true
-        let l:plugin['empty'] = s:true
-    endfor
-endfunction " }}}
-call s:LoadPlugins()
-
-
 let s:ime_english_enable = s:true
-if len(s:standalone_plugin_list) == 0
-    let s:ime_mode = {}
-else
-    let s:ime_mode = s:standalone_plugin_list[0]
-endif
-
+let s:ime_mode = {}
 let s:ime_mode_2nd = {}
 
 
@@ -466,53 +365,107 @@ function! s:interactive_mode_select_menu_handler (menu, cursor, key) " {{{
     call s:SelectMode(s:standalone_plugin_list[(a:cursor)])
 endfunction " }}}
 
-
 " =============================================================================
-" Public Functions
+" Internal API
 " =============================================================================
-function! ime#icon (...) " {{{
-    if a:0 == 0
-        if s:ime_english_enable == s:true
-            return '[En]'
+function! ime#load_plugins () " {{{
+    for l:pname in g:ime_plugins
+        if match(l:pname, '\v^\w+$') == -1
+            call ime#log('core', 'invalid plugin name "'. l:pname . '"')
+            continue
         endif
 
-        let l:ret = get(s:ime_mode, 'icon', '[？]')
-        if g:ime_show_2nd_mode
-            let l:ret .= get(s:ime_mode_2nd, 'icon', '')
+        try
+            let l:plugin_info = function('ime#'. l:pname .'#info')()
+        catch
+            try
+                let l:plugin_info = function('ime_'. l:pname .'#info')()
+            catch
+                call ime#log('core', '// '. v:throwpoint)
+                call ime#log('core', '\\ '. v:exception)
+                continue
+            endtry
+        endtry
+
+        let l:invalid = s:false
+
+        " sanity check
+        if !has_key(l:plugin_info, 'type')
+            call ime#log('core', 'plugin "'. l:pname . '" lacks "type" information')
+            let l:invalid = s:true
         endif
-        return l:ret
-    endif
 
-    if a:0 == 2
-        " ime#icon(pname, icon)
-        let l:pname = substitute(a:1, '-', '_', 'g')
-        if l:pname != ime#mode()
-            call ime#log('core', '// ime#icon('. l:pname .'): forbidden')
-            call ime#log('core', '\\ current activated plugin: "'. ime#mode() .'"')
-            return
+        if l:plugin_info['type'] == 'standalone' &&
+                \ (!has_key(l:plugin_info, 'icon') ||
+                \ !has_key(l:plugin_info, 'description'))
+            call ime#log('core', 'plugin "'. l:pname . '" lacks "icon" or "description" information')
+            let l:invalid = s:true
         endif
 
-        let s:ime_mode['icon'] = a:2
-        let s:ime_mode['menu'] = s:ime_mode['icon'] .' - '. s:ime_mode['description']
+        if !has_key(l:plugin_info, 'pattern')
+            call ime#log('core', 'plugin "'. l:pname . '" lacks "pattern" information')
+            let l:invalid = s:true
+        endif
 
-        redrawstatus!
-        return
+        if !has_key(l:plugin_info, 'handler')
+            call ime#log('core', 'plugin "'. l:pname . '" lacks "handler" information')
+            let l:invalid = s:true
+        endif
+
+        if !has_key(l:plugin_info, 'trigger')
+            call ime#log('core', 'plugin "'. l:pname . '" lacks "trigger" information')
+            let l:invalid = s:true
+        endif
+
+        if has_key(l:plugin_info, 'switch')
+            call ime#log('core', 'plugin "'. l:pname . '" has deprecated information "switch"')
+            let l:invalid = s:true
+        endif
+
+        if has_key(l:plugin_info, 'submode')
+            call ime#log('core', 'plugin "'. l:pname . '" has deprecated information "submode"')
+            let l:invalid = s:true
+        endif
+
+        if l:invalid != s:false
+            continue
+        endif
+
+        let l:plugin_info['name'] = l:pname
+
+        if l:plugin_info['type'] == 'standalone'
+            call add(s:standalone_plugin_list, l:plugin_info)
+        elseif l:plugin_info['type'] == 'embedded'
+            call add(s:embedded_plugin_list, l:plugin_info)
+        endif
+
+        if has_key(l:plugin_info, 'menu')
+            " have to rename 'menu' or it will be overridden
+            " cb stands for callback
+            let l:plugin_info['menu_cb'] = l:plugin_info['menu']
+        endif
+    endfor
+
+    for l:plugin in s:standalone_plugin_list
+        let l:plugin['menu'] = l:plugin['icon'] .' - '. l:plugin['description']
+        let l:plugin['word'] = ''
+        let l:plugin['dup'] = s:true
+        let l:plugin['empty'] = s:true
+    endfor
+
+    if len(s:standalone_plugin_list) == 0
+        let s:ime_mode = {}
+    else
+        let s:ime_mode = s:standalone_plugin_list[0]
     endif
-
-    call ime#log('core', 'ime#icon(): wrong argument')
-endfunction " }}}
-
-
-function! ime#mode () " {{{
-    if s:ime_english_enable == s:true
-        return 'english'
-    endif
-
-    return get(s:ime_mode, 'name', '')
 endfunction " }}}
 
 
 function! ime#toggle_english () " {{{
+    if s:standalone_plugin_list == []
+        call ime#load_plugins()
+    endif
+
     if s:ime_english_enable == s:true
         call s:SelectMode(s:ime_mode)
     else
@@ -570,6 +523,10 @@ endfunction " }}}
 
 
 function! ime#_popup_mode_menu () " {{{
+    if s:standalone_plugin_list == []
+        call ime#load_plugins()
+    endif
+
     if s:ime_mode == {}
         call ime#log('core', 'No input mode installed.')
         return ''
@@ -585,6 +542,10 @@ endfunction " }}}
 
 
 function! ime#_interactive_mode_menu () " {{{
+    if s:standalone_plugin_list == []
+        call ime#load_plugins()
+    endif
+
     let l:cursor = index(s:standalone_plugin_list, s:ime_mode)
     call s:interactive_menu(
             \ 'Select input mode: (j/Down/<C-n>) (k/Up/<C-p>) (enter) (q/esc)',
@@ -593,14 +554,6 @@ function! ime#_interactive_mode_menu () " {{{
             \ function('s:interactive_mode_select_menu_handler'),
             \ )
     return
-endfunction " }}}
-
-
-function! ime#plugins () " {{{
-    return {
-    \ 'standalone': map(copy(s:standalone_plugin_list), 'v:val[''name'']'),
-    \ 'embedded': map(copy(s:embedded_plugin_list), 'v:val[''name'']'),
-    \ }
 endfunction " }}}
 
 
@@ -651,4 +604,66 @@ function! ime#boshiamy_export_cin_file () " {{{
     endfor
 
     call append('$', '%chardef end')
+endfunction " }}}
+
+
+" =============================================================================
+" Public API
+" =============================================================================
+function! ime#mode () " {{{
+    if s:ime_english_enable == s:true
+        return 'english'
+    endif
+
+    return get(s:ime_mode, 'name', '')
+endfunction " }}}
+
+
+function! ime#log (tag, ...) " {{{
+    redraw
+    let l:arguments = copy(a:000)
+    call map(l:arguments, 'type(v:val) == type("") ? (v:val) : string(v:val)')
+    let l:log_msg = join(l:arguments, ' ')
+    echom substitute('[ime]['. a:tag .'] '. l:log_msg, '] [', '][', '')
+endfunction " }}}
+
+
+function! ime#icon (...) " {{{
+    if a:0 == 0
+        if s:ime_english_enable == s:true
+            return '[En]'
+        endif
+
+        let l:ret = get(s:ime_mode, 'icon', '[？]')
+        if g:ime_show_2nd_mode
+            let l:ret .= get(s:ime_mode_2nd, 'icon', '')
+        endif
+        return l:ret
+    endif
+
+    if a:0 == 2
+        " ime#icon(pname, icon)
+        let l:pname = substitute(a:1, '-', '_', 'g')
+        if l:pname != ime#mode()
+            call ime#log('core', '// ime#icon('. l:pname .'): forbidden')
+            call ime#log('core', '\\ current activated plugin: "'. ime#mode() .'"')
+            return
+        endif
+
+        let s:ime_mode['icon'] = a:2
+        let s:ime_mode['menu'] = s:ime_mode['icon'] .' - '. s:ime_mode['description']
+
+        redrawstatus!
+        return
+    endif
+
+    call ime#log('core', 'ime#icon(): wrong argument')
+endfunction " }}}
+
+
+function! ime#plugins () " {{{
+    return {
+    \ 'standalone': map(copy(s:standalone_plugin_list), 'v:val[''name'']'),
+    \ 'embedded': map(copy(s:embedded_plugin_list), 'v:val[''name'']'),
+    \ }
 endfunction " }}}
