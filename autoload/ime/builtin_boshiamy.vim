@@ -1,4 +1,13 @@
+let s:true = exists('v:true') ? v:true : 1
+let s:false = exists('v:false') ? v:false : 0
+
 let s:table = {}
+let s:pure = s:false
+
+
+function! s:log (...)
+    call call(function('ime#log'), ['builtin-boshiamy'] + a:000)
+endfunction
 
 
 function! s:fallback_str (arg)
@@ -23,6 +32,11 @@ function! ime#builtin_boshiamy#handler (matchobj, trigger)
     endif
 
     let l:boshiamy_str = a:matchobj[0]
+
+    if s:pure
+        let l:boshiamy_str = substitute(l:boshiamy_str, '\C^.*[A-Z0-9_]', '', '')
+    endif
+
     while l:boshiamy_str != ''
         if has_key(s:table, l:boshiamy_str)
             return {
@@ -37,6 +51,22 @@ function! ime#builtin_boshiamy#handler (matchobj, trigger)
 endfunction
 
 
+function! ime#builtin_boshiamy#menu (...)
+    if a:0 == 0
+        return [
+                \ {
+                    \ 'key': 'e',
+                    \ 'menu': '積極模式：去除大寫字母、數字以及底線，儘可能送字 ('. (s:pure ? 'on' : 'off') .')'
+                \ },
+            \ ]
+    endif
+
+    if a:1 == 'e'
+        let s:pure = !s:pure
+    endif
+endfunction
+
+
 function! ime#builtin_boshiamy#info ()
     return {
     \ 'type': 'standalone',
@@ -45,6 +75,7 @@ function! ime#builtin_boshiamy#info ()
     \ 'pattern': '\v%(\w|[,.''\[\]])+$',
     \ 'handler': function('ime#builtin_boshiamy#handler'),
     \ 'trigger': [' '],
+    \ 'menu': function('ime#builtin_boshiamy#menu'),
     \ }
 
     " Note: This plugin use ``\w`` in regex.
