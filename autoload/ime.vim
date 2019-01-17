@@ -577,16 +577,18 @@ function! ime#boshiamy_export_cin_file () " {{{
     call append('$', '%chardef begin')
 
     let l:kana_tables = ime#kana_table#table()
-    for l:kana_table in [(l:kana_tables[0]), (l:kana_tables[1])]
+    for l:tuple in [[l:kana_tables[0], ','], [l:kana_tables[1], '.']]
+        let l:kana_table = l:tuple[0]
+        let l:postfix = l:tuple[1]
         for l:key in sort(keys(l:kana_table))
             if l:key == '''' || l:key == '.'
                 continue
             endif
             for l:char in l:kana_table[(l:key)]
                 if l:key == 'nn'
-                    call append('$', 'n, '. l:char)
+                    call append('$', 'n'. l:postfix .' '. l:char)
                 endif
-                call append('$', l:key .', '. l:char)
+                call append('$', l:key . l:postfix .' '. l:char)
             endfor
         endfor
     endfor
