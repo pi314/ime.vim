@@ -32,6 +32,7 @@ let s:embedded_plugin_list = []
 let s:ime_english_enable = s:true
 let s:ime_mode = {}
 let s:ime_mode_2nd = {}
+let s:cursor_pos = []
 
 
 function! s:EscapeKey (key) " {{{
@@ -100,6 +101,8 @@ function! s:SelectMode (new_mode) " {{{
 
     redrawstatus!
     redraw!
+
+    let s:cursor_pos = getcurpos()[1:2]
 endfunction " }}}
 
 
@@ -250,7 +253,13 @@ function! s:SendKey (trigger) " {{{
         return a:trigger
     endif
 
-    let l:line = strpart(getline('.'), 0, (col('.') - 1))
+    let l:cursor_pos = getcurpos()[1:2]
+
+    if l:cursor_pos[0] != s:cursor_pos[0] || l:cursor_pos[1] < s:cursor_pos[1]
+        let s:cursor_pos = copy(l:cursor_pos)
+    endif
+
+    let l:line = strpart(getline('.'), s:cursor_pos[1] - 1, (col('.') - 1))
 
     " guard paired square brackets
     let l:rbracket_count = 0
