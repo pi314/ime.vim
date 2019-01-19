@@ -24,19 +24,14 @@ if !exists('g:ime_select_mode') || type(g:ime_select_mode) != type('')
 endif
 
 
-if !exists('g:ime_select_mode_style') || type(g:ime_select_mode_style) != type('')
-    let g:ime_select_mode_style = 'popup'
-endif
-if g:ime_select_mode_style == 'popup' && (!exists('##CompleteDone') || !exists('v:completed_item'))
-    let g:ime_select_mode_style = 'interactive'
-endif
-
-
-if g:ime_select_mode_style == 'popup'
-    execute 'inoremap <expr> '. g:ime_select_mode .' (pumvisible() ? "<C-Y>" : "") . "<C-R>=ime#_popup_mode_menu()<CR>"'
-else
-    execute 'inoremap '. g:ime_select_mode .' <C-\><C-o>:call ime#_interactive_mode_menu()<CR>'
-endif
+function! s:ime_mode_menu ()
+    if g:ime_select_mode_style == 'popup' && exists('##CompleteDone') && exists('v:completed_item')
+        return (pumvisible() ? "\<C-Y>" : "") . "\<C-R>=ime#_popup_mode_menu()\<CR>"
+    else
+        return "\<C-\>\<C-o>:call ime#_interactive_mode_menu()\<CR>"
+    endif
+endfunction
+execute 'inoremap <expr> '. g:ime_select_mode .' <SID>ime_mode_menu()'
 
 
 if !exists('g:ime_cancel_input') || type(g:ime_cancel_input) != type('')
