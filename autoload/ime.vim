@@ -34,6 +34,9 @@ let s:ime_mode = {}
 let s:ime_mode_2nd = {}
 let s:cursor_pos = []
 
+function! s:log (...)
+    call call(function('ime#log'), ['core'] + a:000)
+endfunction
 
 function! s:EscapeKey (key) " {{{
     if a:key == '|'
@@ -259,7 +262,7 @@ function! s:SendKey (trigger) " {{{
         let s:cursor_pos = copy(l:cursor_pos)
     endif
 
-    let l:line = strpart(getline('.'), s:cursor_pos[1] - 1, (col('.') - 1))
+    let l:line = strpart(getline('.'), s:cursor_pos[1] - 1, (l:cursor_pos[1] - s:cursor_pos[1]))
 
     " guard paired square brackets
     let l:rbracket_count = 0
