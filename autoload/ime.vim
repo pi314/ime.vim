@@ -61,7 +61,7 @@ function! s:SelectMode (new_mode) " {{{
         endfor
     endif
 
-    if has_key(s:ime_mode, 'menu_cb')
+    if s:ime_english_enable == s:false && has_key(s:ime_mode, 'menu_cb')
         call s:ime_mode['menu_cb']('')
     endif
 
