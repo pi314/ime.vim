@@ -112,7 +112,7 @@ let s:hiragana_table['cyo'] = s:hiragana_table['cho']
 let s:hiragana_table['jya'] = s:hiragana_table['ja']
 let s:hiragana_table['jyu'] = s:hiragana_table['ju']
 let s:hiragana_table['jyo'] = s:hiragana_table['jo']
-let s:katakana_table['vu'] = ['ゔ']
+let s:hiragana_table['vu'] = ['ゔ']
 call ime#log('builtin-kana', 'Loading hiragana table...Done')
 
 call ime#log('builtin-kana', 'Loading katakana table...')
