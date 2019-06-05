@@ -49,15 +49,17 @@ endfunction " }}}
 
 
 function! s:SelectMode (new_mode) " {{{
-    for l:key in s:ime_mode['trigger']
-        if l:key == ''
-            continue
-        endif
-        try
-            execute 'iunmap '. s:EscapeKey(l:key)
-        catch
-        endtry
-    endfor
+    if has_key(s:ime_mode, 'trigger')
+        for l:key in s:ime_mode['trigger']
+            if l:key == ''
+                continue
+            endif
+            try
+                execute 'iunmap '. s:EscapeKey(l:key)
+            catch
+            endtry
+        endfor
+    endif
 
     if has_key(s:ime_mode, 'menu_cb')
         call s:ime_mode['menu_cb']('')
