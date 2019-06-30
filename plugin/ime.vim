@@ -25,11 +25,13 @@ endif
 
 
 function! s:ime_mode_menu ()
-    if exists('g:ime_select_mode_style') && g:ime_select_mode_style == 'popup' && exists('##CompleteDone') && exists('v:completed_item')
+    if !exists('g:ime_select_mode_style')
+        return "\<C-\>\<C-o>:call ime#_mode_menu_window()\<CR>"
+    elseif g:ime_select_mode_style == 'popup' && exists('##CompleteDone') && exists('v:completed_item')
         return (pumvisible() ? "\<C-Y>" : "") . "\<C-R>=ime#_mode_menu_popup()\<CR>"
     elseif g:ime_select_mode_style == 'interactive'
         return "\<C-\>\<C-o>:call ime#_mode_menu_interactive()\<CR>"
-    elseif g:ime_select_mode_style == 'window'
+    else
         return "\<C-\>\<C-o>:call ime#_mode_menu_window()\<CR>"
     endif
 endfunction
