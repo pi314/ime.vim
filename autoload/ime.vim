@@ -585,11 +585,12 @@ function! ime#_mode_menu_window () " {{{
     inoremap <buffer> k <Up>
     inoremap <buffer> j <Down>
     inoremap <buffer> q <C-o>:quit<CR>
-    inoremap <buffer> <Esc> <C-o>:quit<CR>
+    inoremap <buffer> <Esc> <C-o>:quit<CR><Esc>
+    inoremap <buffer> <C-c> <C-o>:quit<CR><Esc>
     inoremap <buffer> <CR> <C-o>:call <SID>mode_menu_window_confirm()<CR><C-o>ZQ
     nnoremap <buffer> <CR> :call <SID>mode_menu_window_confirm()<CR>
 
-    let &l:statusline = 'Select input mode: (j/Down) (k/Up) (enter) (q/esc)'
+    let &l:statusline = 'Select input mode: (j/Down) (k/Up) (enter) (q//esc/C-c)'
 
     for l:idx in range(len(s:standalone_plugin_list))
         let l:plugin = s:standalone_plugin_list[(l:idx)]
