@@ -524,7 +524,7 @@ function! ime#plugin_menu (...) " {{{
 endfunction " }}}
 
 
-function! ime#_popup_mode_menu () " {{{
+function! ime#_mode_menu_popup () " {{{
     if s:standalone_plugin_list == []
         call ime#load_plugins()
     endif
@@ -543,7 +543,7 @@ function! ime#_popup_mode_menu () " {{{
 endfunction " }}}
 
 
-function! ime#_interactive_mode_menu () " {{{
+function! ime#_mode_menu_interactive () " {{{
     if s:standalone_plugin_list == []
         call ime#load_plugins()
     endif

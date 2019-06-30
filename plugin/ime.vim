@@ -26,11 +26,11 @@ endif
 
 function! s:ime_mode_menu ()
     if exists('g:ime_select_mode_style') && g:ime_select_mode_style == 'popup' && exists('##CompleteDone') && exists('v:completed_item')
-        return (pumvisible() ? "\<C-Y>" : "") . "\<C-R>=ime#_popup_mode_menu()\<CR>"
+        return (pumvisible() ? "\<C-Y>" : "") . "\<C-R>=ime#_mode_menu_popup()\<CR>"
     elseif g:ime_select_mode_style == 'interactive'
-        return "\<C-\>\<C-o>:call ime#_interactive_mode_menu()\<CR>"
-    elseif g:ime_select_mode_style == 'experiment'
-        return "\<C-\>\<C-o>:call ime#_interactive_mode_menu()\<CR>"
+        return "\<C-\>\<C-o>:call ime#_mode_menu_interactive()\<CR>"
+    elseif g:ime_select_mode_style == 'window'
+        return "\<C-\>\<C-o>:call ime#_mode_menu_interactive()\<CR>"
     endif
 endfunction
 execute 'inoremap <expr> '. g:ime_select_mode .' <SID>ime_mode_menu()'
