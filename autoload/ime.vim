@@ -487,7 +487,7 @@ function! ime#switch_2nd () " {{{
 endfunction " }}}
 
 
-function! ime#menu (...) " {{{
+function! ime#plugin_menu (...) " {{{
     if a:0 == 0
         if s:ime_english_enable || !has_key(s:ime_mode, 'menu_cb')
             call feedkeys(g:ime_menu, 'n')
@@ -506,13 +506,13 @@ function! ime#menu (...) " {{{
     if a:0 == 2
         let l:pname = substitute(a:1, '-', '_', 'g')
         if l:pname != ime#mode()
-            call ime#log('core', '// ime#menu('. l:pname .'): forbidden')
+            call ime#log('core', '// ime#plugin_menu('. l:pname .'): forbidden')
             call ime#log('core', '\\ current activated plugin: "'. ime#mode() .'"')
             return
         endif
 
         if !has_key(s:ime_mode, 'menu_cb')
-            call ime#log('core', '// ime#menu(): plugin "'. s:ime_mode['name'] .'" have no menu')
+            call ime#log('core', '// ime#plugin_menu(): plugin "'. s:ime_mode['name'] .'" have no menu')
             return
         endif
 
@@ -520,7 +520,7 @@ function! ime#menu (...) " {{{
         return
     endif
 
-    call ime#log('core', 'ime#menu(): wrong argument')
+    call ime#log('core', 'ime#plugin_menu(): wrong argument')
 endfunction " }}}
 
 

@@ -27,7 +27,9 @@ endif
 function! s:ime_mode_menu ()
     if exists('g:ime_select_mode_style') && g:ime_select_mode_style == 'popup' && exists('##CompleteDone') && exists('v:completed_item')
         return (pumvisible() ? "\<C-Y>" : "") . "\<C-R>=ime#_popup_mode_menu()\<CR>"
-    else
+    elseif g:ime_select_mode_style == 'interactive'
+        return "\<C-\>\<C-o>:call ime#_interactive_mode_menu()\<CR>"
+    elseif g:ime_select_mode_style == 'experiment'
         return "\<C-\>\<C-o>:call ime#_interactive_mode_menu()\<CR>"
     endif
 endfunction
@@ -57,7 +59,7 @@ endif
 if !exists('g:ime_menu') || type(g:ime_menu) != ''
     let g:ime_menu = ';;'
 endif
-execute 'inoremap '. g:ime_menu .' <C-\><C-o>:call ime#menu()<CR>'
+execute 'inoremap '. g:ime_menu .' <C-\><C-o>:call ime#plugin_menu()<CR>'
 
 
 command! IMEExportBoshiamyCIN :call ime#boshiamy_export_cin_file()
