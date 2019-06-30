@@ -30,7 +30,7 @@ function! s:ime_mode_menu ()
     elseif g:ime_select_mode_style == 'interactive'
         return "\<C-\>\<C-o>:call ime#_mode_menu_interactive()\<CR>"
     elseif g:ime_select_mode_style == 'window'
-        return "\<C-\>\<C-o>:call ime#_mode_menu_interactive()\<CR>"
+        return "\<C-\>\<C-o>:call ime#_mode_menu_window()\<CR>"
     endif
 endfunction
 execute 'inoremap <expr> '. g:ime_select_mode .' <SID>ime_mode_menu()'

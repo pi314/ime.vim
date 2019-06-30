@@ -367,6 +367,18 @@ function! s:interactive_mode_select_menu_handler (menu, cursor, key) " {{{
     call s:SelectMode(s:standalone_plugin_list[(a:cursor)])
 endfunction " }}}
 
+
+function! s:mode_menu_window_confirm () " {{{
+    let l:line = getline('.')
+
+    for l:plugin in s:standalone_plugin_list
+        if (' '. l:plugin['icon'] .' - '. l:plugin['description'] == l:line)
+            call s:SelectMode(l:plugin)
+        endif
+    endfor
+endfunction " }}}
+
+
 " =============================================================================
 " Internal API
 " =============================================================================
@@ -556,6 +568,39 @@ function! ime#_mode_menu_interactive () " {{{
             \ function('s:interactive_mode_select_menu_handler'),
             \ )
     return
+endfunction " }}}
+
+
+function! ime#_mode_menu_window () " {{{
+    if s:standalone_plugin_list == []
+        call ime#load_plugins()
+    endif
+
+    exec len(s:standalone_plugin_list) .'new'
+    setlocal buftype=nofile
+    setlocal nonu
+    setlocal nowrap
+    setlocal colorcolumn=
+
+    inoremap <buffer> k <Up>
+    inoremap <buffer> j <Down>
+    inoremap <buffer> q <C-o>:quit<CR>
+    inoremap <buffer> <Esc> <C-o>:quit<CR>
+    inoremap <buffer> <CR> <C-o>:call <SID>mode_menu_window_confirm()<CR><C-o>ZQ
+    nnoremap <buffer> <CR> :call <SID>mode_menu_window_confirm()<CR>
+
+    let &l:statusline = 'Select input mode: (j/Down) (k/Up) (enter) (q)'
+
+    for l:idx in range(len(s:standalone_plugin_list))
+        let l:plugin = s:standalone_plugin_list[(l:idx)]
+        call setline(l:idx + 1, ' '. l:plugin['icon'] .' - '. l:plugin['description'])
+    endfor
+
+    let l:idx = index(s:standalone_plugin_list, s:ime_mode)
+    call cursor(l:idx + 1, 1)
+
+    setlocal nomodifiable
+    autocmd BufLeave <buffer> quit
 endfunction " }}}
 
 
