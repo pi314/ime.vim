@@ -32,7 +32,7 @@ let s:embedded_plugin_list = []
 let s:ime_english_enable = s:true
 let s:ime_mode = {}
 let s:ime_mode_2nd = {}
-let s:cursor_pos = []
+let s:ime_buf_ind_start = []
 
 function! s:log (...)
     call call(function('ime#log'), ['core'] + a:000)
@@ -49,6 +49,21 @@ function! s:EscapeKey (key) " {{{
         return '<lt>'
     endif
     return a:key
+endfunction " }}}
+
+
+function! s:set_ime_buf_ind_start () " {{{
+    let s:ime_buf_ind_start = copy(getcurpos()[1:2])
+    call s:redraw_ime_buf_ind()
+endfunction " }}}
+
+
+function! s:redraw_ime_buf_ind () " {{{
+    let l:curpos = getcurpos()[1:2]
+    if l:curpos[0] != s:ime_buf_ind_start[0] || l:curpos[1] < s:ime_buf_ind_start[1]
+        let s:ime_buf_ind_start = copy(l:curpos)
+    endif
+    exec '2match IMEBufferInd _\v%'. (s:ime_buf_ind_start[0]) .'l%>'. (s:ime_buf_ind_start[1]-1) .'c%<'. (l:curpos[1]) .'c_'
 endfunction " }}}
 
 
@@ -102,10 +117,19 @@ function! s:SelectMode (new_mode) " {{{
         endfor
     endif
 
+    augroup ime
+        autocmd! ime CursorMovedI
+        autocmd! ime InsertLeave <buffer> call s:set_ime_buf_ind_start()
+        autocmd! ime InsertEnter <buffer> call s:set_ime_buf_ind_start()
+        if s:ime_english_enable == s:false
+            autocmd! ime CursorMovedI <buffer> call s:redraw_ime_buf_ind()
+        endif
+    augroup end
+
     redrawstatus!
     redraw!
 
-    let s:cursor_pos = getcurpos()[1:2]
+    call s:set_ime_buf_ind_start()
 endfunction " }}}
 
 
@@ -191,8 +215,7 @@ function! s:ExecutePlugin (line, plugin, trigger) " {{{
             endwhile
 
             augroup ime
-                autocmd! ime CompleteDone
-                autocmd ime CompleteDone * call s:clear_option_cache()
+                autocmd! ime CompleteDone <buffer> call s:clear_option_cache()
             augroup end
 
             let s:option_cache['col'] = col('.') - l:len
@@ -256,13 +279,13 @@ function! s:SendKey (trigger) " {{{
         return a:trigger
     endif
 
-    let l:cursor_pos = getcurpos()[1:2]
+    let l:curpos = getcurpos()[1:2]
 
-    if l:cursor_pos[0] != s:cursor_pos[0] || l:cursor_pos[1] < s:cursor_pos[1]
-        let s:cursor_pos = copy(l:cursor_pos)
+    if l:curpos[0] != s:ime_buf_ind_start[0] || l:curpos[1] < s:ime_buf_ind_start[1]
+        call s:set_ime_buf_ind_start()
     endif
 
-    let l:line = strpart(getline('.'), s:cursor_pos[1] - 1, (l:cursor_pos[1] - s:cursor_pos[1]))
+    let l:line = strpart(getline('.'), s:ime_buf_ind_start[1] - 1, (l:curpos[1] - s:ime_buf_ind_start[1]))
 
     " guard paired square brackets
     let l:rbracket_count = 0
@@ -585,8 +608,7 @@ function! ime#_mode_menu_popup () " {{{
     endif
 
     augroup ime
-        autocmd! ime CompleteDone
-        autocmd ime CompleteDone * call s:CompSelectMode()
+        autocmd! ime CompleteDone <buffer> call s:CompSelectMode()
     augroup end
     call complete(col('.'), s:standalone_plugin_list)
     return ''

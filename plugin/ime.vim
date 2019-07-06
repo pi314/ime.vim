@@ -67,3 +67,6 @@ execute 'inoremap '. g:ime_menu .' <C-\><C-o>:call ime#plugin_menu()<CR>'
 
 
 command! IMEExportBoshiamyCIN :call ime#boshiamy_export_cin_file()
+
+
+highlight IMEBufferInd term=underline cterm=underline gui=underline
