@@ -579,6 +579,7 @@ function! ime#boshiamy_export_cin_file () " {{{
     call append('$', '%chardef begin')
 
     let l:kana_tables = ime#kana_table#table()
+    let l:small_kana = split('ぁぇぃゕゖぉっぅゎゃょゅァェィヵヶォッゥヮャョュ', '\zs')
     for l:tuple in [[l:kana_tables[0], ','], [l:kana_tables[1], '.']]
         let l:kana_table = l:tuple[0]
         let l:postfix = l:tuple[1]
@@ -587,8 +588,12 @@ function! ime#boshiamy_export_cin_file () " {{{
                 continue
             endif
             for l:char in l:kana_table[(l:key)]
+                let l:is_small = (index(l:small_kana, l:char) >= 0)
                 if l:key == 'nn'
                     call append('$', 'n'. l:postfix .' '. l:char)
+                endif
+                if l:is_small
+                    call append('$', l:key . l:postfix .'v '. l:char)
                 endif
                 call append('$', l:key . l:postfix .' '. l:char)
             endfor
