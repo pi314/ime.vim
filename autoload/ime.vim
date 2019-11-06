@@ -376,6 +376,8 @@ function! s:mode_menu_window_confirm () " {{{
             call s:SelectMode(l:plugin)
         endif
     endfor
+
+    return ''
 endfunction " }}}
 
 
@@ -581,13 +583,13 @@ function! ime#_mode_menu_window () " {{{
     setlocal nonu
     setlocal nowrap
     setlocal colorcolumn=
+    setlocal cursorline
 
     inoremap <buffer> k <Up>
     inoremap <buffer> j <Down>
-    inoremap <buffer> q <C-o>:quit<CR>
-    inoremap <buffer> <Esc> <C-o>:quit<CR><Esc>
-    inoremap <buffer> <C-c> <C-o>:quit<CR><Esc>
-    inoremap <buffer> <CR> <C-o>:call <SID>mode_menu_window_confirm()<CR><C-o>ZQ
+    inoremap <buffer> q <C-o>i
+    inoremap <buffer> <C-c> <Esc>
+    inoremap <buffer> <CR> <C-r>=<SID>mode_menu_window_confirm()<CR><C-o>i
     nnoremap <buffer> <CR> :call <SID>mode_menu_window_confirm()<CR>
 
     let &l:statusline = 'Select input mode: (j/Down) (k/Up) (enter) (q//esc/C-c)'
@@ -602,6 +604,7 @@ function! ime#_mode_menu_window () " {{{
 
     setlocal nomodifiable
     autocmd BufLeave <buffer> quit
+    autocmd InsertLeave <buffer> quit
 endfunction " }}}
 
 
