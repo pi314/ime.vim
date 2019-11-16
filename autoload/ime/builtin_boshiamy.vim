@@ -2,7 +2,7 @@ let s:true = exists('v:true') ? v:true : 1
 let s:false = exists('v:false') ? v:false : 0
 
 let s:table = {}
-let s:pure = s:false
+let s:eager = s:false
 
 
 function! s:log (...)
@@ -33,7 +33,7 @@ function! ime#builtin_boshiamy#handler (matchobj, trigger)
 
     let l:boshiamy_str = a:matchobj[0]
 
-    if s:pure
+    if s:eager
         let l:boshiamy_str = substitute(l:boshiamy_str, '\C^.*[A-Z0-9_]', '', '')
     endif
 
@@ -56,13 +56,13 @@ function! ime#builtin_boshiamy#menu (...)
         return [
                 \ {
                     \ 'key': 'e',
-                    \ 'menu': '積極模式：去除大寫字母、數字以及底線，儘可能送字 ('. (s:pure ? 'on' : 'off') .')'
+                    \ 'menu': '積極模式：去除大寫字母、數字以及底線，儘可能送字 ('. (s:eager ? 'on' : 'off') .')'
                 \ },
             \ ]
     endif
 
     if a:1 == 'e'
-        let s:pure = !s:pure
+        let s:eager = !s:eager
     endif
 endfunction
 

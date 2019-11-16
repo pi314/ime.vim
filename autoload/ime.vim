@@ -252,6 +252,30 @@ function! s:SendKey (trigger) " {{{
 
     let l:line = strpart(getline('.'), 0, (col('.') - 1))
 
+    " guard paired square brackets
+    let l:rbracket_count = 0
+    let l:cut_idx = 0
+    for l:i in range(strlen(l:line) - 1, 0, -1)
+        if l:line[(l:i)] == ']'
+            let l:rbracket_count += 1
+            if l:cut_idx == 0
+                let l:cut_idx = l:i
+            endif
+
+        elseif l:line[(l:i)] == '['
+            if l:rbracket_count == 0
+                break
+            endif
+
+            let l:rbracket_count -= 1
+
+            if l:rbracket_count == 0
+                let l:line = strpart(l:line, l:cut_idx + 1)
+                break
+            endif
+        endif
+    endfor
+
     " search for embedded plugins first
     for l:plugin in s:embedded_plugin_list
         let l:result = s:ExecutePlugin(l:line, l:plugin, a:trigger)
