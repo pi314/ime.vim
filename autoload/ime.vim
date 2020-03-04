@@ -32,7 +32,7 @@ let s:embedded_plugin_list = []
 let s:ime_english_enable = s:true
 let s:ime_mode = {}
 let s:ime_mode_2nd = {}
-let s:ime_buf_ind_start = []
+let b:ime_buf_ind_start = []
 
 function! s:log (...)
     call call(function('ime#log'), ['core'] + a:000)
@@ -53,17 +53,17 @@ endfunction " }}}
 
 
 function! s:set_ime_buf_ind_start () " {{{
-    let s:ime_buf_ind_start = copy(getcurpos()[1:2])
+    let b:ime_buf_ind_start = copy(getcurpos()[1:2])
     call s:redraw_ime_buf_ind()
 endfunction " }}}
 
 
 function! s:redraw_ime_buf_ind () " {{{
     let l:curpos = getcurpos()[1:2]
-    if l:curpos[0] != s:ime_buf_ind_start[0] || l:curpos[1] < s:ime_buf_ind_start[1]
-        let s:ime_buf_ind_start = copy(l:curpos)
+    if l:curpos[0] != b:ime_buf_ind_start[0] || l:curpos[1] < b:ime_buf_ind_start[1]
+        let b:ime_buf_ind_start = copy(l:curpos)
     endif
-    exec '2match IMEBufferInd _\v%'. (s:ime_buf_ind_start[0]) .'l%>'. (s:ime_buf_ind_start[1]-1) .'c%<'. (l:curpos[1]) .'c_'
+    exec '2match IMEBufferInd _\v%'. (b:ime_buf_ind_start[0]) .'l%>'. (b:ime_buf_ind_start[1]-1) .'c%<'. (l:curpos[1]) .'c_'
 endfunction " }}}
 
 
@@ -281,11 +281,11 @@ function! s:SendKey (trigger) " {{{
 
     let l:curpos = getcurpos()[1:2]
 
-    if l:curpos[0] != s:ime_buf_ind_start[0] || l:curpos[1] < s:ime_buf_ind_start[1]
+    if l:curpos[0] != b:ime_buf_ind_start[0] || l:curpos[1] < b:ime_buf_ind_start[1]
         call s:set_ime_buf_ind_start()
     endif
 
-    let l:line = strpart(getline('.'), s:ime_buf_ind_start[1] - 1, (l:curpos[1] - s:ime_buf_ind_start[1]))
+    let l:line = strpart(getline('.'), b:ime_buf_ind_start[1] - 1, (l:curpos[1] - b:ime_buf_ind_start[1]))
 
     " guard paired square brackets
     let l:rbracket_count = 0
