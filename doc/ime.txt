@@ -143,17 +143,18 @@ This setting is used with |inoremap|, be careful not to override your mappings
 or set it to key sequences that generates a character.
 
 -------------------------------------------------------------------------------
-2.4 Different mode select styles                      *g:ime_select_mode_style*
+2.4 Different mode-selecting styles                   *g:ime_select_mode_style*
 >
-    let g:ime_select_mode_style = 'popup'
+    let g:ime_select_mode_style = 'window'
 <
-If this option is not set or set to "popup", the mode selection menu will be
-shown as a completion menu.
+If this option is set to "popup" and both |CompleteDone| and |v:completed_item|
+are available, the mode selection menu will be shown as a completion menu.
+
 If this option is set to "interactive", the mode selection menu will be
 shown in an interactive way.
 
-This option is disabled and treat as "interactive" when
-|CompleteDone| event or |v:completed_item| variable is not available.
+If this option is set to anything else (or not set), the mode selection menu will
+be shown in new split window.
 
 -------------------------------------------------------------------------------
 2.5 Switch mandatory/secondary input mode                    *g:ime_switch_2nd*

@@ -61,7 +61,7 @@ function! s:SelectMode (new_mode) " {{{
         endfor
     endif
 
-    if has_key(s:ime_mode, 'menu_cb')
+    if s:ime_english_enable == s:false && has_key(s:ime_mode, 'menu_cb')
         call s:ime_mode['menu_cb']('')
     endif
 
@@ -252,6 +252,30 @@ function! s:SendKey (trigger) " {{{
 
     let l:line = strpart(getline('.'), 0, (col('.') - 1))
 
+    " guard paired square brackets
+    let l:rbracket_count = 0
+    let l:cut_idx = 0
+    for l:i in range(strlen(l:line) - 1, 0, -1)
+        if l:line[(l:i)] == ']'
+            let l:rbracket_count += 1
+            if l:cut_idx == 0
+                let l:cut_idx = l:i
+            endif
+
+        elseif l:line[(l:i)] == '['
+            if l:rbracket_count == 0
+                break
+            endif
+
+            let l:rbracket_count -= 1
+
+            if l:rbracket_count == 0
+                let l:line = strpart(l:line, l:cut_idx + 1)
+                break
+            endif
+        endif
+    endfor
+
     " search for embedded plugins first
     for l:plugin in s:embedded_plugin_list
         let l:result = s:ExecutePlugin(l:line, l:plugin, a:trigger)
@@ -366,6 +390,20 @@ endfunction " }}}
 function! s:interactive_mode_select_menu_handler (menu, cursor, key) " {{{
     call s:SelectMode(s:standalone_plugin_list[(a:cursor)])
 endfunction " }}}
+
+
+function! s:mode_menu_window_confirm () " {{{
+    let l:line = getline('.')
+
+    for l:plugin in s:standalone_plugin_list
+        if (' '. l:plugin['icon'] .' - '. l:plugin['description'] == l:line)
+            call s:SelectMode(l:plugin)
+        endif
+    endfor
+
+    return ''
+endfunction " }}}
+
 
 " =============================================================================
 " Internal API
@@ -487,7 +525,7 @@ function! ime#switch_2nd () " {{{
 endfunction " }}}
 
 
-function! ime#menu (...) " {{{
+function! ime#plugin_menu (...) " {{{
     if a:0 == 0
         if s:ime_english_enable || !has_key(s:ime_mode, 'menu_cb')
             call feedkeys(g:ime_menu, 'n')
@@ -506,13 +544,13 @@ function! ime#menu (...) " {{{
     if a:0 == 2
         let l:pname = substitute(a:1, '-', '_', 'g')
         if l:pname != ime#mode()
-            call ime#log('core', '// ime#menu('. l:pname .'): forbidden')
+            call ime#log('core', '// ime#plugin_menu('. l:pname .'): forbidden')
             call ime#log('core', '\\ current activated plugin: "'. ime#mode() .'"')
             return
         endif
 
         if !has_key(s:ime_mode, 'menu_cb')
-            call ime#log('core', '// ime#menu(): plugin "'. s:ime_mode['name'] .'" have no menu')
+            call ime#log('core', '// ime#plugin_menu(): plugin "'. s:ime_mode['name'] .'" have no menu')
             return
         endif
 
@@ -520,11 +558,11 @@ function! ime#menu (...) " {{{
         return
     endif
 
-    call ime#log('core', 'ime#menu(): wrong argument')
+    call ime#log('core', 'ime#plugin_menu(): wrong argument')
 endfunction " }}}
 
 
-function! ime#_popup_mode_menu () " {{{
+function! ime#_mode_menu_popup () " {{{
     if s:standalone_plugin_list == []
         call ime#load_plugins()
     endif
@@ -543,7 +581,7 @@ function! ime#_popup_mode_menu () " {{{
 endfunction " }}}
 
 
-function! ime#_interactive_mode_menu () " {{{
+function! ime#_mode_menu_interactive () " {{{
     if s:standalone_plugin_list == []
         call ime#load_plugins()
     endif
@@ -556,6 +594,41 @@ function! ime#_interactive_mode_menu () " {{{
             \ function('s:interactive_mode_select_menu_handler'),
             \ )
     return
+endfunction " }}}
+
+
+function! ime#_mode_menu_window () " {{{
+    if s:standalone_plugin_list == []
+        call ime#load_plugins()
+    endif
+
+    exec len(s:standalone_plugin_list) .'new'
+    setlocal buftype=nofile
+    setlocal nonu
+    setlocal nowrap
+    setlocal colorcolumn=
+    setlocal cursorline
+
+    inoremap <buffer> k <Up>
+    inoremap <buffer> j <Down>
+    inoremap <buffer> q <C-o>i
+    inoremap <buffer> <C-c> <Esc>
+    inoremap <buffer> <CR> <C-r>=<SID>mode_menu_window_confirm()<CR><C-o>i
+    nnoremap <buffer> <CR> :call <SID>mode_menu_window_confirm()<CR>
+
+    let &l:statusline = 'Select input mode: (j/Down) (k/Up) (enter) (q//esc/C-c)'
+
+    for l:idx in range(len(s:standalone_plugin_list))
+        let l:plugin = s:standalone_plugin_list[(l:idx)]
+        call setline(l:idx + 1, ' '. l:plugin['icon'] .' - '. l:plugin['description'])
+    endfor
+
+    let l:idx = index(s:standalone_plugin_list, s:ime_mode)
+    call cursor(l:idx + 1, 1)
+
+    setlocal nomodifiable
+    autocmd BufLeave <buffer> quit
+    autocmd InsertLeave <buffer> quit
 endfunction " }}}
 
 
@@ -579,6 +652,7 @@ function! ime#boshiamy_export_cin_file () " {{{
     call append('$', '%chardef begin')
 
     let l:kana_tables = ime#kana_table#table()
+    let l:small_kana = split('ぁぇぃゕゖぉっぅゎゃょゅァェィヵヶォッゥヮャョュ', '\zs')
     for l:tuple in [[l:kana_tables[0], ','], [l:kana_tables[1], '.']]
         let l:kana_table = l:tuple[0]
         let l:postfix = l:tuple[1]
@@ -587,8 +661,12 @@ function! ime#boshiamy_export_cin_file () " {{{
                 continue
             endif
             for l:char in l:kana_table[(l:key)]
+                let l:is_small = (index(l:small_kana, l:char) >= 0)
                 if l:key == 'nn'
                     call append('$', 'n'. l:postfix .' '. l:char)
+                endif
+                if l:is_small
+                    call append('$', l:key . l:postfix .'v '. l:char)
                 endif
                 call append('$', l:key . l:postfix .' '. l:char)
             endfor

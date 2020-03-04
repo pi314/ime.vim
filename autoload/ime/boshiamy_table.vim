@@ -3,6 +3,17 @@ function! s:log (...)
 endfunction
 
 
+if exists('*trim')
+    function! s:trim (str)
+        return trim(a:str)
+    endfunction
+else
+    function! s:trim (str)
+        return substitute(a:str,'\v^\s*(.{-})\s*$','\1','')
+    endfunction
+endif
+
+
 call s:log('Loading boshiamy table...')
 let s:table = {}
 let s:table["'"] = ["、", "．", "‧", "丶"]
@@ -27457,7 +27468,7 @@ function! s:load_custom_table ()
     endif
 
     if type(g:ime_boshiamy_custom_table) != type('')
-        call s:log('boshiamy', 'The type of g:ime_boshiamy_custom_table is not string')
+        call s:log('boshiamy', 'g:ime_boshiamy_custom_table should be a string')
         return
     endif
 
@@ -27473,9 +27484,15 @@ function! s:load_custom_table ()
             continue
         endif
 
-        let l:entry = split(l:line)
-        let l:seq = l:entry[0]
-        let l:keys = l:entry[1:]
+        let l:m = matchlist(l:line, '\v^(.) *(.*) *\1(.*)$')
+        if !len(l:m)
+            call s:log("Syntax incorrect:", l:line)
+            continue
+        endif
+
+        call s:log(l:m)
+        let l:seq = s:trim(l:m[2])
+        let l:keys = split(l:m[3])
 
         for l:key in l:keys
             if !has_key(l:custom_table, l:key)
