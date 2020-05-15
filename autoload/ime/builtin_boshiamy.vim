@@ -6,7 +6,7 @@ let s:eager = s:false
 
 
 function! s:log (...)
-    call call(function('ime#log'), ['builtin-boshiamy'] + a:000)
+    call call(function('ime#log'), ['builtin_boshiamy'] + a:000)
 endfunction
 
 

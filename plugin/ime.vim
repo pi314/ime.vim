@@ -56,7 +56,7 @@ imap <expr> <Plug>IME_DispatchCR (pumvisible() ? "\<C-Y>" : "\<Plug>IME_OriginCR
 imap <CR> <Plug>IME_DispatchCR
 
 if !exists('g:ime_plugins') || type(g:ime_plugins) != type([])
-    let g:ime_plugins = ['builtin-boshiamy', 'builtin-kana', 'builtin-chewing', 'builtin-unicode']
+    let g:ime_plugins = ['builtin_boshiamy', 'builtin_kana', 'builtin_chewing', 'builtin_unicode']
 endif
 
 
