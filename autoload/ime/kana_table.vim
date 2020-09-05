@@ -1,5 +1,6 @@
 call ime#log('builtin-kana', 'Loading hiragana table...')
 let s:hiragana_table = {}
+let s:hiragana_table['-'] = ['ー']
 let s:hiragana_table[''''] = ['、']
 let s:hiragana_table['.'] = ['。', '々']
 let s:hiragana_table['nn'] = ['ん']
@@ -120,6 +121,7 @@ call ime#log('builtin-kana', 'Loading hiragana table...Done')
 
 call ime#log('builtin-kana', 'Loading katakana table...')
 let s:katakana_table = {}
+let s:katakana_table['-'] = ['ー']
 let s:katakana_table[''''] = ['、']
 let s:katakana_table['.'] = ['。', '々']
 let s:katakana_table['nn'] = ['ン']
@@ -141,6 +143,8 @@ let s:katakana_table['so'] = ['ソ']
 let s:katakana_table['ta'] = ['タ']
 let s:katakana_table['chi'] = ['チ']
 let s:katakana_table['tsu'] = ['ツ', 'ッ']
+let s:katakana_table['tu'] = ['ツ', 'ッ']
+let s:katakana_table['ltu'] = ['ッ']
 let s:katakana_table['te'] = ['テ']
 let s:katakana_table['to'] = ['ト']
 let s:katakana_table['na'] = ['ナ']

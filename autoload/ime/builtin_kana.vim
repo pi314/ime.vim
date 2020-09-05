@@ -77,7 +77,7 @@ function! ime#builtin_kana#info ()
     \ 'description': 'Kana input mode',
     \ 'pattern': '\v%(([.a-z]*)|(['. s:large_small_kana .'])|([んン]))$',
     \ 'handler': function('ime#builtin_kana#handler'),
-    \ 'trigger': split('.''abcdefghijkmnoprstuvwyz', '\zs'),
+    \ 'trigger': split('-.''abcdefghijkmnoprstuvwyz', '\zs'),
     \ 'menu': function('ime#builtin_kana#menu'),
     \ }
 endfunction
