@@ -9,14 +9,18 @@ setlocal completeopt+=menuone
 if !exists('g:ime_toggle_english') || type(g:ime_toggle_english) != type('')
     let g:ime_toggle_english = ',,'
 endif
-execute 'inoremap <expr> '. g:ime_toggle_english .' (pumvisible() ? "<C-Y>" : "") . ime#toggle_english()'
+if g:ime_toggle_english != ''
+    execute 'inoremap <expr> '. g:ime_toggle_english .' (pumvisible() ? "<C-Y>" : "") . ime#toggle_english()'
+endif
 
 
 let g:ime_show_2nd_mode = s:true
 if !exists('g:ime_switch_2nd') || type(g:ime_switch_2nd) != type('')
     let g:ime_switch_2nd = ',.'
 endif
-execute 'inoremap <expr> '. g:ime_switch_2nd .' (pumvisible() ? "<C-Y>" : "") . ime#switch_2nd()'
+if g:ime_switch_2nd != ''
+    execute 'inoremap <expr> '. g:ime_switch_2nd .' (pumvisible() ? "<C-Y>" : "") . ime#switch_2nd()'
+endif
 
 
 if !exists('g:ime_select_mode') || type(g:ime_select_mode) != type('')
@@ -37,13 +41,17 @@ function! s:ime_mode_menu ()
         return "\<C-\>\<C-o>:call ime#_mode_menu_window()\<CR>"
     endif
 endfunction
-execute 'inoremap <expr> '. g:ime_select_mode .' <SID>ime_mode_menu()'
+if g:ime_select_mode != ''
+    execute 'inoremap <expr> '. g:ime_select_mode .' <SID>ime_mode_menu()'
+endif
 
 
 if !exists('g:ime_cancel_input') || type(g:ime_cancel_input) != type('')
     let g:ime_cancel_input = '<C-h>'
 endif
-execute 'inoremap <expr> '. g:ime_cancel_input .' pumvisible() ? "<C-E> " : "'. g:ime_cancel_input .'"'
+if g:ime_cancel_input != ''
+    execute 'inoremap <expr> '. g:ime_cancel_input .' pumvisible() ? "<C-E> " : "'. g:ime_cancel_input .'"'
+endif
 
 
 let s:cr_imap_save = maparg("<CR>", "i")
@@ -60,10 +68,12 @@ if !exists('g:ime_plugins') || type(g:ime_plugins) != type([])
 endif
 
 
-if !exists('g:ime_menu') || type(g:ime_menu) != ''
+if !exists('g:ime_menu') || type(g:ime_menu) != type('')
     let g:ime_menu = ';;'
 endif
-execute 'inoremap '. g:ime_menu .' <C-\><C-o>:call ime#plugin_menu()<CR>'
+if g:ime_menu != ''
+    execute 'inoremap '. g:ime_menu .' <C-\><C-o>:call ime#plugin_menu()<CR>'
+endif
 
 
 command! IMEExportBoshiamyCIN :call ime#boshiamy_export_cin_file()
