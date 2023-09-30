@@ -662,14 +662,21 @@ function! ime#boshiamy_export_cin_file () " {{{
             endif
             for l:char in l:kana_table[(l:key)]
                 let l:is_small = (index(l:small_kana, l:char) >= 0)
+
                 if l:key == 'nn'
                     call append('$', 'n'. l:postfix .' '. l:char)
                 endif
+
+                call append('$', l:key . l:postfix .' '. l:char)
+
                 if l:is_small
                     call append('$', l:key . l:postfix .'v '. l:char)
                 endif
-                call append('$', l:key . l:postfix .' '. l:char)
             endfor
+
+            if l:key != '-' && l:key != 'nn'
+                call append('$', l:key . 'n' . l:postfix .' '. l:kana_table[(l:key)][0] . l:kana_table['nn'][0])
+            endif
         endfor
     endfor
 
