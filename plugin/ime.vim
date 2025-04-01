@@ -54,14 +54,16 @@ if g:ime_cancel_input != ''
 endif
 
 
-let s:cr_imap_save = maparg("<CR>", "i")
-if empty(s:cr_imap_save)
-    let s:cr_imap_save = "<CR>"
-endif
+if !exists('g:ime_enter_to_select') || g:ime_enter_to_select != s:false
+    let s:cr_imap_save = maparg("<CR>", "i")
+    if empty(s:cr_imap_save)
+        let s:cr_imap_save = "<CR>"
+    endif
 
-execute "inoremap <Plug>IME_OriginCR ". s:cr_imap_save
-imap <expr> <Plug>IME_DispatchCR (pumvisible() ? "\<C-Y>" : "\<Plug>IME_OriginCR")
-imap <CR> <Plug>IME_DispatchCR
+    execute "inoremap <Plug>IME_OriginCR ". s:cr_imap_save
+    imap <expr> <Plug>IME_DispatchCR (pumvisible() ? "\<C-Y>" : "\<Plug>IME_OriginCR")
+    imap <CR> <Plug>IME_DispatchCR
+endif
 
 if !exists('g:ime_plugins') || type(g:ime_plugins) != type([])
     let g:ime_plugins = ['builtin_boshiamy', 'builtin_kana', 'builtin_chewing', 'builtin_unicode']

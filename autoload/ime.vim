@@ -23,6 +23,7 @@ let s:false = exists('v:false') ? v:false : 0
 "   'handler': <handler-function-reference>
 "   'trigger': [<trigger>]
 "   'choice': [<choice>]
+"   'unload': <unload-function-reference>
 " }
 
 
@@ -755,4 +756,27 @@ function! ime#plugins () " {{{
     \ 'standalone': map(copy(s:standalone_plugin_list), 'v:val[''name'']'),
     \ 'embedded': map(copy(s:embedded_plugin_list), 'v:val[''name'']'),
     \ }
+endfunction " }}}
+
+
+function! ime#unload () " {{{
+    let l:count = 0
+
+    for l:plugin in s:embedded_plugin_list
+        if has_key(l:plugin, 'unload')
+            call ime#log('core', 'unload embedded plugin '. l:plugin['name'])
+            call l:plugin['unload']()
+            let l:count = l:count + 1
+        endif
+    endfor
+
+    for l:plugin in s:standalone_plugin_list
+        if has_key(l:plugin, 'unload')
+            call ime#log('core', 'unload standalone plugin '. l:plugin['name'])
+            call l:plugin['unload']()
+            let l:count = l:count + 1
+        endif
+    endfor
+
+    call ime#log('core', string(l:count) . ' plugins unloaded')
 endfunction " }}}

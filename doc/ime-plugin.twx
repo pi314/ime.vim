@@ -1,4 +1,4 @@
-*ime-plugin*                For Vim version 8.0               最近更新：2018/12
+*ime-plugin*                For Vim version 8.0               最近更新：2025/04
 
                                                            ime.vim 套件開發文件
 ===============================================================================
@@ -46,6 +46,7 @@ ime.vim 能夠載入第三方的套件，擴充自己的輸入能力。
 
 - "choice"，選字用的按鍵。
 - "menu"，用來提供設定選單，或是調整套件的行為。
+- "unload"，用來卸載已載入的自訂字根表。
 
 在繼續往下讀之前，請參考 |ime-plugin-info()|。
 
@@ -89,27 +90,41 @@ function('ime_{plugin-name}#handler')，引號不可省略。
 
 在 {plugin-folder}/autoload/ 目錄裡增加一個 ime_{plugin-name}_table.vim 檔案：
 >
-    let s:table = {}
-    let s:table['key_1'] = [...]
-    let s:table['key_2'] = [...]
-    ...
-    let s:table['key_n'] = [...]
+    function! s:load_huge_data ()
+        let s:table = {}
+        let s:table['key_1'] = [...]
+        let s:table['key_2'] = [...]
+        ...
+        let s:table['key_n'] = [...]
+    endfunction
+
+    function! ime_{plugin-name}_table#unload ()
+        unlet s:table
+    endfunction
 
     function! ime_{plugin-name}_table#table ()
+        if !exists('s:table')
+            call s:load_huge_data()
+        endif
         return s:table
     endfunction
 <
 
 ime_{plugin-name}.vim 檔案調整為：
 >
-    let s:table = {}
-
     function! ime_{plugin-name}#handler (matchobj, trigger)
-        if s:table == {}
+        if !exists('s:table')
             let s:table = ime_{plugin-name}_table#table()
         endif
 
         " plugin logic here
+    endfunction
+
+    function! ime_{plugin-name}#unload()
+        if exists('s:table')
+            unlet s:table
+        endif
+        call ime_{plugin-name}_table#unload()
     endfunction
 
     function! ime_{plugin-name}#info()
@@ -120,6 +135,7 @@ ime_{plugin-name}.vim 檔案調整為：
             \ 'pattern': '.*$',
             \ 'handler': function('ime_{plugin-name}#handler'),
             \ 'trigger': ['<space>', '3', '4', '6', ...],
+            \ 'unload': function('ime_{plugin-name}#unload'),
             \ }
     endfunction
 <

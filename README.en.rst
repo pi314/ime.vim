@@ -188,19 +188,21 @@ Usage
 
     + This global variable has *no* default value
 
-  - The format of custom table is ``string root root ...``, separate with a space ::
+  - The format of custom table is ``|string| sequence sequence ...`` ::
 
-      (((°Д°;))  ,face
-      (ಥ_ಥ)      ,face
-      ಠ_ಠ        ,face ,stare
-      ఠ_ఠ        ,face ,stare
-      (ゝω・)    ,face
-      (〃∀〃)    ,face
-      (¦3[▓▓]    ,face ,sleep
-      (눈‸눈)    ,face
-      ㅍ_ㅍ      ,face
+      |(((°Д°;))| ,face
+      |(ಥ_ಥ)    | ,face
+      |ಠ_ಠ      | ,face ,stare
+      |ఠ_ఠ      | ,face ,stare
+      |(ゝω・)  | ,face
+      |(〃∀〃)  | ,face
+      |(¦3[▓▓]  | ,face ,sleep
+      |(눈‸눈)  | ,face
+      |ㅍ_ㅍ    | ,face
 
     + The ordering in this table will be kept
+
+  - Use ``:call ime#unload()`` to notify plugins to unload their custom table.
 
 * Load third party plugins ::
 

@@ -1,7 +1,6 @@
 let s:true = exists('v:true') ? v:true : 1
 let s:false = exists('v:false') ? v:false : 0
 
-let s:table = {}
 let s:eager = s:false
 
 
@@ -27,7 +26,7 @@ endfunction
 
 
 function! ime#builtin_boshiamy#handler (matchobj, trigger)
-    if s:table == {}
+    if !exists('s:table')
         let s:table = ime#boshiamy_table#table()
     endif
 
@@ -67,6 +66,14 @@ function! ime#builtin_boshiamy#menu (...)
 endfunction
 
 
+function! ime#builtin_boshiamy#unload ()
+    if exists('s:table')
+        unlet s:table
+    endif
+    call ime#boshiamy_table#unload()
+endfunction
+
+
 function! ime#builtin_boshiamy#info ()
     return {
     \ 'type': 'standalone',
@@ -76,6 +83,7 @@ function! ime#builtin_boshiamy#info ()
     \ 'handler': function('ime#builtin_boshiamy#handler'),
     \ 'trigger': [' '],
     \ 'menu': function('ime#builtin_boshiamy#menu'),
+    \ 'unload': function('ime#builtin_boshiamy#unload'),
     \ }
 
     " Note: This plugin use ``\w`` in regex.
