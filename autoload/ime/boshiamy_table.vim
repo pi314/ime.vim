@@ -23786,7 +23786,7 @@ function! s:load_boshiamy_table ()
     let s:table["wcm"] = ["湄", "浘", "潥"]
     let s:table["wcmr"] = ["潥"]
     let s:table["wcmv"] = ["浘"]
-    let s:table["wcn"] = ["泱", "澤", "濥"]
+    let s:table["wcn"] = ["泱", "沢", "澤", "濥"]
     let s:table["wcnr"] = ["涮"]
     let s:table["wcnv"] = ["澤"]
     let s:table["wco"] = ["灑", "洒", "洺"]
