@@ -4185,6 +4185,7 @@ function! s:load_boshiamy_table ()
     let s:table["dwos"] = ["暐"]
     let s:table["dwv"] = ["逗"]
     let s:table["dwwb"] = ["顯"]
+    let s:table["dwwf"] = ["㬎"]
     let s:table["dwwi"] = ["歞"]
     let s:table["dwwt"] = ["顯"]
     let s:table["dwx"] = ["旻", "旼"]
